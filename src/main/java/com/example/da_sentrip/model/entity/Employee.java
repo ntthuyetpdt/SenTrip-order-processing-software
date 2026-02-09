@@ -50,4 +50,7 @@ public class Employee extends BaseCreatedEntity {
     @Column(name ="ACCOUNT_BANK")
     private String AccountBank;
 
+    @Column(name ="IMG")
+    private String img;
+
 }

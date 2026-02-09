@@ -53,7 +53,6 @@ public class UserServiceImpl implements UserService {
         if (userRepository.findByGmail(request.getGmail()).isPresent()) {
             throw new BadCredentialsException("Gmail already exists");
         }
-
         Role customerRole = roleRepository.findById(4L).orElseThrow(() -> new RuntimeException("Role CUSTOMER not found"));
         User user = new User();
         user.setGmail(request.getGmail());
@@ -68,10 +67,11 @@ public class UserServiceImpl implements UserService {
         if (userRepository.findByGmail(request.getGmail()).isPresent()) {
             throw new BadCredentialsException("Gmail already exists");
         }
-
+        Role role = roleRepository.findById(Long.valueOf(request.getRole())).orElseThrow(() -> new RuntimeException("Role not found"));
         User userAdd = new User();
         userAdd.setGmail(request.getGmail());
         userAdd.setPassword(passwordEncoder.encode("Ab123456@"));
+        userAdd.setRole(role);
         userAdd.setStatus(Status.ACTIVE);
         return userRepository.save(userAdd);
     }
@@ -85,4 +85,6 @@ public class UserServiceImpl implements UserService {
     public Map<String, Object> getMenu(String email, int page, int size) {
         return menuCustomRepository.getMenuByEmail(email, page, size);
     }
+
+
 }

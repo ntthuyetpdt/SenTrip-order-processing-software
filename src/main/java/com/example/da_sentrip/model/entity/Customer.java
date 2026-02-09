@@ -35,4 +35,7 @@ public class Customer extends  BaseCreatedEntity{
     @Column (name ="ADDRESS")
     private String address;
 
+    @Column(name ="IMG")
+    private String img;
+
 }
