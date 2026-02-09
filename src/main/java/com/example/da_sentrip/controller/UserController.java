@@ -23,22 +23,9 @@ public class UserController {
     @PostMapping("/create")
     public ResponseEntity<?> add(@RequestBody UserRequestDTO request){
 
-        try {
-            User user =userService.add(request);
-            return ResponseEntity.ok(ResponseDTO.builder()
-                    .status("ok")
-                    .code(Constants.HTTP_STATUS.SUCCESS)
-                    .message("Account added successfully.")
-                    .build());
-        }catch (Exception e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ResponseDTO.builder()
-                            .status("error")
-                            .code(Constants.HTTP_STATUS.INTERNAL_SERVER_ERROR)
-                            .data(null)
-                            .message(e.getMessage())
-                            .build());
-        }
+            User user =userService.add( request);
+        return ResponseEntity.ok("add user success");
+
     }
     @GetMapping("/profile")
     public SuccessResponse<ProfileResponseDTO> getProfile(@RequestHeader("Authorization") String authHeader) {
@@ -50,6 +37,8 @@ public class UserController {
                 userService.getProfile(email)
         );
     }
+
+    @PostMapping("/cread")
     @GetMapping("/menu")
     public SuccessResponse<?> getMenu(
             @RequestHeader("Authorization") String authHeader,

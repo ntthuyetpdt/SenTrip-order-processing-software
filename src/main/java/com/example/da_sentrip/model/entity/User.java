@@ -28,4 +28,5 @@ public class User {
 
     @Column(name = "STATUS")
     private Status status;
+
 }

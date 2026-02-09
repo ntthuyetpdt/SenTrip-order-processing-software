@@ -7,8 +7,9 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
 public class UserRequestDTO {
     private String gmail;
+    private String Role;
+
 }

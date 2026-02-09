@@ -17,6 +17,7 @@ public class EmployeeRequestDTO {
     private LocalDateTime JoinDate;
     private String cccd;
     private String bankName;
-    private String AccountBank;
+    private String accountBank;
+    private String img;
 
 }

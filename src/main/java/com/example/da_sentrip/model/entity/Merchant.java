@@ -42,7 +42,7 @@ public class Merchant extends  BaseCreatedEntity {
     @Column(name = "ADDRESS")
     private String address;
 
-    @Column(name ="IS_VERIFIED")
-    private String isVerified;
+    @Column(name ="IMG")
+    private String img;
 
 }
