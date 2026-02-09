@@ -1,0 +1,42 @@
+spring:
+  application:
+    name:DA_SenTrip
+  datasource:
+    url: jdbc:mysql://localhost:3306/DASENTRIP?useSSL=false&serverTimezone=UTC
+    username: root
+    password: 11032003
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    initialization-fail-timeout: 60000
+    connection-timeout: 30000
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: hathuongthuy113@gmail.com
+    password: hfxu mlqz okpb akae
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+jwt:
+  secret: my-secret-key-123456789012345678901234
+  expiration: 86400000
+
+cloudinary:
+  cloud-name: dr8e25tyb
+  api-key: 651826164564212
+  api-secret: KkFFMqSpGBQw2ZPzYfldhmX3HCg
+
+server:
+  port: 8888
