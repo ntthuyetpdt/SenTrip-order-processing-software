@@ -36,13 +36,13 @@ public class Merchant extends  BaseCreatedEntity {
     @Column(name = "BANK_ACCOUNT")
     private String bankAccount;
 
-    @Column(name="TAX_CODE")
-    private String TaxCode;
-
     @Column(name = "ADDRESS")
     private String address;
 
     @Column(name ="IMG")
     private String img;
+
+    @Column(name = "BUSINESS_LICENSE_NUMBER")
+    private String businessLicense;
 
 }

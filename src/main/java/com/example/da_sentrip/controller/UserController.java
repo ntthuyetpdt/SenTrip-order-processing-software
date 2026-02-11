@@ -38,7 +38,6 @@ public class UserController {
         );
     }
 
-    @PostMapping("/cread")
     @GetMapping("/menu")
     public SuccessResponse<?> getMenu(
             @RequestHeader("Authorization") String authHeader,
