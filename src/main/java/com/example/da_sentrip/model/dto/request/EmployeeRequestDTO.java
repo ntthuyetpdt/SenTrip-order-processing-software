@@ -2,6 +2,8 @@ package com.example.da_sentrip.model.dto.request;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.time.LocalDateTime;
 
 @Setter
@@ -18,6 +20,5 @@ public class EmployeeRequestDTO {
     private String cccd;
     private String bankName;
     private String accountBank;
-    private String img;
 
 }

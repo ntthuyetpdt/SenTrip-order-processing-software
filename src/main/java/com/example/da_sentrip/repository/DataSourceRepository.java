@@ -10,5 +10,6 @@ public interface DataSourceRepository extends JpaRepository<DataSource, Long> {
     boolean existsByImageUrl(String imageUrl);
     void deleteByImageUrl(String imageUrl);
     Optional<DataSource> findByImageUrlContaining(String fileName);
+    Optional<DataSource> findTopByOrderByIdDesc();
 
 }

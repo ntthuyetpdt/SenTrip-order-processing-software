@@ -10,4 +10,6 @@ public class SuccessResponse<T> {
     private int satus;
     private String message;
     private  T data;
+
+
 }

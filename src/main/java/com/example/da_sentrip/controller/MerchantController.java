@@ -1,11 +1,11 @@
 package com.example.da_sentrip.controller;
 
 import com.example.da_sentrip.model.SuccessResponse;
-import com.example.da_sentrip.model.dto.EmployeeDTO;
-import com.example.da_sentrip.model.dto.reponse.EmployeeReponseDTO;
+import com.example.da_sentrip.model.dto.MerchantDTO;
+import com.example.da_sentrip.model.dto.reponse.MerchantReponseDTO;
 import com.example.da_sentrip.model.dto.reponse.ResponseDTO;
-import com.example.da_sentrip.model.dto.request.EmployeeRequestDTO;
-import com.example.da_sentrip.service.EmployeeService;
+import com.example.da_sentrip.model.dto.request.MerchantRequestDTO;
+import com.example.da_sentrip.service.MerchantService;
 import com.example.da_sentrip.utils.Constants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,16 +14,14 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
-@RequestMapping("/employee")
+@RequestMapping("/supplier")
 @RequiredArgsConstructor
-public class EmployeeController {
-
-    private final EmployeeService employeeService;
-
+public class MerchantController  {
+    private final MerchantService merchantService;
 
     @GetMapping("/getAll")
     public SuccessResponse<?> getAll(){
-        List<EmployeeReponseDTO> user =employeeService.getAll();
+        List<MerchantReponseDTO> user =merchantService.getAll();
         return new SuccessResponse<>(
                 200,
                 "get all list employee success",
@@ -32,8 +30,8 @@ public class EmployeeController {
     }
 
     @PostMapping("/create/{id}")
-    public ResponseEntity<ResponseDTO> create(@PathVariable Long id, @RequestBody EmployeeRequestDTO request) {
-        employeeService.create(request, id);
+    public ResponseEntity<ResponseDTO> create(@PathVariable Long id, @RequestBody MerchantRequestDTO request) {
+        merchantService.create(request, id);
         return ResponseEntity.ok(ResponseDTO.builder()
                 .status("ok")
                 .code(Constants.HTTP_STATUS.SUCCESS)
@@ -42,8 +40,8 @@ public class EmployeeController {
     }
 
     @PostMapping("/update/{id}")
-    public ResponseEntity<ResponseDTO> update(@PathVariable Long id, @ModelAttribute EmployeeRequestDTO request, MultipartFile img) {
-        employeeService.update(id, request,img);
+    public ResponseEntity<ResponseDTO> update(@PathVariable Long id, @ModelAttribute MerchantRequestDTO request, MultipartFile img) {
+        merchantService.update(id, request,img);
         return ResponseEntity.ok(ResponseDTO.builder()
                 .status("ok")
                 .code(Constants.HTTP_STATUS.SUCCESS)
@@ -53,7 +51,7 @@ public class EmployeeController {
 
     @PostMapping("/delete/{id}")
     public ResponseEntity<ResponseDTO> delete(@PathVariable Long id) {
-        employeeService.delete(id);
+        merchantService.delete(id);
         return ResponseEntity.ok(ResponseDTO.builder()
                 .status("ok")
                 .code(Constants.HTTP_STATUS.SUCCESS)
@@ -61,24 +59,15 @@ public class EmployeeController {
                 .build());
     }
 
-    @GetMapping("/details/{id}")
-    public ResponseEntity<SuccessResponse<List<EmployeeDTO>>> getDetails(@PathVariable Long id) {
-        return ResponseEntity.ok(new SuccessResponse<>(
-                200,
-                "Get employee details success",
-                employeeService.getdetailis(id))
-        );
-    }
-
     @GetMapping("/search")
-    public ResponseEntity<SuccessResponse<List<EmployeeDTO>>> search(
+    public ResponseEntity<SuccessResponse<List<MerchantDTO>>> search(
             @RequestParam(required = false) String fullName,
             @RequestParam(required = false) String address,
             @RequestParam(required = false) String mnv) {
         return ResponseEntity.ok(new SuccessResponse<>(
                 200,
                 "Search employees success",
-                employeeService.search(fullName, address, mnv))
+                merchantService.search(fullName, address, mnv))
         );
     }
 }

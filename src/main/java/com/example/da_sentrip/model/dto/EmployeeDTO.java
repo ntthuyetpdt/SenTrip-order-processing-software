@@ -1,6 +1,7 @@
 package com.example.da_sentrip.model.dto;
 
 import com.example.da_sentrip.model.entity.Employee;
+import com.example.da_sentrip.model.entity.Merchant;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -37,5 +38,6 @@ public class EmployeeDTO {
         this.AccountBank =employee.getAccountBank();
         this.img= employee.getImg();
     }
+
 
 }
