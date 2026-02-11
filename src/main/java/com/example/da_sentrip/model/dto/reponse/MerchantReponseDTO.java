@@ -4,7 +4,6 @@ import com.example.da_sentrip.model.entity.Merchant;
 import lombok.Getter;
 import lombok.Setter;
 
-
 @Setter
 @Getter
 public class MerchantReponseDTO {
