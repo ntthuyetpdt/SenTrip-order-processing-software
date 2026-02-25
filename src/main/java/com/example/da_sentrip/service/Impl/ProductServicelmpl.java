@@ -14,6 +14,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Service
@@ -59,11 +60,13 @@ public class ProductServicelmpl implements ProductService {
 
     @Override
     public ProductDTO delete(Long id) {
-        Product product = productRepository.findById(id).orElseThrow()
+        Product product = productRepository.findById(id).orElseThrow(()-> new BadCredentialsException("ID NOT FOUND"));
+        return new ProductDTO(product);
+
     }
 
     @Override
     public List<ProductReponseDTO> search(String productName, String price, String address) {
-        return List.of();
+        return  productRepository.search(productName,price,address).stream().map(ProductReponseDTO::new).collect(Collectors.toList());
     }
 }

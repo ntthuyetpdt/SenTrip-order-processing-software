@@ -26,7 +26,7 @@ public class Product {
     private String serviceType;
 
     @Column(name = "PRICE")
-    private BigDecimal price;
+    private String price;
 
     @Column(name = "REFUNDABLE")
     private Integer refundable;
