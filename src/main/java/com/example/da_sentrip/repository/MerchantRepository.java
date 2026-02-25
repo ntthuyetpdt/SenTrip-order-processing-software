@@ -15,7 +15,7 @@ public interface MerchantRepository extends JpaRepository<Merchant, Long> {
         SELECT m FROM Merchant m
         WHERE (:merchantName IS NULL OR m.merchantName LIKE CONCAT('%', :merchantName, '%'))
           AND (:address IS NULL OR m.address LIKE CONCAT('%', :address, '%'))
-          AND (:businessLicense IS NULL OR m.businessLicenseNumber LIKE CONCAT('%', :businessLicense, '%'))
+          AND (:businessLicense IS NULL OR m.businessLicense LIKE CONCAT('%', :businessLicense, '%'))
     """)
     List<Merchant> findBySearch(
             @Param("merchantName") String merchantName,

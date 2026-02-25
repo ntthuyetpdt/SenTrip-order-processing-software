@@ -36,4 +36,13 @@ public class Product {
 
     @Column(name = "CREATED_AT")
     private LocalDateTime createdAt;
+
+    @Column(name="TYPE")
+    private String Type;
+
+    @Column (name = "ADDRESS")
+    private String address;
+
+    @Column (name ="IMG")
+    private String img;
 }
