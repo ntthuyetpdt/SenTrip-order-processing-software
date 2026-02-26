@@ -1,5 +1,6 @@
 package com.example.da_sentrip.model.entity;
 
+import com.example.da_sentrip.model.enums.OrderStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,8 +28,9 @@ public class Order {
     @JoinColumn(name = "MERCHANT_ID")
     private Merchant merchant;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "ORDER_STATUS")
-    private String orderStatus;
+    private OrderStatus orderStatus;
 
     @Column(name = "TOTAL_AMOUNT")
     private BigDecimal totalAmount;

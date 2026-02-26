@@ -3,7 +3,6 @@ package com.example.da_sentrip.model.dto;
 import com.example.da_sentrip.model.entity.Product;
 import lombok.Getter;
 import lombok.Setter;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Setter
@@ -11,7 +10,7 @@ import java.time.LocalDateTime;
 public class ProductDTO {
     private String productName;
     private String serviceType;
-    private BigDecimal price;
+    private String price;
     private Integer refundable;
     private Integer status;
     private LocalDateTime createdAt;

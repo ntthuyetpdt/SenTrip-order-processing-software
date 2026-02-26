@@ -29,7 +29,7 @@ public class ProductController {
         return new SuccessResponse<>(200, "Create product success", product);
     }
 
-    @PutMapping("/update/{id}")
+    @PostMapping("/update/{id}")
     public SuccessResponse<?> update(
             @PathVariable Long id,
             @ModelAttribute ProductRequestDTO request, // Dùng ModelAttribute để nhận form-data kèm file
@@ -39,7 +39,7 @@ public class ProductController {
         return new SuccessResponse<>(200, "Update product success", product);
     }
 
-    @DeleteMapping("/delete/{id}")
+    @PostMapping("/delete/{id}")
     public SuccessResponse<?> delete(@PathVariable Long id) {
         ProductDTO product = productService.delete(id);
         return new SuccessResponse<>(200, "Delete product success", product);

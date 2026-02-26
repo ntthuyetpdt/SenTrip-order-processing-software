@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 public class ProductReponseDTO {
     private String productName;
     private String serviceType;
-    private BigDecimal price;
+    private String price;
     private Integer refundable;
     private Integer status;
     private LocalDateTime createdAt;
