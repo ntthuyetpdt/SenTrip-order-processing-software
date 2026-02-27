@@ -11,6 +11,7 @@ import com.example.da_sentrip.service.OrderService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -32,7 +33,6 @@ public class OrderServiceImpl implements OrderService {
         if (request == null || request.getItems() == null || request.getItems().isEmpty()) {
             throw new IllegalArgumentException("No product found.");
         }
-
         User user = userRepository.findByGmail(gmail).orElseThrow(() -> new BadCredentialsException("User not found"));
         Merchant merchant = request.getMerchantId() == null ? null : merchantRepository.findById(request.getMerchantId()).orElseThrow(() -> new BadCredentialsException("MERCHANT NOT FOUND"));
         Order order = new Order();
@@ -43,18 +43,17 @@ public class OrderServiceImpl implements OrderService {
         order.setCreatedAt(LocalDateTime.now());
         order.setUpdatedAt(LocalDateTime.now());
         BigDecimal totalAmount = request.getItems().stream().map(item -> {
-        if (item.getQuantity() == null || item.getQuantity() <= 0) throw new BadCredentialsException("QUANTITY MUST BE > 0");
-        Product product = productRepository.findById(item.getProductId()).orElseThrow(() -> new BadCredentialsException("PRODUCT NOT FOUND: " + item.getProductId()));
-        if (product.getStatus() == null || product.getStatus() != 1) throw new IllegalStateException("PRODUCT IS INACTIVE: " + product.getId());
-        return new BigDecimal(product.getPrice()).multiply(BigDecimal.valueOf(item.getQuantity()));
+            Product product = productRepository.findById(item.getProductId()).orElseThrow(() -> new BadCredentialsException("PRODUCT NOT FOUND: " + item.getProductId()));
+            if (product.getStatus() == null || product.getStatus() != 1) throw new IllegalStateException("PRODUCT IS INACTIVE: " + product.getId());
+            return new BigDecimal(product.getPrice()).multiply(BigDecimal.valueOf(item.getQuantity()));
         }).reduce(BigDecimal.ZERO, BigDecimal::add);
+
         order.setTotalAmount(totalAmount);
         Order savedOrder = orderRepository.save(order);
         request.getItems().forEach(item -> {
             Product product = productRepository.findById(item.getProductId()).get();
             orderRepository.insertOrderItem(savedOrder.getId(), product.getId(), item.getQuantity(), product.getPrice());
         });
-
         return  mapToDTO(savedOrder);
     }
 
@@ -63,6 +62,7 @@ public class OrderServiceImpl implements OrderService {
         List<Order> orders = orderRepository.findAll();
         return orders.stream().map(OrderReponseDTO::new).toList();
     }
+
 
     @Override
     @Transactional
@@ -74,6 +74,27 @@ public class OrderServiceImpl implements OrderService {
         dto.setOrderStatus(OrderStatus.CANCELLED);
         return dto;
     }
+
+    @Override
+    public List<OrderReponseDTO> getMyOrders(Authentication authentication) {
+        String gmail = authentication.getName();
+        User user = userRepository.findByGmail(gmail).orElseThrow(() -> new RuntimeException("User not found"));
+        return orderRepository.findOrderSummaryByUser(user.getId()).stream().map(view -> {
+                    OrderReponseDTO dto = new OrderReponseDTO(
+                            view.getOrderCode(),
+                            OrderStatus.valueOf(view.getOrderStatus()),
+                            view.getTotalAmount(),
+                            view.getCreatedAt(),
+                            view.getProductNames()
+                    );
+                    UserOrderDTO userDto = new UserOrderDTO();
+                    userDto.setId(view.getUserId());
+                    userDto.setGmail(view.getGmail());
+                    dto.setUser(userDto);
+                    return dto;
+                }).toList();
+    }
+
 
     private OrderDTO mapToDTO(Order order) {
         OrderDTO dto = new OrderDTO();

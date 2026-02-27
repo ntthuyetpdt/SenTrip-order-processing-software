@@ -38,5 +38,17 @@ cloudinary:
   api-key: 651826164564212
   api-secret: KkFFMqSpGBQw2ZPzYfldhmX3HCg
 
+vnpay:
+  tmnCode: DEMO123ABC
+  hashSecret: ABCXYZ123456
+  payUrl: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+  returnUrl: https://your-public-domain.com/api/v1/payments/vnpay/return
+  ipnUrl: https://your-public-domain.com/api/v1/payments/vnpay/ipn
+  version: 2.1.0
+  command: pay
+  currCode: VND
+  locale: vn
+  orderType: other
+
 server:
   port: 8888

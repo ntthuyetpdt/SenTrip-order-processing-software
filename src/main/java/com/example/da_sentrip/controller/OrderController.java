@@ -24,6 +24,11 @@ public class OrderController {
         List<OrderReponseDTO> orders = orderService.Getall();
         return new SuccessResponse<>(200, "Get the list of successful orders", orders);
     }
+    @GetMapping("/getAllUser")
+    public SuccessResponse<?> getMyOrders(Authentication authentication) {
+        return new SuccessResponse<>(200, "Get your orders successfully",
+                orderService.getMyOrders(authentication));
+    }
 
     @PostMapping("/create")
     public SuccessResponse<?> create(@RequestBody OrderRequestDTO request, Authentication authentication) {
