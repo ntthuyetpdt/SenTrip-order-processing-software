@@ -17,7 +17,7 @@ public class ProductController {
 
     private final ProductService productService;
 
-    @GetMapping("/getAll")
+    @GetMapping("/viewproduct")
     public SuccessResponse<?> getAll() {
         List<ProductReponseDTO> products = productService.getAll();
         return new SuccessResponse<>(200, "Get all list product success", products);
@@ -32,7 +32,7 @@ public class ProductController {
     @PostMapping("/update/{id}")
     public SuccessResponse<?> update(
             @PathVariable Long id,
-            @ModelAttribute ProductRequestDTO request, // Dùng ModelAttribute để nhận form-data kèm file
+            @ModelAttribute ProductRequestDTO request,
             @RequestParam(value = "img", required = false) MultipartFile img
     ) {
         ProductDTO product = productService.update(id, request, img);

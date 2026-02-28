@@ -20,7 +20,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
                       @Param("bankName") String bankName,
                       @Param("bankAccount") String bankAccount);
 
-    @Query(value = """
+    @Query(value = """ 
         SELECT P.ID 
         FROM PAYMENTS P 
         WHERE P.PAYMENT_CODE = :paymentCode 
