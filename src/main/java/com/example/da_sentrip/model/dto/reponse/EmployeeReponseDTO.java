@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @Getter
 
 public class EmployeeReponseDTO {
+    private Long id;
     private String mnv;
     private String fullName;
     private String Role;
@@ -26,6 +27,7 @@ public class EmployeeReponseDTO {
     private String accountBank;
     private String img;
     public EmployeeReponseDTO(Employee employee , User user){
+        this.id =employee.getId();
         this.mnv =employee.getMnv();
         this.fullName =employee.getFullName();
         this.Role = String.valueOf(user.getRole());

@@ -30,11 +30,7 @@ public class ProductController {
     }
 
     @PostMapping("/update/{id}")
-    public SuccessResponse<?> update(
-            @PathVariable Long id,
-            @ModelAttribute ProductRequestDTO request,
-            @RequestParam(value = "img", required = false) MultipartFile img
-    ) {
+    public SuccessResponse<?> update(@PathVariable Long id, @ModelAttribute ProductRequestDTO request, MultipartFile img) {
         ProductDTO product = productService.update(id, request, img);
         return new SuccessResponse<>(200, "Update product success", product);
     }
