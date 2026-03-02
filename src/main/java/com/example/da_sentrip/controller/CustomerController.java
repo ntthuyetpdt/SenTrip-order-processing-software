@@ -5,11 +5,13 @@ import com.example.da_sentrip.model.SuccessResponse;
 import com.example.da_sentrip.model.dto.CustomerDTO;
 import com.example.da_sentrip.model.dto.reponse.CustomerReponseDTO;
 import com.example.da_sentrip.model.dto.reponse.ResponseDTO;
+import com.example.da_sentrip.model.dto.reponse.TicketReponseDTO;
 import com.example.da_sentrip.model.dto.request.CustomerRequestDTO;
 import com.example.da_sentrip.service.CustomerService;
 import com.example.da_sentrip.utils.Constants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -42,7 +44,7 @@ public class CustomerController {
     }
 
     @PostMapping("/update/{id}")
-    public ResponseEntity<ResponseDTO> update(@PathVariable Long id, @ModelAttribute CustomerRequestDTO request, MultipartFile img) {
+    public ResponseEntity<ResponseDTO> update(@PathVariable Long id, @RequestBody CustomerRequestDTO request,@RequestParam(value = "img",required = false) MultipartFile img) {
         customerService.update(id, request,img);
         return ResponseEntity.ok(ResponseDTO.builder()
                 .status("ok")
@@ -71,5 +73,16 @@ public class CustomerController {
                 "Search employees success",
                 customerService.search(fullName, address, phone))
         );
+    }
+    @GetMapping("/ticketsMy")
+    public ResponseEntity<ResponseDTO<Object>> getMyTickets(Authentication authentication) {
+        List<TicketReponseDTO> tickets = customerService.getTicket(authentication);
+        return ResponseEntity.ok(ResponseDTO.builder()
+                .status("ok")
+                .code(Constants.HTTP_STATUS.SUCCESS)
+                .message("Get ticket success")
+                .data(tickets)
+                .build());
+
     }
 }

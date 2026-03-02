@@ -42,7 +42,7 @@ public class EmployeeController {
     }
 
     @PostMapping("/update/{id}")
-    public ResponseEntity<ResponseDTO> update(@PathVariable Long id, @ModelAttribute EmployeeRequestDTO request, MultipartFile img) {
+    public ResponseEntity<ResponseDTO> update(@PathVariable Long id, @RequestBody EmployeeRequestDTO request,@RequestParam(value = "img",required = false) MultipartFile img) {
         employeeService.update(id, request,img);
         return ResponseEntity.ok(ResponseDTO.builder()
                 .status("ok")

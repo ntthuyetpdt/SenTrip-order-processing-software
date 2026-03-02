@@ -11,7 +11,7 @@ import java.util.List;
 public interface EmployeeService {
     EmployeeDTO create (EmployeeRequestDTO request ,Long id);
     EmployeeDTO update (Long id, EmployeeRequestDTO request, MultipartFile img);
-    EmployeeDTO delete (Long id);
+    void delete (Long id);
     List<EmployeeDTO>  getdetailis(Long id);
     List<EmployeeDTO> search(String fullName, String address, String mnv);
     List<EmployeeReponseDTO> getAll ( );

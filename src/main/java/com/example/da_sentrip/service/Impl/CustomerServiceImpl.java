@@ -3,6 +3,7 @@ package com.example.da_sentrip.service.Impl;
 import com.example.da_sentrip.helper.MediaStorageService;
 import com.example.da_sentrip.model.dto.CustomerDTO;
 import com.example.da_sentrip.model.dto.reponse.CustomerReponseDTO;
+import com.example.da_sentrip.model.dto.reponse.TicketReponseDTO;
 import com.example.da_sentrip.model.dto.request.CustomerRequestDTO;
 import com.example.da_sentrip.model.entity.Customer;
 import com.example.da_sentrip.model.entity.User;
@@ -13,6 +14,7 @@ import com.example.da_sentrip.service.CustomerService;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -40,7 +42,6 @@ public class CustomerServiceImpl implements CustomerService {
         Customer customer =customerRepository.findById(id).orElseThrow(() ->new BadCredentialsException("Customer not found"));
         modelMapper.map(request,customer);
         if (img != null && !img.isEmpty()) {
-
             if (customer.getImg() != null && customer.getImg().matches("\\d+")) {
                 mediaStorageService.deleteMedia(Long.valueOf(customer.getImg()));
             }
@@ -85,4 +86,27 @@ public class CustomerServiceImpl implements CustomerService {
             return dto;
         }).toList();
     }
+
+    @Override
+    public List<TicketReponseDTO> getTicket(Authentication authentication) {
+        String gmail = authentication.getName();
+        User user = userRepository.findByGmail(gmail).orElseThrow(() -> new RuntimeException("User not found"));
+        return customerRepository.findTicketsByUserId(user.getId()).stream()
+                .map(view -> new TicketReponseDTO(
+                        view.getFullName(),
+                        view.getPhone(),
+                        view.getGmail(),
+                        view.getProductName(),
+                        view.getServiceType(),
+                        view.getType(),
+                        view.getCreateTime(),
+                        view.getStatus(),
+                        view.getTotalAmount(),
+                        view.getPaidAt(),
+                        view.getPaymentCode()
+                ))
+                .toList();
+    }
+
+
 }

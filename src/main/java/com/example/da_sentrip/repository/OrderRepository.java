@@ -1,7 +1,7 @@
 package com.example.da_sentrip.repository;
 
 import com.example.da_sentrip.model.entity.Order;
-import com.example.da_sentrip.service.OrderSummaryView;
+import com.example.da_sentrip.model.dto.reponse.view.OrderSummaryView;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

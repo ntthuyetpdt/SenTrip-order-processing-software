@@ -12,4 +12,5 @@ public class PaymentRequestDTO {
     private String bankName;
     private String bankAccount;
     private Long employeeId;
+    private String qrUrl;
 }

@@ -49,6 +49,8 @@ vnpay:
   currCode: VND
   locale: vn
   orderType: other
+app:
+  public-base-url: http://192.168.32.111:8888
 
 server:
   port: 8888

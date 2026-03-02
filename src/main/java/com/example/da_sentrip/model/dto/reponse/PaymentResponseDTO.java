@@ -17,5 +17,7 @@ public class PaymentResponseDTO {
     private String paymentStatus;
     private String bankName;
     private LocalDateTime paidAt;
+    private String paymentUrl;
+    private String qrUrl;
 }
 

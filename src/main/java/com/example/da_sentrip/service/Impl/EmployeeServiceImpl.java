@@ -10,6 +10,7 @@ import com.example.da_sentrip.repository.DataSourceRepository;
 import com.example.da_sentrip.repository.EmployeeRepository;
 import com.example.da_sentrip.repository.UserRepository;
 import com.example.da_sentrip.service.EmployeeService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -52,13 +53,15 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public EmployeeDTO delete(Long id) {
+    public void delete(Long id) {
         Employee employee = employeeRepository.findById(id).orElseThrow(() -> new BadCredentialsException("ID not found"));
-        if (employee.getImg() != null && !employee.getImg().isBlank()) {
-            Long imgId = Long.parseLong(employee.getImg());
+        String img = employee.getImg();
+        if (img != null && img.matches("\\d+")) {
+            Long imgId = Long.parseLong(img);
             dataSourceRepository.findById(imgId).ifPresent(data -> mediaStorageService.deleteMedia(imgId));
         }
-        return new EmployeeDTO(employee);
+
+        employeeRepository.deleteById(id);
     }
 
     @Override
