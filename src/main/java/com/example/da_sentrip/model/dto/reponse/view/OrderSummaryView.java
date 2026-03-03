@@ -12,4 +12,6 @@ public interface OrderSummaryView {
     String getGmail();           // u.GMAIL as gmail
     String getProductNames();
     String getAdditionalService();
+    String getImg();
+    String getQuantities();
 }

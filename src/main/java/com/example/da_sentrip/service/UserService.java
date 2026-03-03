@@ -7,6 +7,7 @@ import com.example.da_sentrip.model.dto.request.RegisterRequestDTO;
 import com.example.da_sentrip.model.dto.request.UserRequestDTO;
 import com.example.da_sentrip.model.entity.User;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 

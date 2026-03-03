@@ -7,6 +7,7 @@ public interface TicketView {
     String getFullName();
     String getPhone();
     String getGmail();
+    String getCccd();
     String getProductName();
     String getServiceType();
     String getType();
@@ -15,5 +16,7 @@ public interface TicketView {
     BigDecimal getTotalAmount();
     LocalDateTime getPaidAt();
     String getPaymentCode();
+    String getImg ();
+    String getQuantities();
 
 }

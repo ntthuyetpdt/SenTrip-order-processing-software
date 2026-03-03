@@ -21,7 +21,7 @@ public class OrderController {
 
     @GetMapping("/getall")
     public SuccessResponse<?> getAll(Authentication authentication) {
-        List<OrderReponseDTO> orders = orderService.Getall();
+        List<OrderReponseDTO> orders = orderService.Getall(authentication);
         return new SuccessResponse<>(200, "Get the list of successful orders", orders);
     }
     @GetMapping("/getuser")

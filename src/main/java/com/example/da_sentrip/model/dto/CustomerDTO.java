@@ -15,14 +15,14 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 
 public class CustomerDTO {
-    private String MaKH;
+    private String cccd;
     private String fullName;
     private LocalDateTime dateTime;
     private String phone;
     private String address;
     private String img;
     public CustomerDTO (Customer customer){
-        this.MaKH = customer.getMaKH();
+        this.cccd = customer.getCccd();
         this.fullName=customer.getFullName();
         this.dateTime = customer.getDateTime();
         this.phone =customer.getPhone();

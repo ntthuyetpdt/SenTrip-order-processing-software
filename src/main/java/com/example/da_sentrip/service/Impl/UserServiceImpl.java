@@ -1,5 +1,7 @@
 package com.example.da_sentrip.service.Impl;
 
+import com.example.da_sentrip.helper.MediaStorageService;
+import com.example.da_sentrip.model.dto.EmployeeDTO;
 import com.example.da_sentrip.model.dto.reponse.LoginReponseDTO;
 import com.example.da_sentrip.model.dto.reponse.ProfileResponseDTO;
 import com.example.da_sentrip.model.dto.request.LoginRequestDto;
@@ -15,9 +17,12 @@ import com.example.da_sentrip.repository.custom.UserCustomRepository;
 import com.example.da_sentrip.security.JwtUtil;
 import com.example.da_sentrip.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.Map;
 
 @Service
@@ -29,7 +34,9 @@ public class UserServiceImpl implements UserService {
     private final JwtUtil jwtUtil;
     private final RoleRepository roleRepository;
     private final UserCustomRepository userCustomRepository;
+    private final ModelMapper modelMapper;
     private final MenuCustomRepository menuCustomRepository;
+    private final MediaStorageService mediaStorageService;
 
     @Override
     public LoginReponseDTO login(LoginRequestDto request) {

@@ -17,6 +17,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -58,9 +60,29 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrderReponseDTO> Getall() {
-        List<Order> orders = orderRepository.findAll();
-        return orders.stream().map(OrderReponseDTO::new).toList();
+    public List<OrderReponseDTO> Getall(Authentication authentication) {
+        return orderRepository.findAllOrderSummary()
+                .stream()
+                .map(view -> {
+                    OrderReponseDTO dto = new OrderReponseDTO(
+                            view.getOrderCode(),
+                            OrderStatus.valueOf(view.getOrderStatus()),
+                            view.getTotalAmount(),
+                            view.getCreatedAt(),
+                            view.getProductNames(),
+                            view.getAdditionalService(),
+                            view.getImg(),
+                            view.getQuantities()
+                    );
+
+                    UserOrderDTO userDto = new UserOrderDTO();
+                    userDto.setId(view.getUserId());
+                    userDto.setGmail(view.getGmail());
+                    dto.setUser(userDto);
+
+                    return dto;
+                })
+                .toList();
     }
 
 
@@ -86,7 +108,9 @@ public class OrderServiceImpl implements OrderService {
                             view.getTotalAmount(),
                             view.getCreatedAt(),
                             view.getProductNames(),
-                            view.getAdditionalService()
+                            view.getAdditionalService(),
+                            view.getImg(),
+                            view.getQuantities()
                     );
                     UserOrderDTO userDto = new UserOrderDTO();
                     userDto.setId(view.getUserId());
@@ -95,6 +119,7 @@ public class OrderServiceImpl implements OrderService {
                     return dto;
                 }).toList();
     }
+
 
 
     private OrderDTO mapToDTO(Order order) {

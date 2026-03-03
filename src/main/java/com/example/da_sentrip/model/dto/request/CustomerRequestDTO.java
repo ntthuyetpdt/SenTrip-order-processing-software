@@ -11,4 +11,5 @@ public class CustomerRequestDTO {
     private String gmail;
     private String phone;
     private String address;
+    private String cccd;
 }

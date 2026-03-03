@@ -9,5 +9,8 @@ import java.util.List;
 public class ProfileResponseDTO {
     private String gmail;
     private String role;
+    private  String name;
+    private String img;
     private List<String> permissions;
+
 }

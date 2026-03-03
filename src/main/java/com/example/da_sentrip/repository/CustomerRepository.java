@@ -22,11 +22,14 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
     );
 
     @Query(value = """
-    SELECT
+            SELECT
         C.FULL_NAME AS fullName,
         C.PHONE AS phone,
+        C.CCCD AS cccd,
         U.GMAIL AS gmail,
         GROUP_CONCAT(DISTINCT PR.PRODUCT_NAME ORDER BY PR.PRODUCT_NAME SEPARATOR ', ') AS productName,
+        GROUP_CONCAT(OI.QUANTITY ORDER BY OI.ID SEPARATOR ', ') AS quantities,
+        GROUP_CONCAT(DISTINCT CASE WHEN PR.IMG IS NOT NULL AND PR.IMG REGEXP '^[0-9]+$' THEN DS.MEDIA_URL ELSE PR.IMG  END  ORDER BY PR.PRODUCT_NAME SEPARATOR ', ' ) AS img,
         MAX(PR.SERVICE_TYPE) AS serviceType,
         MAX(PR.TYPE) AS type,
         O.CREATED_AT AS createTime,
@@ -34,27 +37,38 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
         O.TOTAL_AMOUNT AS totalAmount,
         PAY.PAID_AT AS paidAt,
         PAY.PAYMENT_CODE AS paymentCode
+    
     FROM ORDERS O
-    JOIN CUSTOMERS C ON C.USER_ID = O.USER_ID
-    JOIN USERS U ON U.ID = O.USER_ID
-    LEFT JOIN ORDER_ITEMS OI ON OI.ORDER_ID = O.ID
-    LEFT JOIN PRODUCTS PR ON PR.ID = OI.PRODUCT_ID
-    LEFT JOIN PAYMENTS PAY ON PAY.ID = (
+             JOIN CUSTOMERS C ON C.USER_ID = O.USER_ID
+             JOIN USERS U ON U.ID = O.USER_ID
+             LEFT JOIN ORDER_ITEMS OI ON OI.ORDER_ID = O.ID
+             LEFT JOIN PRODUCTS PR ON PR.ID = OI.PRODUCT_ID
+    
+             LEFT JOIN DATA_SOUSES DS
+                       ON (
+                           PR.IMG IS NOT NULL
+                               AND PR.IMG REGEXP '^[0-9]+$'
+                               AND DS.ID = CAST(PR.IMG AS UNSIGNED)
+                           )
+    
+             LEFT JOIN PAYMENTS PAY ON PAY.ID = (
         SELECT P2.ID
         FROM PAYMENTS P2
         WHERE P2.ORDER_ID = O.ID
         ORDER BY P2.PAID_AT DESC
         LIMIT 1
     )
+    
     WHERE O.USER_ID = :userId
     GROUP BY
-        O.ID, C.FULL_NAME, C.PHONE, U.GMAIL,
+        O.ID,
+        C.FULL_NAME, C.PHONE, C.CCCD, U.GMAIL,
         O.CREATED_AT,
         COALESCE(PAY.PAYMENT_STATUS, O.ORDER_STATUS),
         O.TOTAL_AMOUNT,
         PAY.PAID_AT,
         PAY.PAYMENT_CODE
-    ORDER BY O.CREATED_AT DESC
+    ORDER BY O.CREATED_AT DESC;
     """, nativeQuery = true)
     List<TicketView> findTicketsByUserId(@Param("userId") Long userId);
 }

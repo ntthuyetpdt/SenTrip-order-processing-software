@@ -96,6 +96,7 @@ public class CustomerServiceImpl implements CustomerService {
                         view.getFullName(),
                         view.getPhone(),
                         view.getGmail(),
+                        view.getCccd(),
                         view.getProductName(),
                         view.getServiceType(),
                         view.getType(),
@@ -103,7 +104,9 @@ public class CustomerServiceImpl implements CustomerService {
                         view.getStatus(),
                         view.getTotalAmount(),
                         view.getPaidAt(),
-                        view.getPaymentCode()
+                        view.getPaymentCode(),
+                        view.getImg(),
+                        view.getQuantities()
                 ))
                 .toList();
     }

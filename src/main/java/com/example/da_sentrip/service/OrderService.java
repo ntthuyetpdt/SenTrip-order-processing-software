@@ -9,7 +9,7 @@ import java.util.List;
 public interface OrderService {
 
     OrderDTO Order(OrderRequestDTO request, String gmail);
-    List<OrderReponseDTO> Getall();
+    List<OrderReponseDTO> Getall(Authentication authentication);
     OrderDTO Cancel(String oderCode);
     List<OrderReponseDTO> getMyOrders(Authentication authentication);
 }

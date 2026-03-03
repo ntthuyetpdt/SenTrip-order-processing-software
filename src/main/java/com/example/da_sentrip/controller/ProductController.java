@@ -31,10 +31,7 @@ public class ProductController {
         return new SuccessResponse<>(200, "Create product success", product);
     }
 
-    @PostMapping(
-            value = "/update/{id}",
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
-    )
+    @PostMapping(value = "/update/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> update(
             @PathVariable Long id,
             @RequestPart(value = "request", required = false) ProductRequestDTO request,

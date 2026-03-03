@@ -20,8 +20,8 @@ public class Customer extends  BaseCreatedEntity{
     @JoinColumn(name = "USER_ID", unique = true)
     private User user;
 
-    @Column(name ="MKH")
-    private String MaKH;
+    @Column(name ="CCCD")
+    private String cccd;
 
     @Column(name = "FULL_NAME")
     private String fullName;

@@ -43,13 +43,17 @@ public class CustomerController {
                 .build());
     }
 
-    @PostMapping("/update/{id}")
-    public ResponseEntity<ResponseDTO> update(@PathVariable Long id, @RequestBody CustomerRequestDTO request,@RequestParam(value = "img",required = false) MultipartFile img) {
-        customerService.update(id, request,img);
+    @PostMapping( "/update/{id}")
+    public ResponseEntity<ResponseDTO> update(
+            @PathVariable Long id,
+            @RequestPart("request") CustomerRequestDTO request,
+            @RequestPart(value = "img", required = false) MultipartFile img) {
+
+        customerService.update(id, request, img);
         return ResponseEntity.ok(ResponseDTO.builder()
                 .status("ok")
                 .code(Constants.HTTP_STATUS.SUCCESS)
-                .message("Update employee success")
+                .message("Update custome success ")
                 .build());
     }
 
@@ -59,7 +63,7 @@ public class CustomerController {
         return ResponseEntity.ok(ResponseDTO.builder()
                 .status("ok")
                 .code(Constants.HTTP_STATUS.SUCCESS)
-                .message("Delete employee success")
+                .message("Delete customersuccess")
                 .build());
     }
 
@@ -70,7 +74,7 @@ public class CustomerController {
             @RequestParam(required = false) String phone) {
         return ResponseEntity.ok(new SuccessResponse<>(
                 200,
-                "Search employees success",
+                "Search customer success",
                 customerService.search(fullName, address, phone))
         );
     }
