@@ -19,6 +19,7 @@ public class OrderReponseDTO {
     private LocalDateTime createdAt;
     private UserOrderDTO user;
     private String productNames;
+    private String additionalService;
 
     public OrderReponseDTO(Order order) {
         this.orderCode = order.getOrderCode();
@@ -28,11 +29,12 @@ public class OrderReponseDTO {
         this.user = new UserOrderDTO(order.getUser());
     }
 
-    public OrderReponseDTO(String orderCode, OrderStatus orderStatus, BigDecimal totalAmount, LocalDateTime createdAt, String productNames) {
+    public OrderReponseDTO(String orderCode, OrderStatus orderStatus, BigDecimal totalAmount, LocalDateTime createdAt, String productNames,String additionalService ) {
         this.orderCode = orderCode;
         this.orderStatus = orderStatus;
         this.totalAmount = totalAmount;
         this.createdAt = createdAt;
         this.productNames = productNames;
+        this.additionalService =additionalService;
     }
 }

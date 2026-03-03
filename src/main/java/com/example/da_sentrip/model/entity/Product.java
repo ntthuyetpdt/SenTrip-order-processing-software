@@ -3,14 +3,12 @@ package com.example.da_sentrip.model.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Setter
 @Table(name = "PRODUCTS")
-public class Product {
+public class Product  extends BaseCreatedEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,6 +23,10 @@ public class Product {
     @Column(name = "SERVICE_TYPE")
     private String serviceType;
 
+    @ManyToOne
+    @JoinColumn(name = "MERCHANT_ID", nullable = false)
+    private Merchant merchant;
+
     @Column(name = "PRICE")
     private String price;
 
@@ -34,9 +36,6 @@ public class Product {
     @Column(name = "STATUS")
     private Integer status;
 
-    @Column(name = "CREATED_AT")
-    private LocalDateTime createdAt;
-
     @Column(name="TYPE")
     private String Type;
 
@@ -45,4 +44,7 @@ public class Product {
 
     @Column (name ="IMG")
     private String img;
+
+    @Column (name = "ADDITIONAL_SERVICES")
+    private String additionalService;
 }

@@ -85,7 +85,8 @@ public class OrderServiceImpl implements OrderService {
                             OrderStatus.valueOf(view.getOrderStatus()),
                             view.getTotalAmount(),
                             view.getCreatedAt(),
-                            view.getProductNames()
+                            view.getProductNames(),
+                            view.getAdditionalService()
                     );
                     UserOrderDTO userDto = new UserOrderDTO();
                     userDto.setId(view.getUserId());

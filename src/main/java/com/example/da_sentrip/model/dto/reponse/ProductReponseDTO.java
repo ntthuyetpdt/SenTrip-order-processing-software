@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class ProductReponseDTO {
+    private Long id;
     private String productName;
     private String serviceType;
     private String price;
@@ -17,7 +18,11 @@ public class ProductReponseDTO {
     private LocalDateTime createdAt;
     private String Type;
     private String img;
+    private String additionalService;
+    private Long merchantId;
+
     public ProductReponseDTO (Product product){
+        this.id = product.getId();
         this.productName = product.getProductName();
         this.serviceType = product.getServiceType();
         this.price= product.getPrice();
@@ -26,6 +31,9 @@ public class ProductReponseDTO {
         this.createdAt= product.getCreatedAt();
         this.Type= product.getType();
         this.img= product.getImg();
-
+        this.additionalService =product.getAdditionalService();
+        if (product.getMerchant() != null) {
+            this.merchantId = product.getMerchant().getId();
+        }
     }
 }

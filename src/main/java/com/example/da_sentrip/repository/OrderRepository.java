@@ -69,7 +69,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
         o.TOTAL_AMOUNT as totalAmount,
         u.ID as userId,
         u.GMAIL as gmail,
-        GROUP_CONCAT(p.PRODUCT_NAME SEPARATOR ', ') as productNames
+        GROUP_CONCAT(p.PRODUCT_NAME SEPARATOR ', ') as productNames,
+        GROUP_CONCAT(p.ADDITIONAL_SERVICES  SEPARATOR ', ') as  additionalService
     FROM ORDERS o
     JOIN USERS u ON u.ID = o.USER_ID
     JOIN ORDER_ITEMS oi ON oi.ORDER_ID = o.ID

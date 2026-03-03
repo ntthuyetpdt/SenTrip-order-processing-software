@@ -11,4 +11,5 @@ public interface OrderSummaryView {
     Long getUserId();            // u.ID as userId
     String getGmail();           // u.GMAIL as gmail
     String getProductNames();
+    String getAdditionalService();
 }

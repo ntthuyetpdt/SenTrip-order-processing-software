@@ -6,6 +6,8 @@ import com.example.da_sentrip.model.dto.reponse.ProductReponseDTO;
 import com.example.da_sentrip.model.dto.request.ProductRequestDTO;
 import com.example.da_sentrip.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
@@ -29,12 +31,19 @@ public class ProductController {
         return new SuccessResponse<>(200, "Create product success", product);
     }
 
-    @PostMapping("/update/{id}")
-    public SuccessResponse<?> update(@PathVariable Long id, @ModelAttribute ProductRequestDTO request, MultipartFile img) {
-        ProductDTO product = productService.update(id, request, img);
-        return new SuccessResponse<>(200, "Update product success", product);
+    @PostMapping(
+            value = "/update/{id}",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public ResponseEntity<?> update(
+            @PathVariable Long id,
+            @RequestPart(value = "request", required = false) ProductRequestDTO request,
+            @RequestPart(value = "img", required = false) MultipartFile img
+    ) {
+        if (request == null) request = new ProductRequestDTO();
+        productService.update(id, request, img);
+        return ResponseEntity.ok("Updated");
     }
-
     @PostMapping("/delete/{id}")
     public SuccessResponse<?> delete(@PathVariable Long id) {
         ProductDTO product = productService.delete(id);

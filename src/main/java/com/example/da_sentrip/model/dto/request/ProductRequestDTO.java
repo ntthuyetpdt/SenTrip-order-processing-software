@@ -17,4 +17,5 @@ public class ProductRequestDTO {
     private String Type;
     private  String address;
     private String img;
+    private String additionalService;
 }
