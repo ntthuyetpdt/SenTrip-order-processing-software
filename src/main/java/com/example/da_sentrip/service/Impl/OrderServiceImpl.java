@@ -1,8 +1,10 @@
 package com.example.da_sentrip.service.Impl;
 
 import com.example.da_sentrip.model.dto.OrderDTO;
+import com.example.da_sentrip.model.dto.reponse.OderdetailReponseDTO;
 import com.example.da_sentrip.model.dto.reponse.OrderReponseDTO;
 import com.example.da_sentrip.model.dto.reponse.UserOrderDTO;
+import com.example.da_sentrip.model.dto.reponse.view.OderDetailProjection;
 import com.example.da_sentrip.model.dto.request.OrderRequestDTO;
 import com.example.da_sentrip.model.entity.*;
 import com.example.da_sentrip.model.enums.OrderStatus;
@@ -15,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.Objects;
@@ -74,11 +77,9 @@ public class OrderServiceImpl implements OrderService {
                             view.getImg(),
                             view.getQuantities()
                     );
-
                     UserOrderDTO userDto = new UserOrderDTO();
                     userDto.setId(view.getUserId());
                     userDto.setGmail(view.getGmail());
-                    dto.setUser(userDto);
 
                     return dto;
                 })
@@ -112,14 +113,42 @@ public class OrderServiceImpl implements OrderService {
                             view.getImg(),
                             view.getQuantities()
                     );
-                    UserOrderDTO userDto = new UserOrderDTO();
-                    userDto.setId(view.getUserId());
-                    userDto.setGmail(view.getGmail());
-                    dto.setUser(userDto);
                     return dto;
                 }).toList();
     }
 
+    @Override
+    public List<OderdetailReponseDTO> details(String orderCode) {
+
+        List<OderDetailProjection> projections = orderRepository.findOrderDetailByOrderCode(orderCode);
+        List<OderdetailReponseDTO> result = new ArrayList<>();
+        for (OderDetailProjection p : projections) {
+            OderdetailReponseDTO dto = new OderdetailReponseDTO();
+            dto.setCreatedAt(p.getCreatedAt());
+            dto.setOrderCode(p.getOrderCode());
+            dto.setOrderStatus(p.getOrderStatus());
+            dto.setTotalAmount(p.getTotalAmount());
+            dto.setUserId(p.getUserId());
+            dto.setGmail(p.getGmail());
+            dto.setFullName(p.getFullName());
+            dto.setPhone(p.getPhone());
+            dto.setCccd(p.getCccd());
+            dto.setPaymentStatus(p.getPaymentStatus());
+            dto.setPaymentCode(p.getPaymentCode());
+            dto.setPaidAt(p.getPaidAt());
+            dto.setProductNames(p.getProductNames());
+            dto.setType(p.getType());
+            dto.setServiceType(p.getServiceType());
+            dto.setAdditionalService(p.getAdditionalService());
+            dto.setDescription(p.getDescription());
+            dto.setQuantities(p.getQuantities());
+            dto.setImg(p.getImg());
+
+            result.add(dto);
+        }
+
+        return result;
+    }
 
 
     private OrderDTO mapToDTO(Order order) {

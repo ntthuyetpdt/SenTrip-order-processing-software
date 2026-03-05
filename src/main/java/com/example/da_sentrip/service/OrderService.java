@@ -1,6 +1,7 @@
 package com.example.da_sentrip.service;
 
 import com.example.da_sentrip.model.dto.OrderDTO;
+import com.example.da_sentrip.model.dto.reponse.OderdetailReponseDTO;
 import com.example.da_sentrip.model.dto.reponse.OrderReponseDTO;
 import com.example.da_sentrip.model.dto.request.OrderRequestDTO;
 import org.springframework.security.core.Authentication;
@@ -12,4 +13,5 @@ public interface OrderService {
     List<OrderReponseDTO> Getall(Authentication authentication);
     OrderDTO Cancel(String oderCode);
     List<OrderReponseDTO> getMyOrders(Authentication authentication);
+    List<OderdetailReponseDTO> details (String  orderCode);
 }

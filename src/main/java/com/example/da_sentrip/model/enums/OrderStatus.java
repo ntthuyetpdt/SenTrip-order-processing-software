@@ -8,5 +8,6 @@ public enum OrderStatus {
     COMPLETED,         // Hoàn thành
     CANCELLED,         // Hủy vé
     REFUND_REQUESTED,  // Yêu cầu hoàn vé
-    REFUNDED  // hoàn tiền
+    REFUNDED ,
+    CONFIRMED// hoàn tiền
 }

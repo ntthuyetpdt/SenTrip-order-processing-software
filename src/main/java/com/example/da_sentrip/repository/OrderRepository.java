@@ -1,6 +1,8 @@
 package com.example.da_sentrip.repository;
 
+import com.example.da_sentrip.model.dto.reponse.OderdetailReponseDTO;
 import com.example.da_sentrip.model.dto.reponse.view.GetallOder;
+import com.example.da_sentrip.model.dto.reponse.view.OderDetailProjection;
 import com.example.da_sentrip.model.entity.Order;
 import com.example.da_sentrip.model.dto.reponse.view.OrderSummaryView;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,17 +22,42 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Optional<Order> findByOrderCode(@Param("orderCode") String orderCode);
 
     @Query(value = """
-        SELECT 
-            O.ORDER_CODE, O.ORDER_STATUS, O.TOTAL_AMOUNT, O.CREATED_AT,
-            OI.PRODUCT_ID, OI.QUANTITY, OI.PRICE AS ITEM_PRICE,
-            P.PRODUCT_CODE, P.PRODUCT_NAME, P.SERVICE_TYPE, P.PRICE AS PRODUCT_PRICE,
-            P.REFUNDABLE, P.STATUS, P.TYPE, P.ADDRESS, P.IMG
-        FROM ORDERS O
-        JOIN ORDER_ITEMS OI ON OI.ORDER_ID = O.ID
-        JOIN PRODUCTS P ON P.ID = OI.PRODUCT_ID
-        WHERE O.ORDER_CODE = :orderCode
+            SELECT
+            o.CREATED_AT AS createdAt,
+            o.ORDER_CODE AS orderCode,
+            o.ORDER_STATUS AS orderStatus,
+            o.TOTAL_AMOUNT AS totalAmount,
+            u.ID AS userId,
+            u.GMAIL AS gmail,
+            c.FULL_NAME AS fullName,
+            c.PHONE AS phone,
+            c.CCCD AS cccd,
+            pay.PAYMENT_STATUS AS paymentStatus,
+            pay.PAYMENT_CODE AS paymentCode,
+            pay.PAID_AT AS paidAt,
+            GROUP_CONCAT(p.PRODUCT_NAME SEPARATOR ', ') AS productNames,
+            GROUP_CONCAT(p.ADDITIONAL_SERVICES SEPARATOR ', ') AS additionalService,
+            GROUP_CONCAT(p.SERVICE_TYPE SEPARATOR ',') AS  serviceType,
+            GROUP_CONCAT(p.TYPE SEPARATOR ',') AS Type,
+            GROUP_CONCAT(oi.QUANTITY ORDER BY oi.ID SEPARATOR ', ') AS quantities,
+            GROUP_CONCAT( DISTINCT CASE  WHEN p.IMG IS NOT NULL AND p.IMG REGEXP '^[0-9]+$'  THEN ds.MEDIA_URL ELSE p.IMG END SEPARATOR ', ' ) AS img
+        FROM ORDERS o
+                 JOIN USERS u ON u.ID = o.USER_ID
+                 LEFT JOIN CUSTOMERS c ON c.USER_ID = u.ID   
+                 JOIN ORDER_ITEMS oi ON oi.ORDER_ID = o.ID
+                 JOIN PRODUCTS p ON p.ID = oi.PRODUCT_ID
+                 LEFT JOIN PAYMENTS pay ON pay.ORDER_ID = o.ID
+                 LEFT JOIN DATA_SOUSES ds ON (  p.IMG IS NOT NULL  AND p.IMG REGEXP '^[0-9]+$' AND ds.ID = CAST(p.IMG AS UNSIGNED)  )
+        WHERE o.ORDER_CODE = :orderCode
+        GROUP BY
+            o.CREATED_AT, o.ORDER_CODE, o.ORDER_STATUS, o.TOTAL_AMOUNT,
+            u.ID, u.GMAIL,
+            c.FULL_NAME, c.PHONE, c.CCCD,
+            pay.PAYMENT_STATUS, pay.PAYMENT_CODE, pay.PAID_AT
+        
+        ORDER BY o.CREATED_AT DESC;
         """, nativeQuery = true)
-    List<Object[]> findOrderDetailByOrderCode(@Param("orderCode") String orderCode);
+    List<OderDetailProjection> findOrderDetailByOrderCode(String orderCode);
 
     @Modifying
     @Transactional
@@ -83,7 +110,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
         ON (p.IMG IS NOT NULL AND p.IMG REGEXP '^[0-9]+$'
         AND ds.ID = CAST(p.IMG AS UNSIGNED))
         WHERE o.USER_ID = :userId
-        GROUP BY o.CREATED_AT, o.ORDER_CODE, o.ORDER_STATUS, o.TOTAL_AMOUNT, u.ID, u.GMAIL
+        GROUP BY o.CREATED_AT, o.ORDER_CODE, o.ORDER_STATUS, o.TOTAL_AMOUNT
         ORDER BY o.CREATED_AT DESC
 """, nativeQuery = true)
     List<OrderSummaryView> findOrderSummaryByUser(@Param("userId") Long userId);

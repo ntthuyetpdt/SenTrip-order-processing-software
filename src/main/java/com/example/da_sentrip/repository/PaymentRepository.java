@@ -1,43 +1,42 @@
 package com.example.da_sentrip.repository;
 
 import com.example.da_sentrip.model.entity.Payment;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.math.BigDecimal;
+import java.util.Optional;
 
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Modifying
+    @Transactional
     @Query(value = """
-        INSERT INTO PAYMENTS (PAYMENT_CODE, ORDER_ID, AMOUNT, PAYMENT_STATUS, BANK_NAME, BANK_ACCOUNT)
-        VALUES (:paymentCode, :orderId, :amount, 'CONFIRM', :bankName, :bankAccount)
-        """, nativeQuery = true)
-    int insertPending(@Param("paymentCode") String paymentCode,
-                      @Param("orderId") Long orderId,
-                      @Param("amount") BigDecimal amount,
-                      @Param("bankName") String bankName,
-                      @Param("bankAccount") String bankAccount);
+    INSERT INTO PAYMENTS (PAYMENT_CODE, ORDER_ID, AMOUNT, PAYMENT_STATUS)
+    VALUES (:paymentCode, :orderId, :amount, 'WAITING_FOR_PAYMENT')
+""", nativeQuery = true)
+    void insertWaiting(@Param("paymentCode") String paymentCode,
+                       @Param("orderId") Long orderId,
+                       @Param("amount") BigDecimal amount);
 
-    @Query(value = """ 
-        SELECT P.ID 
-        FROM PAYMENTS P 
-        WHERE P.PAYMENT_CODE = :paymentCode 
-        LIMIT 1
-        """, nativeQuery = true)
-    Long findIdByPaymentCode(@Param("paymentCode") String paymentCode);
-
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query(value = """
-        UPDATE PAYMENTS
-        SET PAYMENT_STATUS = 'SUCCESS',
-            PROCESSED_BY   = :employeeId,
-            PAID_AT        = NOW()
-        WHERE ID = :paymentId
+        SELECT p.ID
+        FROM PAYMENTS p
+        WHERE p.PAYMENT_CODE = :paymentCode
         """, nativeQuery = true)
-    int markSuccess(@Param("paymentId") Long paymentId,
-                    @Param("employeeId") Long employeeId);
+    Optional<Long> findIdByPaymentCode(@Param("paymentCode") String paymentCode);
+
+    @Modifying
+    @Query(value = """
+    UPDATE PAYMENTS
+    SET PAYMENT_STATUS = 'SUCCESS',
+        PAID_AT = NOW()
+    WHERE ID = :paymentId
+""", nativeQuery = true)
+    void markSuccess(@Param("paymentId") Long paymentId);
+
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query(value = """
@@ -53,4 +52,26 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
                   @Param("oldAmount") BigDecimal oldAmount,
                   @Param("newAmount") BigDecimal newAmount,
                   @Param("performedBy") Long performedBy);
+
+
+    @Query(value = """
+    SELECT p.ID AS id,
+           p.PAYMENT_CODE AS paymentCode,
+           p.ORDER_ID AS orderId,
+           p.AMOUNT AS amount,
+           p.PAYMENT_STATUS AS paymentStatus
+    FROM PAYMENTS p
+    WHERE p.PAYMENT_CODE = :paymentCode
+    LIMIT 1
+    FOR UPDATE
+""", nativeQuery = true)
+    Optional<PaymentSnapshot> lockByPaymentCode(@Param("paymentCode") String paymentCode);
+
+    interface PaymentSnapshot {
+        Long getId();
+        String getPaymentCode();
+        Long getOrderId();
+        BigDecimal getAmount();
+        String getPaymentStatus();
+    }
 }

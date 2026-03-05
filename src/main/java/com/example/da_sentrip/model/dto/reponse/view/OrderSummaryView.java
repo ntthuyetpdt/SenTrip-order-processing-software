@@ -7,9 +7,7 @@ public interface OrderSummaryView {
     LocalDateTime getCreatedAt();
     String getOrderCode();
     String getOrderStatus();     // lấy từ o.ORDER_STATUS
-    BigDecimal getTotalAmount();
-    Long getUserId();            // u.ID as userId
-    String getGmail();           // u.GMAIL as gmail
+    BigDecimal getTotalAmount();     // u.GMAIL as gmail
     String getProductNames();
     String getAdditionalService();
     String getImg();

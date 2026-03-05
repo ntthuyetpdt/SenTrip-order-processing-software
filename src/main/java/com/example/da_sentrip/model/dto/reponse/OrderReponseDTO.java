@@ -17,7 +17,6 @@ public class OrderReponseDTO {
     private OrderStatus orderStatus;
     private BigDecimal totalAmount;
     private LocalDateTime createdAt;
-    private UserOrderDTO user;
     private String productNames;
     private String additionalService;
     private String img;
@@ -28,7 +27,6 @@ public class OrderReponseDTO {
         this.orderStatus = order.getOrderStatus();
         this.totalAmount = order.getTotalAmount();
         this.createdAt = order.getCreatedAt();
-        this.user = new UserOrderDTO(order.getUser());
     }
 
     public OrderReponseDTO(String orderCode, OrderStatus orderStatus, BigDecimal totalAmount, LocalDateTime createdAt, String productNames,String additionalService,String img ,String quantities) {

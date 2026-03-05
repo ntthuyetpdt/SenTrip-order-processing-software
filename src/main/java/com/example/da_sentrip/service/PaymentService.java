@@ -5,5 +5,6 @@ import com.example.da_sentrip.model.dto.request.PaymentRequestDTO;
 
 public interface PaymentService {
         PaymentResponseDTO payOrder (PaymentRequestDTO request);
+        PaymentResponseDTO confirmPaymentByUrl(String url);
 
 }

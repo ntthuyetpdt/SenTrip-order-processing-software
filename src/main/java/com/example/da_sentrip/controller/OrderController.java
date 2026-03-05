@@ -2,11 +2,15 @@ package com.example.da_sentrip.controller;
 
 import com.example.da_sentrip.model.SuccessResponse;
 import com.example.da_sentrip.model.dto.OrderDTO;
+import com.example.da_sentrip.model.dto.reponse.OderdetailReponseDTO;
+import com.example.da_sentrip.model.dto.reponse.ResponseDTO;
 import com.example.da_sentrip.model.dto.request.OrderRequestDTO;
 import com.example.da_sentrip.model.dto.reponse.OrderReponseDTO;
 import com.example.da_sentrip.repository.OrderRepository;
 import com.example.da_sentrip.service.OrderService;
+import com.example.da_sentrip.utils.Constants;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
 import java.util.List;
@@ -38,9 +42,14 @@ public class OrderController {
     }
 
     @GetMapping("/detail/{orderCode}")
-    public SuccessResponse<?> detail(@PathVariable String orderCode) {
-        List<Object[]> detail = orderRepository.findOrderDetailByOrderCode(orderCode);
-        return new SuccessResponse<>(200, "GET ORDER DETAIL SUCCESS", detail);
+    public ResponseEntity<ResponseDTO<Object>> detail(@PathVariable String orderCode) {
+        List<OderdetailReponseDTO> detail = orderService.details(orderCode);
+        return ResponseEntity.ok(ResponseDTO.builder()
+                .status("ok")
+                .code(Constants.HTTP_STATUS.SUCCESS)
+                .message("get detail sucess")
+                .data(detail)
+                .build());
     }
 
     @PostMapping("/cancel/{orderCode}")
