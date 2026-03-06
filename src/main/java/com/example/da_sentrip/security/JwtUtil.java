@@ -25,7 +25,6 @@ public class JwtUtil {
     }
 
     public String generateToken(User user) {
-
         return Jwts.builder()
                 .subject(user.getGmail())
                 .claim("userId", user.getId())
@@ -35,18 +34,13 @@ public class JwtUtil {
                 .signWith(signingKey)
                 .compact();
     }
-
-
     public Claims getClaims(String token) {
-
         return Jwts.parser()
                 .verifyWith((SecretKey) signingKey)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
     }
-
-
     public boolean validateToken(String token) {
         try {
             getClaims(token);

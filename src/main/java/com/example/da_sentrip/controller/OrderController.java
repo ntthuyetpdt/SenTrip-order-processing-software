@@ -6,7 +6,6 @@ import com.example.da_sentrip.model.dto.reponse.OderdetailReponseDTO;
 import com.example.da_sentrip.model.dto.reponse.ResponseDTO;
 import com.example.da_sentrip.model.dto.request.OrderRequestDTO;
 import com.example.da_sentrip.model.dto.reponse.OrderReponseDTO;
-import com.example.da_sentrip.repository.OrderRepository;
 import com.example.da_sentrip.service.OrderService;
 import com.example.da_sentrip.utils.Constants;
 import lombok.RequiredArgsConstructor;
@@ -21,24 +20,46 @@ import java.util.List;
 public class OrderController {
 
     private final OrderService orderService;
-    private final OrderRepository orderRepository;
 
     @GetMapping("/getall")
     public SuccessResponse<?> getAll(Authentication authentication) {
         List<OrderReponseDTO> orders = orderService.Getall(authentication);
-        return new SuccessResponse<>(200, "Get the list of successful orders", orders);
+        return new SuccessResponse<>(
+                Constants.HTTP_STATUS.SUCCESS,
+                "View successful ",
+                orders);
     }
     @GetMapping("/getuser")
     public SuccessResponse<?> getMyOrders(Authentication authentication) {
-        return new SuccessResponse<>(200, "Get your orders successfully",
-                orderService.getMyOrders(authentication));
+        List<OrderReponseDTO> oder= orderService.getMyOrders(authentication);
+        return new SuccessResponse<>(
+                Constants.HTTP_STATUS.SUCCESS,
+                "View successful "
+                ,oder
+        );
+
     }
 
     @PostMapping("/create")
-    public SuccessResponse<?> create(@RequestBody OrderRequestDTO request, Authentication authentication) {
+    public ResponseEntity<ResponseDTO> create(@RequestBody OrderRequestDTO request, Authentication authentication) {
         String gmail = authentication.getName();
         OrderDTO order = orderService.Order(request, gmail);
-        return new SuccessResponse<>(200, "Order added successfully", order);
+        try {
+            return ResponseEntity.ok(ResponseDTO.builder()
+                    .status("ok")
+                    .code(Constants.HTTP_STATUS.CREATED)
+                    .message("get detail sucess")
+                    .data(order)
+                    .build());
+        }catch (Exception ex){
+            return ResponseEntity.ok(ResponseDTO.builder()
+                    .status("ok")
+                    .code(Constants.HTTP_STATUS.BAD_REQUEST)
+                    .message("get detail sucess")
+                    .data(null)
+                    .build());
+        }
+
     }
 
     @GetMapping("/detail/{orderCode}")
@@ -53,8 +74,21 @@ public class OrderController {
     }
 
     @PostMapping("/cancel/{orderCode}")
-    public SuccessResponse<?> cancel(@PathVariable String orderCode) {
+    public ResponseEntity<ResponseDTO<Object>> cancel(@PathVariable String orderCode) {
         OrderDTO result = orderService.Cancel(orderCode);
-        return new SuccessResponse<>(200, "Order cancelled successfully.", result);
+        try {
+            return ResponseEntity.ok(ResponseDTO.builder()
+                    .status("ok")
+                    .code(Constants.HTTP_STATUS.SUCCESS)
+                    .message("get detail sucess")
+                    .data(result)
+                    .build());
+        }catch (Exception ex) {
+            return ResponseEntity.ok(ResponseDTO.builder()
+                    .status("ok")
+                    .code(Constants.HTTP_STATUS.BAD_REQUEST)
+                    .message("get detail sucess")
+                    .build());
+        }
     }
 }

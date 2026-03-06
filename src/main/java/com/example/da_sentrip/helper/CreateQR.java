@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayOutputStream;
 
 @Service
-public class QR {
+public class CreateQR {
     public byte[] generateQr(String text, int width, int height) {
         try {
             BitMatrix matrix = new MultiFormatWriter().encode(text, BarcodeFormat.QR_CODE, width, height);

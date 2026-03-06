@@ -9,7 +9,6 @@ import com.example.da_sentrip.model.entity.User;
 import com.example.da_sentrip.security.JwtUtil;
 import com.example.da_sentrip.utils.Constants;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,9 +21,22 @@ public class UserController {
 
     @PostMapping("/create")
     public ResponseEntity<?> add(@RequestBody UserRequestDTO request){
-
-            User user =userService.add( request);
-        return ResponseEntity.ok("add user success");
+        userService.add( request);
+            try {
+                return ResponseEntity.ok(ResponseDTO.builder()
+                        .status("ok")
+                        .code(Constants.HTTP_STATUS.CREATED)
+                        .message("create success")
+                        .build()
+                );
+            }catch (Exception ex) {
+                return ResponseEntity.ok(ResponseDTO.builder()
+                        .status("ok")
+                        .code(Constants.HTTP_STATUS.FORBIDDEN)
+                        .message("create failed")
+                        .build()
+                );
+            }
 
     }
     @GetMapping("/profile")
@@ -32,25 +44,38 @@ public class UserController {
         String token = authHeader.substring(7);
         String email = jwtUtil.getGmailFromToken(token);
         return new SuccessResponse<>(
-                200,
+                Constants.HTTP_STATUS.SUCCESS,
                 "Get profile success",
                 userService.getProfile(email)
         );
     }
 
     @GetMapping("/menu")
-    public SuccessResponse<?> getMenu(
+    public ResponseEntity<ResponseDTO> getMenu(
             @RequestHeader("Authorization") String authHeader,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size
     ) {
         String token = authHeader.substring(7);
         String email = jwtUtil.getGmailFromToken(token);
-        return new SuccessResponse<>(
-                200,
-                "Get menu success",
-                userService.getMenu(email, page, size)
-        );
+        User user= (User) userService.getMenu(email, page, size);
+        try {
+            return ResponseEntity.ok(ResponseDTO.builder()
+                    .status("ok")
+                    .code(Constants.HTTP_STATUS.SUCCESS)
+                    .message("view menuu success")
+                    .data(user)
+                    .build()
+            );
+        }catch (Exception ex){
+            return ResponseEntity.ok(ResponseDTO.builder()
+                    .status("ok")
+                    .code(Constants.HTTP_STATUS.UNAUTHORIZED)
+                    .message("view menuu failed")
+                    .build()
+            );
+        }
+
     }
 
 

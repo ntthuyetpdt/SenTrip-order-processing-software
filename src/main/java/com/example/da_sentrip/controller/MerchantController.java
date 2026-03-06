@@ -23,8 +23,8 @@ public class MerchantController  {
     public SuccessResponse<?> getAll(){
         List<MerchantReponseDTO> user =merchantService.getAll();
         return new SuccessResponse<>(
-                200,
-                "get all list employee success",
+                Constants.HTTP_STATUS.SUCCESS,
+                "view  success",
                 user
         );
     }
@@ -32,31 +32,55 @@ public class MerchantController  {
     @PostMapping("/create/{id}")
     public ResponseEntity<ResponseDTO> create(@PathVariable Long id, @RequestBody MerchantRequestDTO request) {
         merchantService.create(request, id);
-        return ResponseEntity.ok(ResponseDTO.builder()
-                .status("ok")
-                .code(Constants.HTTP_STATUS.SUCCESS)
-                .message("Add employee success")
-                .build());
+        try {
+            return ResponseEntity.ok(ResponseDTO.builder()
+                    .status("ok")
+                    .code(Constants.HTTP_STATUS.CREATED)
+                    .message("Add  success")
+                    .build());
+        }catch (Exception ex) {
+            return ResponseEntity.ok(ResponseDTO.builder()
+                    .status("ok")
+                    .code(Constants.HTTP_STATUS.BAD_REQUEST)
+                    .message("Add  failed")
+                    .build());
+        }
     }
 
     @PostMapping("/update/{id}")
     public ResponseEntity<ResponseDTO> update(@PathVariable Long id, @ModelAttribute MerchantRequestDTO request, MultipartFile img) {
         merchantService.update(id, request,img);
-        return ResponseEntity.ok(ResponseDTO.builder()
-                .status("ok")
-                .code(Constants.HTTP_STATUS.SUCCESS)
-                .message("Update employee success")
-                .build());
+        try {
+            return ResponseEntity.ok(ResponseDTO.builder()
+                    .status("ok")
+                    .code(Constants.HTTP_STATUS.SUCCESS)
+                    .message("Update  success")
+                    .build());
+        }catch (Exception ex) {
+            return ResponseEntity.ok(ResponseDTO.builder()
+                    .status("ok")
+                    .code(Constants.HTTP_STATUS.BAD_REQUEST)
+                    .message("Update failed")
+                    .build());
+        }
     }
 
     @PostMapping("/delete/{id}")
     public ResponseEntity<ResponseDTO> delete(@PathVariable Long id) {
         merchantService.delete(id);
-        return ResponseEntity.ok(ResponseDTO.builder()
-                .status("ok")
-                .code(Constants.HTTP_STATUS.SUCCESS)
-                .message("Delete employee success")
-                .build());
+        try {
+            return ResponseEntity.ok(ResponseDTO.builder()
+                    .status("ok")
+                    .code(Constants.HTTP_STATUS.SUCCESS)
+                    .message("Delete  success")
+                    .build());
+        }catch (Exception ex) {
+            return ResponseEntity.ok(ResponseDTO.builder()
+                    .status("ok")
+                    .code(Constants.HTTP_STATUS.SUCCESS)
+                    .message("Delete failed")
+                    .build());
+        }
     }
 
     @GetMapping("/search")
@@ -65,8 +89,8 @@ public class MerchantController  {
             @RequestParam(required = false) String address,
             @RequestParam(required = false) String mnv) {
         return ResponseEntity.ok(new SuccessResponse<>(
-                200,
-                "Search employees success",
+                Constants.HTTP_STATUS.SUCCESS,
+                "Search  success",
                 merchantService.search(fullName, address, mnv))
         );
     }

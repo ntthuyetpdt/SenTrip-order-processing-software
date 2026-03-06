@@ -21,25 +21,17 @@ public class CartItemsServiceImpl implements CartItemsService {
 
     private final CartItemsRepository cartItemsRepository;
     private final CartsRepository cartsRepository;
-    private final CustomerRepository customerRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final DataSourceRepository dataSourceRepository;
 
     @Override
     public CartItemsDTO add(Authentication authentication, AddToCartRequest request) {
 
         String gmail = authentication.getName();
-
-        User user = userRepository.findByGmail(gmail)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        Product product = productRepository.findById(request.getProductId())
-                .orElseThrow(() -> new RuntimeException("Product not found"));
-
-        // tìm cart của user
+        User user = userRepository.findByGmail(gmail).orElseThrow(() -> new RuntimeException("User not found"));
+        Product product = productRepository.findById(request.getProductId()).orElseThrow(() -> new RuntimeException("Product not found"));
         Carts cart = cartsRepository.findByUserId(user.getId()).orElse(null);
-
-        // nếu chưa có cart thì tạo mới
         if (cart == null) {
             cart = new Carts();
             cart.setUserId(user.getId());
@@ -48,20 +40,10 @@ public class CartItemsServiceImpl implements CartItemsService {
         }
 
         BigDecimal cartId = BigDecimal.valueOf(cart.getId());
-
-        // check sản phẩm đã có trong cart chưa
-        CartItems cartItems = cartItemsRepository
-                .findByCartIdAndProductId_Id(cartId, request.getProductId())
-                .orElse(null);
-
+        CartItems cartItems = cartItemsRepository.findByCartIdAndProductId_Id(cartId, request.getProductId()).orElse(null);
         if (cartItems != null) {
-
-            cartItems.setQuantity(
-                    cartItems.getQuantity().add(BigDecimal.valueOf(request.getQuantity()))
-            );
-
+            cartItems.setQuantity(cartItems.getQuantity().add(BigDecimal.valueOf(request.getQuantity())));
         } else {
-
             cartItems = new CartItems();
             cartItems.setCartId(cartId);
             cartItems.setProductId(product);
@@ -69,24 +51,19 @@ public class CartItemsServiceImpl implements CartItemsService {
             cartItems.setPrice(new BigDecimal(product.getPrice())
                     .multiply(BigDecimal.valueOf(request.getQuantity())));
         }
-
         CartItems saved = cartItemsRepository.save(cartItems);
-
         CartItemsDTO dto = new CartItemsDTO();
         dto.setId(saved.getId());
         dto.setCartId(saved.getCartId());
         dto.setProductId(saved.getProductId().getId());
         dto.setQuantity(saved.getQuantity());
         dto.setPrice(saved.getPrice());
-
         return dto;
     }
 
     @Override
     public String delete(Long cartItemId) {
-        CartItems cartItems = cartItemsRepository.findById(cartItemId)
-                .orElseThrow(() -> new BadCredentialsException("CART ITEM ID NOT FOUND"));
-
+        CartItems cartItems = cartItemsRepository.findById(cartItemId).orElseThrow(() -> new BadCredentialsException("CART ITEM ID NOT FOUND"));
         cartItemsRepository.delete(cartItems);
         return "Delete cart item successfully";
     }
@@ -94,26 +71,24 @@ public class CartItemsServiceImpl implements CartItemsService {
     @Override
     public List<CartDetailResponseDTO> getCart(Authentication authentication) {
         String gmail = authentication.getName();
-
-        User user = userRepository.findByGmail(gmail)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        Carts cart = cartsRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new RuntimeException("Cart not found"));
-
+        User user = userRepository.findByGmail(gmail).orElseThrow(() -> new RuntimeException("User not found"));
+        Carts cart = cartsRepository.findByUserId(user.getId()).orElseThrow(() -> new RuntimeException("Cart not found"));
         List<CartItems> cartItemsList = cartItemsRepository.findByCartId(BigDecimal.valueOf(cart.getId()));
-
         return cartItemsList.stream().map(item -> {
             Product product = item.getProductId();
-
             CartDetailResponseDTO dto = new CartDetailResponseDTO();
+            if (product.getImg() != null && product.getImg().matches("\\d+")) {
+                dataSourceRepository.findById(Long.valueOf(product.getImg())).ifPresent(ds -> {
+                    dto.setImg(ds.getImageUrl());
+                });
+            } else {
+                dto.setImg(product.getImg());
+            }
             dto.setCartItemId(item.getId());
             dto.setProductId(product.getId());
             dto.setProductName(product.getProductName());
             dto.setPrice(product.getPrice());
             dto.setQuantity(item.getQuantity());
-            dto.setTotalPrice(item.getPrice());
-            dto.setImg(product.getImg());
             return dto;
         }).collect (Collectors.toList());
     }

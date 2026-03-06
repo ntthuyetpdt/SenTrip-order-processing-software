@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.util.List;
 
 @RestController
@@ -24,23 +23,32 @@ public class CustomerController {
     private final CustomerService customerService;
 
     @GetMapping("/getAll")
-    public SuccessResponse<?> getAll(){
-        List<CustomerReponseDTO> user =customerService.getAll();
+    public SuccessResponse<List<CustomerReponseDTO>> getAll(){
+        List<CustomerReponseDTO> customers = customerService.getAll();
         return new SuccessResponse<>(
-                200,
-                "get all list employee success",
-                user
+                Constants.HTTP_STATUS.SUCCESS,
+                "Get all customers success",
+                customers
         );
     }
 
     @PostMapping("/create/{id}")
     public ResponseEntity<ResponseDTO> create(@PathVariable Long id, @RequestBody CustomerRequestDTO request) {
         customerService.create(request, id);
-        return ResponseEntity.ok(ResponseDTO.builder()
-                .status("ok")
-                .code(Constants.HTTP_STATUS.SUCCESS)
-                .message("Add employee success")
-                .build());
+        try {
+            return ResponseEntity.ok(ResponseDTO.builder()
+                    .status("ok")
+                    .code(Constants.HTTP_STATUS.CREATED)
+                    .message("Add successfully")
+                    .build());
+        }catch (Exception ex){
+            return ResponseEntity.ok(ResponseDTO.builder()
+                    .status("ok")
+                    .code(Constants.HTTP_STATUS.NOT_FOUND)
+                    .message("Add failed")
+                    .build());
+        }
+
     }
 
     @PostMapping( "/update/{id}")
@@ -48,45 +56,86 @@ public class CustomerController {
             @PathVariable Long id,
             @RequestPart("request") CustomerRequestDTO request,
             @RequestPart(value = "img", required = false) MultipartFile img) {
-
         customerService.update(id, request, img);
-        return ResponseEntity.ok(ResponseDTO.builder()
-                .status("ok")
-                .code(Constants.HTTP_STATUS.SUCCESS)
-                .message("Update custome success ")
-                .build());
+
+        try{
+            return ResponseEntity.ok(ResponseDTO.builder()
+                    .status("ok")
+                    .code(Constants.HTTP_STATUS.SUCCESS)
+                    .message("Updated successfully ")
+                    .build());
+        }catch (Exception ex){
+            return ResponseEntity.ok(ResponseDTO.builder()
+                    .status("ok")
+                    .code(Constants.HTTP_STATUS.NOT_FOUND)
+                    .message("Update failed")
+                    .build());
+        }
+
     }
 
     @PostMapping("/delete/{id}")
     public ResponseEntity<ResponseDTO> delete(@PathVariable Long id) {
         customerService.delete(id);
-        return ResponseEntity.ok(ResponseDTO.builder()
-                .status("ok")
-                .code(Constants.HTTP_STATUS.SUCCESS)
-                .message("Delete customersuccess")
-                .build());
+        try{
+            return ResponseEntity.ok(ResponseDTO.builder()
+                    .status("ok")
+                    .code(Constants.HTTP_STATUS.SUCCESS)
+                    .message("Delete success")
+                    .build());
+        }catch (Exception ex){
+            return ResponseEntity.ok(ResponseDTO.builder()
+                    .status("ok")
+                    .code(Constants.HTTP_STATUS.BAD_REQUEST)
+                    .message("Delete success")
+                    .build());
+        }
+
     }
 
     @GetMapping("/search")
-    public ResponseEntity<SuccessResponse<List<CustomerDTO>>> search(
+    public ResponseEntity<SuccessResponse<?>> search(
             @RequestParam(required = false) String fullName,
             @RequestParam(required = false) String address,
             @RequestParam(required = false) String phone) {
-        return ResponseEntity.ok(new SuccessResponse<>(
-                200,
-                "Search customer success",
-                customerService.search(fullName, address, phone))
-        );
+        try {
+            List<CustomerDTO> result = customerService.search(fullName, address, phone);
+            return ResponseEntity.ok(new SuccessResponse<>(
+                    Constants.HTTP_STATUS.SUCCESS,
+                    "Search success",
+                    result
+            ));
+        } catch (Exception ex) {
+            return ResponseEntity.status(Constants.HTTP_STATUS.BAD_REQUEST)
+                    .body(new SuccessResponse<>(
+                            Constants.HTTP_STATUS.BAD_REQUEST,
+                            "Search failed",
+                            null
+                    ));
+        }
     }
     @GetMapping("/ticketsMy")
-    public ResponseEntity<ResponseDTO<Object>> getMyTickets(Authentication authentication) {
-        List<TicketReponseDTO> tickets = customerService.getTicket(authentication);
-        return ResponseEntity.ok(ResponseDTO.builder()
-                .status("ok")
-                .code(Constants.HTTP_STATUS.SUCCESS)
-                .message("Get ticket success")
-                .data(tickets)
-                .build());
-
+    public ResponseEntity<ResponseDTO<?>> getMyTickets(Authentication authentication) {
+        try {
+            List<TicketReponseDTO> tickets = customerService.getTicket(authentication);
+            return ResponseEntity.ok(
+                    ResponseDTO.builder()
+                    .status("ok")
+                    .code(Constants.HTTP_STATUS.SUCCESS)
+                    .message("view ticket success")
+                    .data(tickets)
+                    .build()
+            );
+        } catch (Exception ex) {
+            return ResponseEntity.status(Constants.HTTP_STATUS.BAD_REQUEST)
+                    .body(
+                    ResponseDTO.builder()
+                    .status("fail")
+                    .code(Constants.HTTP_STATUS.BAD_REQUEST)
+                    .message("view ticket failed")
+                    .data(null)
+                    .build()
+                    );
+        }
     }
 }

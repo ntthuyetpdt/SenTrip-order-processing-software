@@ -9,7 +9,7 @@ import java.util.List;
 
 @Service
 public interface EmployeeService {
-    EmployeeDTO create (EmployeeRequestDTO request ,Long id);
+    EmployeeDTO create (EmployeeRequestDTO request ,String gmail);
     EmployeeDTO update (Long id, EmployeeRequestDTO request, MultipartFile img);
     void delete (Long id);
     List<EmployeeDTO>  getdetailis(Long id);

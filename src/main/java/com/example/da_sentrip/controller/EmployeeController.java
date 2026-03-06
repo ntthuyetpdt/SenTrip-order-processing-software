@@ -25,49 +25,82 @@ public class EmployeeController {
     public SuccessResponse<?> getAll(){
         List<EmployeeReponseDTO> user =employeeService.getAll();
         return new SuccessResponse<>(
-                200,
-                "get all list employee success",
+                Constants.HTTP_STATUS.SUCCESS,
+                "view list employee success",
                 user
         );
     }
 
     @PostMapping("/create/{id}")
-    public ResponseEntity<ResponseDTO> create(@PathVariable Long id, @RequestBody EmployeeRequestDTO request) {
-        employeeService.create(request, id);
-        return ResponseEntity.ok(ResponseDTO.builder()
-                .status("ok")
-                .code(Constants.HTTP_STATUS.SUCCESS)
-                .message("Add employee success")
-                .build());
+    public ResponseEntity<ResponseDTO> create(@PathVariable String gmail, @RequestBody EmployeeRequestDTO request) {
+        employeeService.create(request, gmail);
+        try {
+            return ResponseEntity.ok(ResponseDTO.builder()
+                    .status("ok")
+                    .code(Constants.HTTP_STATUS.SUCCESS)
+                    .message("Add  success")
+                    .build());
+        }catch (Exception ex ){
+            return ResponseEntity.ok(ResponseDTO.builder()
+                    .status("ok")
+                    .code(Constants.HTTP_STATUS.BAD_REQUEST)
+                    .message("Add failed")
+                    .build());
+        }
     }
 
     @PostMapping("/update/{id}")
     public ResponseEntity<ResponseDTO> update(@PathVariable Long id, @RequestBody EmployeeRequestDTO request,@RequestParam(value = "img",required = false) MultipartFile img) {
         employeeService.update(id, request,img);
-        return ResponseEntity.ok(ResponseDTO.builder()
-                .status("ok")
-                .code(Constants.HTTP_STATUS.SUCCESS)
-                .message("Update employee success")
-                .build());
+        try {
+            return ResponseEntity.ok(ResponseDTO.builder()
+                    .status("ok")
+                    .code(Constants.HTTP_STATUS.SUCCESS)
+                    .message("Update  success")
+                    .build());
+        }catch (Exception ex) {
+            return ResponseEntity.ok(ResponseDTO.builder()
+                    .status("ok")
+                    .code(Constants.HTTP_STATUS.BAD_REQUEST)
+                    .message("Update  failed")
+                    .build());
+
+        }
     }
 
     @PostMapping("/delete/{id}")
     public ResponseEntity<ResponseDTO> delete(@PathVariable Long id) {
         employeeService.delete(id);
-        return ResponseEntity.ok(ResponseDTO.builder()
-                .status("ok")
-                .code(Constants.HTTP_STATUS.SUCCESS)
-                .message("Delete employee success")
-                .build());
+        try {
+            return ResponseEntity.ok(ResponseDTO.builder()
+                    .status("ok")
+                    .code(Constants.HTTP_STATUS.SUCCESS)
+                    .message("Delete  success")
+                    .build());
+        }catch (Exception ex) {
+            return ResponseEntity.ok(ResponseDTO.builder()
+                    .status("ok")
+                    .code(Constants.HTTP_STATUS.BAD_REQUEST)
+                    .message("Delete  failed")
+                    .build());
+        }
     }
 
     @GetMapping("/details/{id}")
     public ResponseEntity<SuccessResponse<List<EmployeeDTO>>> getDetails(@PathVariable Long id) {
-        return ResponseEntity.ok(new SuccessResponse<>(
-                200,
-                "Get employee details success",
-                employeeService.getdetailis(id))
-        );
+        try {
+            return ResponseEntity.ok(new SuccessResponse<>(
+                    Constants.HTTP_STATUS.SUCCESS,
+                    "Get  details success",
+                    employeeService.getdetailis(id))
+            );
+        }catch (Exception ex) {
+            return ResponseEntity.ok(new SuccessResponse<>(
+                    Constants.HTTP_STATUS.UNAUTHORIZED,
+                    "Get  details failed",
+                    null
+            ));
+        }
     }
 
     @GetMapping("/search")
@@ -75,10 +108,18 @@ public class EmployeeController {
             @RequestParam(required = false) String fullName,
             @RequestParam(required = false) String address,
             @RequestParam(required = false) String mnv) {
-        return ResponseEntity.ok(new SuccessResponse<>(
-                200,
-                "Search employees success",
-                employeeService.search(fullName, address, mnv))
-        );
+        try {
+            return ResponseEntity.ok(new SuccessResponse<>(
+                    Constants.HTTP_STATUS.SUCCESS,
+                    "Search  success",
+                    employeeService.search(fullName, address, mnv))
+            );
+        }catch (Exception ex) {
+            return ResponseEntity.ok(new SuccessResponse<>(
+                    Constants.HTTP_STATUS.BAD_REQUEST,
+                    "Search failed",
+                    null
+            ));
+        }
     }
 }

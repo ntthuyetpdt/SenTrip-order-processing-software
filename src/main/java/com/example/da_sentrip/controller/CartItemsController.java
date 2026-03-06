@@ -10,7 +10,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
@@ -23,30 +22,55 @@ public class CartItemsController {
     @PostMapping("/add")
     public ResponseEntity<ResponseDTO> addToCart( Authentication authentication,@RequestBody AddToCartRequest request) {
         cartItemsService.add(authentication,request);
-        return ResponseEntity.ok(ResponseDTO.builder()
-                .status("ok")
-                .code(Constants.HTTP_STATUS.SUCCESS)
-                .message("Add employee success")
-                .build());
+        try {
+            return ResponseEntity.ok(ResponseDTO.builder()
+                    .status("ok")
+                    .code(Constants.HTTP_STATUS.SUCCESS)
+                    .message("Add employee success")
+                    .build());
+        }catch (Exception ex){
+            return ResponseEntity.ok(ResponseDTO.builder()
+                    .status("ok")
+                    .code(Constants.HTTP_STATUS.BAD_REQUEST)
+                    .message("Add employee success")
+                    .build());
+        }
     }
 
     @DeleteMapping("/delete/{cartItemId}")
     public ResponseEntity<ResponseDTO> deleteCartItem(@PathVariable Long cartItemId) {
          cartItemsService.delete(cartItemId);
-        return ResponseEntity.ok(ResponseDTO.builder()
-                .status("ok")
-                .code(Constants.HTTP_STATUS.SUCCESS)
-                .message("Delete customersuccess")
-                .build());
+         try {
+             return ResponseEntity.ok(ResponseDTO.builder()
+                     .status("ok")
+                     .code(Constants.HTTP_STATUS.SUCCESS)
+                     .message("Delete customersuccess")
+                     .build());
+         }catch (Exception ex){
+             return ResponseEntity.ok(ResponseDTO.builder()
+                     .status("ok")
+                     .code(Constants.HTTP_STATUS.BAD_REQUEST)
+                     .message("Delete not success")
+                     .build());
+         }
     }
 
     @GetMapping("/my-cart")
-    public SuccessResponse<?> getMyCart(Authentication authentication) {
+    public ResponseEntity<ResponseDTO> getMyCart(Authentication authentication) {
         List<CartDetailResponseDTO> cart =cartItemsService.getCart(authentication);
-        return new SuccessResponse<>(
-                200,
-                "get all list employee success",
-                cart
-        );
+        try {
+            return ResponseEntity.ok(ResponseDTO.builder()
+                    .status("ok")
+                    .code(Constants.HTTP_STATUS.SUCCESS)
+                    .message("view  cart success")
+                    .data(cart)
+                    .build());
+        }catch (Exception ex) {
+            return ResponseEntity.ok(ResponseDTO.builder()
+                    .status("ok")
+                    .code(Constants.HTTP_STATUS.FORBIDDEN)
+                    .message("view  cart not success")
+                    .build());
+        }
     }
 }

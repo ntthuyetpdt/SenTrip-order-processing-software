@@ -32,8 +32,8 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final ModelMapper modelMapper;
 
     @Override
-    public EmployeeDTO create(EmployeeRequestDTO request, Long id) {
-        userRepository.findById(id).orElseThrow(() -> new BadCredentialsException("ID not found"));
+    public EmployeeDTO create(EmployeeRequestDTO request, String gmail) {
+        userRepository.findByGmail(gmail).orElseThrow(() -> new BadCredentialsException("gmail not found"));
         return new EmployeeDTO(modelMapper.map(request, Employee.class));
     }
 

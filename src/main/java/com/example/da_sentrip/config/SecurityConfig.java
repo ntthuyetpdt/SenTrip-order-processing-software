@@ -1,5 +1,7 @@
 package com.example.da_sentrip.config;
 
+import com.example.da_sentrip.security.CustomAccessDeniedHandler;
+import com.example.da_sentrip.security.CustomAuthenticationEntryPoint;
 import com.example.da_sentrip.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -20,6 +22,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -27,17 +31,19 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**","/payments/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/product/**").permitAll()
-                        .requestMatchers("/order/**", "/user/**", "/employee/**", "/customer/**","/cart/**").authenticated()
-                        .anyRequest().authenticated()
+                .exceptionHandling(authen -> authen
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)
+                        .accessDeniedHandler(customAccessDeniedHandler)
                 )
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/auth/**", "/payments/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/product/**").permitAll()
+                        .requestMatchers("/order/**", "/user/**", "/employee/**", "/customer/**", "/cart/**").authenticated()
+                        .anyRequest().authenticated()
+                ).addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
