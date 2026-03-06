@@ -1,13 +1,17 @@
 package com.example.da_sentrip.model.dto.reponse;
 
 import com.example.da_sentrip.model.entity.Product;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class ProductReponseDTO {
     private Long id;
     private String productName;

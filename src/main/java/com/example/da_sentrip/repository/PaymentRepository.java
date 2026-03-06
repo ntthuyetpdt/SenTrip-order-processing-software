@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
@@ -17,34 +18,32 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     INSERT INTO PAYMENTS (PAYMENT_CODE, ORDER_ID, AMOUNT, PAYMENT_STATUS)
     VALUES (:paymentCode, :orderId, :amount, 'WAITING_FOR_PAYMENT')
 """, nativeQuery = true)
-    void insertWaiting(@Param("paymentCode") String paymentCode,
-                       @Param("orderId") Long orderId,
-                       @Param("amount") BigDecimal amount);
+    void insertWaiting(@Param("paymentCode") String paymentCode, @Param("orderId") Long orderId, @Param("amount") BigDecimal amount);
 
     @Query(value = """
-        SELECT p.ID
-        FROM PAYMENTS p
-        WHERE p.PAYMENT_CODE = :paymentCode
-        """, nativeQuery = true)
+    SELECT p.ID
+    FROM PAYMENTS p
+    WHERE p.PAYMENT_CODE = :paymentCode
+    """, nativeQuery = true)
     Optional<Long> findIdByPaymentCode(@Param("paymentCode") String paymentCode);
 
     @Modifying
     @Query(value = """
     UPDATE PAYMENTS
     SET PAYMENT_STATUS = 'SUCCESS',
-        PAID_AT = NOW()
+    PAID_AT = NOW()
     WHERE ID = :paymentId
-""", nativeQuery = true)
+    """, nativeQuery = true)
     void markSuccess(@Param("paymentId") Long paymentId);
 
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query(value = """
-        INSERT INTO PAYMENT_AUDIT_LOGS 
-            (PAYMENT_ID, ACTION, OLD_STATUS, NEW_STATUS, OLD_AMOUNT, NEW_AMOUNT, PERFORMED_BY, PERFORMED_AT)
-        VALUES 
-            (:paymentId, :action, :oldStatus, :newStatus, :oldAmount, :newAmount, :performedBy, NOW())
-        """, nativeQuery = true)
+    INSERT INTO PAYMENT_AUDIT_LOGS 
+    (PAYMENT_ID, ACTION, OLD_STATUS, NEW_STATUS, OLD_AMOUNT, NEW_AMOUNT, PERFORMED_BY, PERFORMED_AT)
+    VALUES 
+    (:paymentId, :action, :oldStatus, :newStatus, :oldAmount, :newAmount, :performedBy, NOW())
+    """, nativeQuery = true)
     int insertLog(@Param("paymentId") Long paymentId,
                   @Param("action") String action,
                   @Param("oldStatus") String oldStatus,

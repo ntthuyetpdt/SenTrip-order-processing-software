@@ -30,7 +30,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**","/payments/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/product/**").permitAll()
-                        .requestMatchers("/order/**", "/user/**", "/employee/**", "/customer/**").authenticated()
+                        .requestMatchers("/order/**", "/user/**", "/employee/**", "/customer/**","/cart/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

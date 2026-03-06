@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -158,6 +159,68 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     ORDER BY o.CREATED_AT DESC
 """, nativeQuery = true)
     List<GetallOder> findAllOrderSummary();
+
+
+    @Query(value = """
+    SELECT EXISTS(
+    SELECT 1
+    FROM PAYMENTS p
+    WHERE p.ORDER_ID = :orderId
+    AND p.PAYMENT_STATUS = 'SUCCESS'
+    )
+""", nativeQuery = true)
+    int existsPaidSuccess(@Param("orderId") Long orderId);
+
+
+    @Query(value = """
+    SELECT EXISTS(
+    SELECT 1
+    FROM INVOICES i
+    WHERE i.ORDER_ID = :orderId
+    AND i.STATUS = 'SUCCESS'
+    )""", nativeQuery = true)
+    int existsInvoiceSuccess(@Param("orderId") Long orderId);
+
+
+    @Modifying
+    @Query(value = """
+    INSERT INTO INVOICES (INVOICE_CODE, ORDER_ID, MERCHANT_ID, AMOUNT, STATUS, CREATED_AT)
+    VALUES (:invoiceCode, :orderId, :merchantId, :amount, :status, NOW())
+""", nativeQuery = true)
+    void insertInvoice(
+            @Param("invoiceCode") String invoiceCode,
+            @Param("orderId") Long orderId,
+            @Param("merchantId") Long merchantId,
+            @Param("amount") BigDecimal amount,
+            @Param("status") String status
+    );
+
+
+    @Query(value = """
+    SELECT
+        i.ID AS id,
+        i.INVOICE_CODE AS invoiceCode,
+        i.ORDER_ID AS orderId,
+        i.MERCHANT_ID AS merchantId,
+        i.AMOUNT AS amount,
+        i.STATUS AS status,
+        i.CREATED_AT AS createdAt
+    FROM INVOICES i
+    WHERE i.ORDER_ID = :orderId
+    ORDER BY i.ID DESC
+    LIMIT 1
+""", nativeQuery = true)
+    Optional<InvoiceProjection> findLatestByOrderId(@Param("orderId") Long orderId);
+
+    interface InvoiceProjection {
+        Long getId();
+        String getInvoiceCode();
+        Long getOrderId();
+        Long getMerchantId();
+        BigDecimal getAmount();
+        String getStatus();
+        LocalDateTime getCreatedAt();
+    }
 
 
 }
