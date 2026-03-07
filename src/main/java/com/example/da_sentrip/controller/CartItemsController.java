@@ -68,8 +68,9 @@ public class CartItemsController {
         }catch (Exception ex) {
             return ResponseEntity.ok(ResponseDTO.builder()
                     .status("ok")
-                    .code(Constants.HTTP_STATUS.FORBIDDEN)
+                    .code(Constants.HTTP_STATUS.UNAUTHORIZED)
                     .message("view  cart not success")
+                    .data(null)
                     .build());
         }
     }

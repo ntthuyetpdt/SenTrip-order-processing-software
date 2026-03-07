@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -71,25 +72,37 @@ public class CartItemsServiceImpl implements CartItemsService {
     @Override
     public List<CartDetailResponseDTO> getCart(Authentication authentication) {
         String gmail = authentication.getName();
-        User user = userRepository.findByGmail(gmail).orElseThrow(() -> new RuntimeException("User not found"));
-        Carts cart = cartsRepository.findByUserId(user.getId()).orElseThrow(() -> new RuntimeException("Cart not found"));
+        User user = userRepository.findByGmail(gmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Optional<Carts> cartOptional = cartsRepository.findByUserId(user.getId());
+
+        if (cartOptional.isEmpty()) {
+            return null; // không có cart -> trả data = null
+        }
+
+        Carts cart = cartOptional.get();
+
         List<CartItems> cartItemsList = cartItemsRepository.findByCartId(BigDecimal.valueOf(cart.getId()));
+
         return cartItemsList.stream().map(item -> {
             Product product = item.getProductId();
             CartDetailResponseDTO dto = new CartDetailResponseDTO();
+
             if (product.getImg() != null && product.getImg().matches("\\d+")) {
-                dataSourceRepository.findById(Long.valueOf(product.getImg())).ifPresent(ds -> {
-                    dto.setImg(ds.getImageUrl());
-                });
+                dataSourceRepository.findById(Long.valueOf(product.getImg()))
+                        .ifPresent(ds -> dto.setImg(ds.getImageUrl()));
             } else {
                 dto.setImg(product.getImg());
             }
+
             dto.setCartItemId(item.getId());
             dto.setProductId(product.getId());
             dto.setProductName(product.getProductName());
             dto.setPrice(product.getPrice());
             dto.setQuantity(item.getQuantity());
+
             return dto;
-        }).collect (Collectors.toList());
+        }).collect(Collectors.toList());
     }
 }
