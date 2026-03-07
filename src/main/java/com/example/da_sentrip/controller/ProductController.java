@@ -101,7 +101,7 @@ public class ProductController {
             return ResponseEntity.ok(ResponseDTO.builder()
                     .status("ok")
                     .code(Constants.HTTP_STATUS.SUCCESS)
-                    .message("delete success")
+                    .message("search success")
                     .data(view)
                     .build()
             );
@@ -109,8 +109,7 @@ public class ProductController {
             return ResponseEntity.ok(ResponseDTO.builder()
                     .status("ok")
                     .code(Constants.HTTP_STATUS.NOT_FOUND)
-                    .message("delete success")
-                    .data(view)
+                    .message("search failed")
                     .build()
             );
         }
