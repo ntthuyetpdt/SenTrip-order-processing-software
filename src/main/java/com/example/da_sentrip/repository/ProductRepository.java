@@ -1,5 +1,7 @@
 package com.example.da_sentrip.repository;
 
+import com.example.da_sentrip.model.dto.reponse.view.MerchantDashboardView;
+import com.example.da_sentrip.model.dto.reponse.view.OrderCustomerView;
 import com.example.da_sentrip.model.entity.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -20,4 +22,46 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             @Param("price") String price,
             @Param("address") String address
     );
+    @Query(value = """
+        SELECT
+            O.ID AS orderId,
+            O.ORDER_CODE AS orderCode,
+            O.CREATED_AT AS createdAt,
+            COALESCE(C.FULL_NAME, U.GMAIL) AS fullName,
+            COALESCE(C.PHONE, '') AS phone,
+            P.ADDRESS AS address,
+            P.PRODUCT_NAME AS productName,
+            P.TYPE AS type,
+            P.ADDITIONAL_SERVICES AS additionalServices,
+            OI.QUANTITY AS quantity,
+            OI.PRICE AS price
+        FROM ORDERS O
+                 JOIN ORDER_ITEMS OI ON OI.ORDER_ID = O.ID
+                 JOIN PRODUCTS P ON P.ID = OI.PRODUCT_ID
+                 LEFT JOIN USERS U ON U.ID = O.USER_ID
+                 LEFT JOIN CUSTOMERS C ON C.USER_ID = U.ID
+        WHERE P.MERCHANT_ID = :MERCHANT_ID
+        ORDER BY O.CREATED_AT DESC;
+""", nativeQuery = true)
+    List<OrderCustomerView> getOrderCustomerFull(@Param("MERCHANT_ID") Long merchantId);
+
+    @Query(value = """
+    SELECT 
+        COALESCE(SUM(T.REVENUE), 0) AS totalRevenue, 
+        COUNT(DISTINCT T.USER_ID) AS totalCustomers, 
+        COUNT(DISTINCT T.ORDER_ID) AS totalOrders
+    FROM (
+        SELECT 
+            O.ID AS ORDER_ID, 
+            O.USER_ID, 
+            MAX(CASE WHEN PY.PAYMENT_STATUS = 'SUCCESS' THEN PY.AMOUNT ELSE 0 END) AS REVENUE
+        FROM ORDERS O
+        JOIN ORDER_ITEMS OI ON OI.ORDER_ID = O.ID
+        JOIN PRODUCTS P ON P.ID = OI.PRODUCT_ID
+        LEFT JOIN PAYMENTS PY ON PY.ORDER_ID = O.ID
+        WHERE P.MERCHANT_ID = :merchantId
+        GROUP BY O.ID, O.USER_ID
+    ) T
+    """, nativeQuery = true)
+   List<MerchantDashboardView>  getMerchantDashboard(@Param("merchantId") Long merchantId);
 }

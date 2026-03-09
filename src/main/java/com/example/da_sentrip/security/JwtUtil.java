@@ -53,4 +53,8 @@ public class JwtUtil {
     public String getGmailFromToken(String token) {
         return getClaims(token).getSubject();
     }
+    public Long getUserIdFromToken(String token) {
+        Claims claims = getClaims(token);
+        return claims.get("userId", Long.class);
+    }
 }

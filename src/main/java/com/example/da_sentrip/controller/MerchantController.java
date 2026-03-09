@@ -2,22 +2,26 @@ package com.example.da_sentrip.controller;
 
 import com.example.da_sentrip.model.SuccessResponse;
 import com.example.da_sentrip.model.dto.MerchantDTO;
+import com.example.da_sentrip.model.dto.reponse.MerchantDashboardResponseDTO;
 import com.example.da_sentrip.model.dto.reponse.MerchantReponseDTO;
 import com.example.da_sentrip.model.dto.reponse.ResponseDTO;
 import com.example.da_sentrip.model.dto.request.MerchantRequestDTO;
 import com.example.da_sentrip.service.MerchantService;
+import com.example.da_sentrip.service.ProductService;
 import com.example.da_sentrip.utils.Constants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
-@RequestMapping("/supplier")
+@RequestMapping("/merchant")
 @RequiredArgsConstructor
 public class MerchantController  {
     private final MerchantService merchantService;
+    private final ProductService productService;
 
     @GetMapping("/getAll")
     public SuccessResponse<?> getAll(){
@@ -94,4 +98,15 @@ public class MerchantController  {
                 merchantService.search(fullName, address, mnv))
         );
     }
+    @GetMapping("/dashboard")
+    public SuccessResponse<?> getMerchantDashboard(Authentication authentication) {
+        List<MerchantDashboardResponseDTO> data = productService.getMerchantDashboard(authentication);
+        return new SuccessResponse<>(
+                Constants.HTTP_STATUS.SUCCESS,
+                "Lấy dữ liệu dashboard thành công",
+                data
+        );
+    }
+
+
 }

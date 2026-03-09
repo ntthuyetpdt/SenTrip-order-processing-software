@@ -13,4 +13,5 @@ import lombok.Setter;
 public class RegisterRequestDTO {
     private String gmail;
     private String password;
+    private Long Role;
 }

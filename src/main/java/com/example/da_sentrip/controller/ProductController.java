@@ -2,6 +2,7 @@ package com.example.da_sentrip.controller;
 
 import com.example.da_sentrip.model.SuccessResponse;
 import com.example.da_sentrip.model.dto.ProductDTO;
+import com.example.da_sentrip.model.dto.reponse.ListProductMechartReponseDTO;
 import com.example.da_sentrip.model.dto.reponse.ProductReponseDTO;
 import com.example.da_sentrip.model.dto.reponse.ResponseDTO;
 import com.example.da_sentrip.model.dto.request.ProductRequestDTO;
@@ -10,6 +11,7 @@ import com.example.da_sentrip.utils.Constants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
@@ -29,22 +31,29 @@ public class ProductController {
                 products);
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<ResponseDTO> create(@RequestBody ProductRequestDTO request) {
-        ProductDTO product = productService.create(request);
+    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ResponseDTO> create(
+            @ModelAttribute ProductRequestDTO request,
+            @RequestParam(value = "img", required = false) MultipartFile img,
+            Authentication authentication) {
         try {
-            return ResponseEntity.ok(ResponseDTO.builder()
-                    .status("ok")
-                    .code(Constants.HTTP_STATUS.CREATED)
-                    .message("create  success")
-                    .data(product)
-                    .build());
-        }catch (Exception ex) {
-            return ResponseEntity.ok(ResponseDTO.builder()
-                    .status("ok")
-                    .code(Constants.HTTP_STATUS.BAD_REQUEST)
-                    .message("create  failed")
-                    .build());
+            ProductDTO product = productService.create(request, img, authentication);
+            return ResponseEntity.ok(
+                    ResponseDTO.builder()
+                            .status("ok")
+                            .code(Constants.HTTP_STATUS.CREATED)
+                            .message("create success")
+                            .data(product)
+                            .build()
+            );
+        } catch (Exception ex) {
+            return ResponseEntity.ok(
+                    ResponseDTO.builder()
+                            .status("failed")
+                            .code(Constants.HTTP_STATUS.BAD_REQUEST)
+                            .message("create failed: " + ex.getMessage())
+                            .build()
+            );
         }
     }
 
@@ -114,5 +123,14 @@ public class ProductController {
             );
         }
 
+    }
+    @GetMapping("/getOderCustome")
+    public SuccessResponse<?> getMerchantOrders(Authentication authentication) {
+        List<ListProductMechartReponseDTO> data = productService.getOrderCustomerFull(authentication);
+        return new SuccessResponse<>(
+                Constants.HTTP_STATUS.SUCCESS,
+                "view success",
+                data
+        );
     }
 }

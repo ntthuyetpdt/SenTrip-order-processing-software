@@ -69,7 +69,7 @@ public class CartItemsController {
             return ResponseEntity.ok(ResponseDTO.builder()
                     .status("ok")
                     .code(Constants.HTTP_STATUS.UNAUTHORIZED)
-                    .message("view  cart not success")
+                    .message("view  failed")
                     .data(null)
                     .build());
         }

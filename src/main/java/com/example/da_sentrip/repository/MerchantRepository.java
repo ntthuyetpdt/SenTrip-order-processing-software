@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.util.List;
+import java.util.Optional;
 
 
 @Repository
@@ -22,4 +23,6 @@ public interface MerchantRepository extends JpaRepository<Merchant, Long> {
             @Param("address") String address,
             @Param("businessLicense") String businessLicense
     );
+
+    Optional<Merchant> findByUserId(Long userId);
 }

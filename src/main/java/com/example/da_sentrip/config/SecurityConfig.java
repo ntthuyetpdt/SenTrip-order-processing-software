@@ -36,9 +36,8 @@ public class SecurityConfig {
                         .accessDeniedHandler(customAccessDeniedHandler)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/payments/**", "/product/search").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/product/**").permitAll()
-                        .requestMatchers("/order/**", "/user/**", "/employee/**", "/customer/**", "/cart/**").authenticated()
+                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/order/**", "/user/**", "/employee/**", "/customer/**", "/cart/**","/product/**","/merchant/**").authenticated()
                         .anyRequest().authenticated()
                 ).addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
