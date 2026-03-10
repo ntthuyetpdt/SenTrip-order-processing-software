@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 public class AuthenController {
 
     private final UserService userService;
-    private final JwtUtil jwtUtil;
 
     @PostMapping("/login")
     public SuccessResponse<LoginReponseDTO> login(@RequestBody LoginRequestDto request) {

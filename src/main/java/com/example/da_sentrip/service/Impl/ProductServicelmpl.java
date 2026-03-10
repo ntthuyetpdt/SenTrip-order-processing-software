@@ -1,5 +1,6 @@
 package com.example.da_sentrip.service.Impl;
 
+import com.example.da_sentrip.exception.ResourceNotFoundException;
 import com.example.da_sentrip.helper.MediaStorageService;
 import com.example.da_sentrip.model.dto.ProductDTO;
 import com.example.da_sentrip.model.dto.reponse.ListProductMechartReponseDTO;
@@ -7,6 +8,7 @@ import com.example.da_sentrip.model.dto.reponse.MerchantDashboardResponseDTO;
 import com.example.da_sentrip.model.dto.reponse.ProductReponseDTO;
 import com.example.da_sentrip.model.dto.reponse.view.MerchantDashboardView;
 import com.example.da_sentrip.model.dto.reponse.view.OrderCustomerView;
+import com.example.da_sentrip.model.dto.request.MerchantDashboardRequestDTO;
 import com.example.da_sentrip.model.dto.request.ProductRequestDTO;
 import com.example.da_sentrip.model.entity.Merchant;
 import com.example.da_sentrip.model.entity.Product;
@@ -19,11 +21,15 @@ import com.example.da_sentrip.security.JwtUtil;
 import com.example.da_sentrip.service.ProductService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -120,15 +126,47 @@ public class ProductServicelmpl implements ProductService {
                 .toList();
     }
 
+
     @Override
-    public List<MerchantDashboardResponseDTO> getMerchantDashboard(Authentication authentication) {
+    public MerchantDashboardResponseDTO getMerchantDashboard(Authentication authentication, MerchantDashboardRequestDTO request) {
+        String email = authentication.getName();
+        User user = userRepository.findByGmail(email).orElseThrow(() -> new ResourceNotFoundException("User not found: " + email));
+        Merchant merchant = merchantRepository.findByUserId(user.getId()).orElseThrow(() -> new ResourceNotFoundException("Bạn chưa đăng ký profile Merchant"));
+        LocalDateTime finalStart;
+        LocalDateTime finalEnd;
+
+        if (request == null || (request.getStartDate() == null && request.getEndDate() == null)) {
+            finalStart = LocalDateTime.of(2000, 1, 1, 0, 0);
+            finalEnd = LocalDateTime.now().plusYears(100);
+        } else {
+            finalStart = (request.getStartDate() != null) ? request.getStartDate() : LocalDateTime.of(1970, 1, 1, 0, 0);
+            finalEnd = (request.getEndDate() != null) ? request.getEndDate() : LocalDateTime.now().plusYears(100);
+        }
+        MerchantDashboardView view = productRepository.getMerchantDashboard(
+                merchant.getId(),
+                finalStart,
+                finalEnd
+        );
+        return new MerchantDashboardResponseDTO(
+                view.getTotalRevenue() != null ? view.getTotalRevenue() : BigDecimal.ZERO,
+                view.getTotalCustomers() != null ? view.getTotalCustomers() : 0L,
+                view.getTotalOrders() != null ? view.getTotalOrders() : 0L
+        );
+    }
+
+    @Override
+    public List<ProductReponseDTO> getMechant(Authentication authentication) {
         String gmail = authentication.getName();
-        User user = userRepository.findByGmail(gmail).orElseThrow(() -> new RuntimeException("User not found with email: " + gmail));
-        Merchant merchant = merchantRepository.findByUserId(user.getId()).orElseThrow(() -> new RuntimeException("Merchant profile not found for user: " + user.getId()));
-        return  productRepository.getMerchantDashboard(merchant.getId()).stream().map(view -> new MerchantDashboardResponseDTO(
-                view.getTotalRevenue(),
-                view.getTotalCustomers(),
-                view.getTotalOrders()
-        )).toList();
+        User user = userRepository.findByGmail(gmail).orElseThrow(() -> new RuntimeException("User not found"));
+        Merchant merchant = merchantRepository.findByUserId(user.getId()).orElseThrow(() -> new RuntimeException("Merchant not found"));
+        return  productRepository.findByMerchantId(merchant.getId()).stream().map(product -> {
+            ProductReponseDTO dto = new ProductReponseDTO(product);
+            if (product.getImg() != null && product.getImg().matches("\\d+")) {
+                dataSourceRepository.findById(Long.valueOf(product.getImg())).ifPresent(ds -> {
+                    dto.setImg(ds.getImageUrl());
+                });
+            }
+            return dto;
+        }).toList();
     }
 }

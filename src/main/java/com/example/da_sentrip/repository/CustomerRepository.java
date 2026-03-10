@@ -3,11 +3,13 @@ package com.example.da_sentrip.repository;
 import com.example.da_sentrip.model.dto.reponse.view.TicketView;
 import com.example.da_sentrip.model.entity.Customer;
 import com.example.da_sentrip.model.entity.Employee;
+import com.example.da_sentrip.model.entity.Merchant;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
     @Query(value = """
@@ -71,4 +73,7 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
     ORDER BY O.CREATED_AT DESC;
     """, nativeQuery = true)
     List<TicketView> findTicketsByUserId(@Param("userId") Long userId);
+
+
+    Optional<Customer> findByUserId(Long userId);
 }

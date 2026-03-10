@@ -4,7 +4,9 @@ import com.example.da_sentrip.model.SuccessResponse;
 import com.example.da_sentrip.model.dto.MerchantDTO;
 import com.example.da_sentrip.model.dto.reponse.MerchantDashboardResponseDTO;
 import com.example.da_sentrip.model.dto.reponse.MerchantReponseDTO;
+import com.example.da_sentrip.model.dto.reponse.ProductReponseDTO;
 import com.example.da_sentrip.model.dto.reponse.ResponseDTO;
+import com.example.da_sentrip.model.dto.request.MerchantDashboardRequestDTO;
 import com.example.da_sentrip.model.dto.request.MerchantRequestDTO;
 import com.example.da_sentrip.service.MerchantService;
 import com.example.da_sentrip.service.ProductService;
@@ -98,15 +100,23 @@ public class MerchantController  {
                 merchantService.search(fullName, address, mnv))
         );
     }
-    @GetMapping("/dashboard")
-    public SuccessResponse<?> getMerchantDashboard(Authentication authentication) {
-        List<MerchantDashboardResponseDTO> data = productService.getMerchantDashboard(authentication);
+
+    @PostMapping("/dashboard")
+    public ResponseEntity<MerchantDashboardResponseDTO> getDashboard(
+            Authentication authentication,
+            @RequestBody(required = false) MerchantDashboardRequestDTO request
+    ) {
+        return ResponseEntity.ok(productService.getMerchantDashboard(authentication, request));
+    }
+
+    @GetMapping("/getMechant")
+    public SuccessResponse<?> getMechant(Authentication authentication) {
+        List<ProductReponseDTO> data = productService.getMechant(authentication);
         return new SuccessResponse<>(
                 Constants.HTTP_STATUS.SUCCESS,
-                "Lấy dữ liệu dashboard thành công",
+                "view success",
                 data
         );
     }
-
 
 }

@@ -2,6 +2,7 @@ package com.example.da_sentrip.handler;
 
 
 import com.example.da_sentrip.config.MessageTemplate;
+import com.example.da_sentrip.exception.BadRequestException;
 import com.example.da_sentrip.exception.EntityValidationException;
 import com.example.da_sentrip.exception.PartialUpdateException;
 import com.example.da_sentrip.exception.ResourceNotFoundException;
@@ -15,6 +16,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 import java.util.Date;
 
@@ -68,6 +70,12 @@ public class GlobalExceptionHandler {
         log.error(e.toString());
         ErrorDetail errorDetail = new ErrorDetail( new Date(), e.getMessage(), "", request.getDescription(false));
         return new ResponseEntity<>(errorDetail, HttpStatus.UNAUTHORIZED);
+    }
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<?> handleBadRequestException(BadRequestException e, WebRequest request) {
+        log.error(e.toString());
+        ErrorDetail errorDetail = new ErrorDetail(new Date(), e.getMessage(), "", request.getDescription(false));
+        return new ResponseEntity<>(errorDetail, HttpStatus.BAD_REQUEST);
     }
 
 }

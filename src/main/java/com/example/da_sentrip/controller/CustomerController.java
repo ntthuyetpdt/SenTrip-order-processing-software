@@ -32,37 +32,14 @@ public class CustomerController {
         );
     }
 
-    @PostMapping("/create/{id}")
-    public ResponseEntity<ResponseDTO> create(@PathVariable Long id, @RequestBody CustomerRequestDTO request) {
-        customerService.create(request, id);
-        try {
-            return ResponseEntity.ok(ResponseDTO.builder()
-                    .status("ok")
-                    .code(Constants.HTTP_STATUS.CREATED)
-                    .message("Add successfully")
-                    .build());
-        }catch (Exception ex){
-            return ResponseEntity.ok(ResponseDTO.builder()
-                    .status("ok")
-                    .code(Constants.HTTP_STATUS.NOT_FOUND)
-                    .message("Add failed")
-                    .build());
-        }
-
-    }
-
     @PostMapping(value = "/update/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResponseDTO> update(
-            @PathVariable Long id,
-            @RequestPart(value = "request", required = false) CustomerRequestDTO request,
-            @RequestPart(value = "img", required = false) MultipartFile img
-    ) {
-        if (request == null) {
-            request = new CustomerRequestDTO();
-        }
+            @ModelAttribute CustomerRequestDTO request,
+            @RequestPart(value = "img", required = false) MultipartFile img,
+            Authentication authentication ) {
 
         try {
-            customerService.update(id, request, img);
+           customerService.update( request, img,authentication);
             return ResponseEntity.ok(ResponseDTO.builder()
                     .status("ok")
                     .code(Constants.HTTP_STATUS.SUCCESS)
@@ -76,25 +53,6 @@ public class CustomerController {
                     .message("Update failed: " + ex.getMessage())
                     .build());
         }
-    }
-
-    @PostMapping("/delete/{id}")
-    public ResponseEntity<ResponseDTO> delete(@PathVariable Long id) {
-        customerService.delete(id);
-        try{
-            return ResponseEntity.ok(ResponseDTO.builder()
-                    .status("ok")
-                    .code(Constants.HTTP_STATUS.SUCCESS)
-                    .message("Delete success")
-                    .build());
-        }catch (Exception ex){
-            return ResponseEntity.ok(ResponseDTO.builder()
-                    .status("ok")
-                    .code(Constants.HTTP_STATUS.BAD_REQUEST)
-                    .message("Delete success")
-                    .build());
-        }
-
     }
 
     @GetMapping("/search")

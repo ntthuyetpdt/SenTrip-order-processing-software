@@ -32,14 +32,10 @@ public class CustomerServiceImpl implements CustomerService {
     private final ModelMapper modelMapper;
 
     @Override
-    public CustomerDTO create(CustomerRequestDTO request, Long id) {
-       customerRepository.findById(id).orElseThrow(() ->new BadCredentialsException("ID not Found"));
-       return new CustomerDTO(modelMapper.map(request, Customer.class));
-    }
-
-    @Override
-    public CustomerDTO update(Long id, CustomerRequestDTO request, MultipartFile img) {
-        Customer customer =customerRepository.findById(id).orElseThrow(() ->new BadCredentialsException("Customer not found"));
+    public CustomerDTO update( CustomerRequestDTO request, MultipartFile img,Authentication authentication) {
+        String gmail = authentication.getName();
+        User user = userRepository.findByGmail(gmail).orElseThrow(() -> new RuntimeException("User not found"));
+        Customer customer =customerRepository.findByUserId(user.getId()).orElseThrow(() ->new BadCredentialsException("Customer not found"));
         modelMapper.map(request,customer);
         if (img != null && !img.isEmpty()) {
             if (customer.getImg() != null && customer.getImg().matches("\\d+")) {
@@ -52,19 +48,6 @@ public class CustomerServiceImpl implements CustomerService {
         customerRepository.save(customer);
         return new CustomerDTO(customer);
     }
-
-    @Override
-    public CustomerDTO delete(Long id) {
-        Customer customer = customerRepository.findById(id).orElseThrow(() -> new BadCredentialsException("ID not found"));
-
-        if (customer.getImg() != null && !customer.getImg().isBlank()) {
-            Long imgId = Long.parseLong(customer.getImg());
-            dataSourceRepository.findById(imgId).ifPresent(data -> mediaStorageService.deleteMedia(imgId));
-        }
-        return new CustomerDTO(customer);
-    }
-
-
 
     @Override
     public List<CustomerDTO> search(String fullName, String address, String phone) {

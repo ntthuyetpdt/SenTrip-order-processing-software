@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
@@ -46,22 +47,29 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<OrderCustomerView> getOrderCustomerFull(@Param("MERCHANT_ID") Long merchantId);
 
     @Query(value = """
-    SELECT 
-        COALESCE(SUM(T.REVENUE), 0) AS totalRevenue, 
-        COUNT(DISTINCT T.USER_ID) AS totalCustomers, 
-        COUNT(DISTINCT T.ORDER_ID) AS totalOrders
-    FROM (
         SELECT 
-            O.ID AS ORDER_ID, 
-            O.USER_ID, 
-            MAX(CASE WHEN PY.PAYMENT_STATUS = 'SUCCESS' THEN PY.AMOUNT ELSE 0 END) AS REVENUE
-        FROM ORDERS O
-        JOIN ORDER_ITEMS OI ON OI.ORDER_ID = O.ID
-        JOIN PRODUCTS P ON P.ID = OI.PRODUCT_ID
-        LEFT JOIN PAYMENTS PY ON PY.ORDER_ID = O.ID
-        WHERE P.MERCHANT_ID = :merchantId
-        GROUP BY O.ID, O.USER_ID
-    ) T
+            COALESCE(SUM(T.REVENUE), 0) AS totalRevenue, 
+            COUNT(DISTINCT T.USER_ID) AS totalCustomers, 
+            COUNT(DISTINCT T.ORDER_ID) AS totalOrders
+        FROM (
+            SELECT 
+                O.ID AS ORDER_ID, 
+                O.USER_ID, 
+                MAX(CASE WHEN PY.PAYMENT_STATUS = 'SUCCESS' THEN PY.AMOUNT ELSE 0 END) AS REVENUE
+            FROM ORDERS O
+            JOIN ORDER_ITEMS OI ON OI.ORDER_ID = O.ID
+            JOIN PRODUCTS P ON P.ID = OI.PRODUCT_ID
+            LEFT JOIN PAYMENTS PY ON PY.ORDER_ID = O.ID
+            WHERE P.MERCHANT_ID = :merchantId 
+              AND O.CREATED_AT >= :startDate 
+              AND O.CREATED_AT < :endDate
+            GROUP BY O.ID, O.USER_ID
+        ) T
     """, nativeQuery = true)
-   List<MerchantDashboardView>  getMerchantDashboard(@Param("merchantId") Long merchantId);
+    MerchantDashboardView getMerchantDashboard(
+            @Param("merchantId") Long merchantId,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
+    );
+    List<Product> findByMerchantId(Long merchantId);
 }
