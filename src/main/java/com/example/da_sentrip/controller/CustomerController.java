@@ -1,6 +1,5 @@
 package com.example.da_sentrip.controller;
 
-
 import com.example.da_sentrip.model.SuccessResponse;
 import com.example.da_sentrip.model.dto.CustomerDTO;
 import com.example.da_sentrip.model.dto.reponse.CustomerReponseDTO;
@@ -10,6 +9,7 @@ import com.example.da_sentrip.model.dto.request.CustomerRequestDTO;
 import com.example.da_sentrip.service.CustomerService;
 import com.example.da_sentrip.utils.Constants;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -51,27 +51,31 @@ public class CustomerController {
 
     }
 
-    @PostMapping( "/update/{id}")
+    @PostMapping(value = "/update/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResponseDTO> update(
             @PathVariable Long id,
-            @RequestPart("request") CustomerRequestDTO request,
-            @RequestPart(value = "img", required = false) MultipartFile img) {
-        customerService.update(id, request, img);
+            @RequestPart(value = "request", required = false) CustomerRequestDTO request,
+            @RequestPart(value = "img", required = false) MultipartFile img
+    ) {
+        if (request == null) {
+            request = new CustomerRequestDTO();
+        }
 
-        try{
+        try {
+            customerService.update(id, request, img);
             return ResponseEntity.ok(ResponseDTO.builder()
                     .status("ok")
                     .code(Constants.HTTP_STATUS.SUCCESS)
-                    .message("Updated successfully ")
+                    .message("Updated successfully")
                     .build());
-        }catch (Exception ex){
+
+        } catch (Exception ex) {
             return ResponseEntity.ok(ResponseDTO.builder()
-                    .status("ok")
-                    .code(Constants.HTTP_STATUS.NOT_FOUND)
-                    .message("Update failed")
+                    .status("fail")
+                    .code(Constants.HTTP_STATUS.BAD_REQUEST)
+                    .message("Update failed: " + ex.getMessage())
                     .build());
         }
-
     }
 
     @PostMapping("/delete/{id}")

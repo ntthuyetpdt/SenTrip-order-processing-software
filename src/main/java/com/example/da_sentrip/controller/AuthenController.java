@@ -5,7 +5,6 @@ import com.example.da_sentrip.model.dto.reponse.LoginReponseDTO;
 import com.example.da_sentrip.model.dto.reponse.ResponseDTO;
 import com.example.da_sentrip.model.dto.request.LoginRequestDto;
 import com.example.da_sentrip.model.dto.request.RegisterRequestDTO;
-import com.example.da_sentrip.model.entity.User;
 import com.example.da_sentrip.security.JwtUtil;
 import com.example.da_sentrip.service.UserService;
 import com.example.da_sentrip.utils.Constants;
@@ -35,7 +34,7 @@ public class AuthenController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequestDTO request){
         try {
-            User user =userService.register(request);
+            userService.register(request);
             return ResponseEntity.ok(ResponseDTO.builder()
                     .status("ok")
                     .code(Constants.HTTP_STATUS.SUCCESS)
