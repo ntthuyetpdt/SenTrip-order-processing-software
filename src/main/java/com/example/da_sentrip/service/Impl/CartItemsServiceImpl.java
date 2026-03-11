@@ -49,8 +49,7 @@ public class CartItemsServiceImpl implements CartItemsService {
             cartItems.setCartId(cartId);
             cartItems.setProductId(product);
             cartItems.setQuantity(BigDecimal.valueOf(request.getQuantity()));
-            cartItems.setPrice(new BigDecimal(product.getPrice())
-                    .multiply(BigDecimal.valueOf(request.getQuantity())));
+            cartItems.setPrice(product.getPrice().multiply(BigDecimal.valueOf(request.getQuantity())));
         }
         CartItems saved = cartItemsRepository.save(cartItems);
         CartItemsDTO dto = new CartItemsDTO();
@@ -64,7 +63,7 @@ public class CartItemsServiceImpl implements CartItemsService {
 
     @Override
     public String delete(Long cartItemId) {
-        CartItems cartItems = cartItemsRepository.findById(cartItemId).orElseThrow(() -> new BadCredentialsException("CART ITEM ID NOT FOUND"));
+        CartItems cartItems = cartItemsRepository.findById(cartItemId).orElseThrow(() -> new BadCredentialsException("Order code not found in shopping cart"));
         cartItemsRepository.delete(cartItems);
         return "Delete cart item successfully";
     }
@@ -78,13 +77,11 @@ public class CartItemsServiceImpl implements CartItemsService {
         Optional<Carts> cartOptional = cartsRepository.findByUserId(user.getId());
 
         if (cartOptional.isEmpty()) {
-            return null; // không có cart -> trả data = null
+            return null;
         }
 
         Carts cart = cartOptional.get();
-
         List<CartItems> cartItemsList = cartItemsRepository.findByCartId(BigDecimal.valueOf(cart.getId()));
-
         return cartItemsList.stream().map(item -> {
             Product product = item.getProductId();
             CartDetailResponseDTO dto = new CartDetailResponseDTO();
@@ -99,7 +96,7 @@ public class CartItemsServiceImpl implements CartItemsService {
             dto.setCartItemId(item.getId());
             dto.setProductId(product.getId());
             dto.setProductName(product.getProductName());
-            dto.setPrice(product.getPrice());
+            dto.setPrice(String.valueOf(product.getPrice()));
             dto.setQuantity(item.getQuantity());
 
             return dto;

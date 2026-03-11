@@ -32,7 +32,7 @@ public class CustomerServiceImpl implements CustomerService {
     private final ModelMapper modelMapper;
 
     @Override
-    public CustomerDTO update( CustomerRequestDTO request, MultipartFile img,Authentication authentication) {
+    public CustomerDTO update(Long id, CustomerRequestDTO request, MultipartFile img, Authentication authentication) {
         String gmail = authentication.getName();
         User user = userRepository.findByGmail(gmail).orElseThrow(() -> new RuntimeException("User not found"));
         Customer customer =customerRepository.findByUserId(user.getId()).orElseThrow(() ->new BadCredentialsException("Customer not found"));

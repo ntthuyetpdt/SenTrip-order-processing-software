@@ -3,6 +3,7 @@ package com.example.da_sentrip.controller;
 import com.example.da_sentrip.model.SuccessResponse;
 import com.example.da_sentrip.model.dto.OrderDTO;
 import com.example.da_sentrip.model.dto.reponse.OderdetailReponseDTO;
+import com.example.da_sentrip.model.dto.reponse.OrderAllReponseDTO;
 import com.example.da_sentrip.model.dto.reponse.ResponseDTO;
 import com.example.da_sentrip.model.dto.request.OrderRequestDTO;
 import com.example.da_sentrip.model.dto.reponse.OrderReponseDTO;
@@ -23,10 +24,10 @@ public class OrderController {
 
     @GetMapping("/getall")
     public SuccessResponse<?> getAll(Authentication authentication) {
-        List<OrderReponseDTO> orders = orderService.Getall(authentication);
+        List<OrderAllReponseDTO> orders = orderService.Getall(authentication);
         return new SuccessResponse<>(
                 Constants.HTTP_STATUS.SUCCESS,
-                "View successful ",
+                "View success ",
                 orders);
     }
     @GetMapping("/getuser")
@@ -34,7 +35,7 @@ public class OrderController {
         List<OrderReponseDTO> oder= orderService.getMyOrders(authentication);
         return new SuccessResponse<>(
                 Constants.HTTP_STATUS.SUCCESS,
-                "View successful "
+                "View success "
                 ,oder
         );
 

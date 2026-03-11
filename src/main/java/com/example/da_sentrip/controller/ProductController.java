@@ -32,56 +32,32 @@ public class ProductController {
     }
 
     @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ResponseDTO> create(
-            @ModelAttribute ProductRequestDTO request,
-            @RequestParam(value = "img", required = false) MultipartFile img,
+    public SuccessResponse<?> create(
+            @RequestPart(value = "request", required = false) ProductRequestDTO request,
+            @RequestPart(value = "img", required = false) MultipartFile img,
             Authentication authentication) {
         try {
-            ProductDTO product = productService.create(request, img, authentication);
-            return ResponseEntity.ok(
-                    ResponseDTO.builder()
-                            .status("ok")
-                            .code(Constants.HTTP_STATUS.CREATED)
-                            .message("create success")
-                            .data(product)
-                            .build()
-            );
+            productService.create( request, img, authentication);
+            return new SuccessResponse<>(200, "create success", null);
         } catch (Exception ex) {
-            return ResponseEntity.ok(
-                    ResponseDTO.builder()
-                            .status("failed")
-                            .code(Constants.HTTP_STATUS.BAD_REQUEST)
-                            .message("create failed: " + ex.getMessage())
-                            .build()
-            );
+            return new SuccessResponse<>(400, "create failed: " + ex.getMessage(), null);
         }
     }
 
     @PostMapping(value = "/update/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ResponseDTO> update(
+    public SuccessResponse<?> update(
             @PathVariable Long id,
-            @RequestPart("request") ProductRequestDTO request,
-            @RequestPart(value = "img", required = false) MultipartFile img
-    ) {
+            @RequestPart(value = "request") ProductRequestDTO request,
+            @RequestPart(value = "img", required = false) MultipartFile img,
+            Authentication authentication) {
         try {
-            productService.update(id, request, img);
-            return ResponseEntity.ok(
-                    ResponseDTO.builder()
-                            .status("ok")
-                            .code(Constants.HTTP_STATUS.SUCCESS)
-                            .message("update success")
-                            .build()
-            );
+            productService.update( id,request, img, authentication);
+            return new SuccessResponse<>(200, "update success", null);
         } catch (Exception ex) {
-            return ResponseEntity.ok(
-                    ResponseDTO.builder()
-                            .status("fail")
-                            .code(Constants.HTTP_STATUS.BAD_REQUEST)
-                            .message("update failed: " + ex.getMessage())
-                            .build()
-            );
+            return new SuccessResponse<>(400, "Update failed: " + ex.getMessage(), null);
         }
     }
+
     @PostMapping("/delete/{id}")
     public ResponseEntity<ResponseDTO> delete(@PathVariable Long id) {
         productService.delete(id);

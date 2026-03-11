@@ -16,11 +16,10 @@ public class ProductReponseDTO {
     private Long id;
     private String productName;
     private String serviceType;
-    private String price;
+    private BigDecimal price;
     private Integer refundable;
     private Integer status;
-    private LocalDateTime createdAt;
-    private String Type;
+    private String type;
     private String img;
     private String additionalService;
     private Long merchantId;
@@ -32,8 +31,7 @@ public class ProductReponseDTO {
         this.price= product.getPrice();
         this.refundable=product.getRefundable();
         this.status = product.getStatus();
-        this.createdAt= product.getCreatedAt();
-        this.Type= product.getType();
+        this.type= product.getType();
         this.img= product.getImg();
         this.additionalService =product.getAdditionalService();
         if (product.getMerchant() != null) {

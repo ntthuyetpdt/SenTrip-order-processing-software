@@ -1,6 +1,5 @@
 package com.example.da_sentrip.model.dto.request;
 
-import com.example.da_sentrip.model.entity.Merchant;
 import lombok.Getter;
 import lombok.Setter;
 import java.math.BigDecimal;

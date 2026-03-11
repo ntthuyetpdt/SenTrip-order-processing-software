@@ -2,6 +2,7 @@ package com.example.da_sentrip.repository;
 
 import com.example.da_sentrip.model.dto.reponse.OderdetailReponseDTO;
 import com.example.da_sentrip.model.dto.reponse.view.GetallOder;
+import com.example.da_sentrip.model.dto.reponse.view.InvoiceProjection;
 import com.example.da_sentrip.model.dto.reponse.view.OderDetailProjection;
 import com.example.da_sentrip.model.entity.Order;
 import com.example.da_sentrip.model.dto.reponse.view.OrderSummaryView;
@@ -133,30 +134,33 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query(value = """
     SELECT
-        o.CREATED_AT AS createdAt,
         o.ORDER_CODE AS orderCode,
-        o.ORDER_STATUS AS orderStatus,
+        c.FULL_NAME AS fullNameCustomer,
+        o.CREATED_AT AS createdAt,
+        GROUP_CONCAT(DISTINCT p.SERVICE_TYPE ORDER BY oi.ID SEPARATOR ', ') AS serviceType,
+        GROUP_CONCAT(DISTINCT p.ADDITIONAL_SERVICES ORDER BY oi.ID SEPARATOR ', ') AS additionalService,
+        GROUP_CONCAT(DISTINCT p.ADDRESS ORDER BY oi.ID SEPARATOR ', ') AS address,
         o.TOTAL_AMOUNT AS totalAmount,
-        u.ID AS userId,
-        u.GMAIL AS gmail,
-        GROUP_CONCAT(p.PRODUCT_NAME ORDER BY oi.ID SEPARATOR ', ') AS productNames,
-        GROUP_CONCAT(p.ADDITIONAL_SERVICES ORDER BY oi.ID SEPARATOR ', ') AS additionalService,
-        GROUP_CONCAT(oi.QUANTITY ORDER BY oi.ID SEPARATOR ', ') AS quantities,
-        GROUP_CONCAT( DISTINCT CASE WHEN p.IMG IS NOT NULL AND p.IMG REGEXP '^[0-9]+$' THEN ds.MEDIA_URL ELSE p.IMG END ORDER BY oi.ID SEPARATOR ', ' ) AS img
+        o.ORDER_STATUS AS orderStatus,
+        pm.PAYMENT_STATUS AS paymentStatus
     FROM ORDERS o
-    JOIN USERS u ON u.ID = o.USER_ID
-    JOIN ORDER_ITEMS oi ON oi.ORDER_ID = o.ID
-    JOIN PRODUCTS p ON p.ID = oi.PRODUCT_ID
-    LEFT JOIN DATA_SOUSES ds
-        ON (
-            p.IMG IS NOT NULL
-            AND p.IMG REGEXP '^[0-9]+$'
-            AND ds.ID = CAST(p.IMG AS UNSIGNED)
-        )
+             JOIN customers c
+                  ON c.USER_ID = o.USER_ID
+             JOIN ORDER_ITEMS oi
+                  ON oi.ORDER_ID = o.ID
+             JOIN PRODUCTS p
+                  ON p.ID = oi.PRODUCT_ID
+             LEFT JOIN PAYMENTS pm
+                       ON pm.ORDER_ID = o.ID
     GROUP BY
-        o.ID, o.CREATED_AT, o.ORDER_CODE, o.ORDER_STATUS, o.TOTAL_AMOUNT,
-        u.ID, u.GMAIL
-    ORDER BY o.CREATED_AT DESC
+        o.ID,
+        o.ORDER_CODE,
+        c.FULL_NAME,
+        o.CREATED_AT,
+        o.TOTAL_AMOUNT,
+        o.ORDER_STATUS,
+        pm.PAYMENT_STATUS
+    ORDER BY o.CREATED_AT DESC;
 """, nativeQuery = true)
     List<GetallOder> findAllOrderSummary();
 
@@ -210,9 +214,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     ORDER BY i.ID DESC
     LIMIT 1
 """, nativeQuery = true)
-    Optional<InvoiceProjection> findLatestByOrderId(@Param("orderId") Long orderId);
+    Optional<InvoiceProjection1> findLatestByOrderId(@Param("orderId") Long orderId);
 
-    interface InvoiceProjection {
+    interface InvoiceProjection1 {
         Long getId();
         String getInvoiceCode();
         Long getOrderId();
@@ -221,6 +225,37 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
         String getStatus();
         LocalDateTime getCreatedAt();
     }
+    @Query(value = """
+
+            SELECT
+                o.ORDER_CODE AS orderCode,
+                c.FULL_NAME AS fullNameCustomer,
+                c.PHONE AS phone,
+                c.ADDRESS AS address,
+                o.CREATED_AT AS createdAt,
+                o.TOTAL_AMOUNT AS totalAmount,
+                o.ORDER_STATUS AS orderStatus,
+                COALESCE(pm.PAYMENT_STATUS, 'UNPAID') AS paymentStatus,
+                GROUP_CONCAT(p.PRODUCT_NAME ORDER BY oi.ID SEPARATOR ', ') AS productNames,
+                GROUP_CONCAT(oi.QUANTITY ORDER BY oi.ID SEPARATOR ', ') AS quantities
+            FROM ORDERS o
+                     JOIN CUSTOMERS c ON c.USER_ID = o.USER_ID
+                     JOIN ORDER_ITEMS oi ON oi.ORDER_ID = o.ID
+                     JOIN PRODUCTS p ON p.ID = oi.PRODUCT_ID
+                     LEFT JOIN PAYMENTS pm ON pm.ORDER_ID = o.ID
+            WHERE o.ORDER_CODE = :orderCode
+            GROUP BY
+                o.ID,
+                o.ORDER_CODE,
+                c.FULL_NAME,
+                c.PHONE,
+                c.ADDRESS,
+                o.CREATED_AT,
+                o.TOTAL_AMOUNT,
+                o.ORDER_STATUS,
+                pm.PAYMENT_STATUS
+        """, nativeQuery = true)
+    InvoiceProjection findInvoiceByOrderId(@Param("orderCode") String orderCode);
 
 
 }

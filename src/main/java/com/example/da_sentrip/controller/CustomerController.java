@@ -33,25 +33,24 @@ public class CustomerController {
     }
 
     @PostMapping(value = "/update/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ResponseDTO> update(
-            @ModelAttribute CustomerRequestDTO request,
+    public SuccessResponse<?> update(
+            @PathVariable Long id,
+            @RequestParam CustomerRequestDTO request,
             @RequestPart(value = "img", required = false) MultipartFile img,
             Authentication authentication ) {
 
         try {
-           customerService.update( request, img,authentication);
-            return ResponseEntity.ok(ResponseDTO.builder()
-                    .status("ok")
-                    .code(Constants.HTTP_STATUS.SUCCESS)
-                    .message("Updated successfully")
-                    .build());
+           customerService.update( id,request, img,authentication);
+            return new  SuccessResponse<>(
+                    Constants.HTTP_STATUS.SUCCESS,
+            "update success",
+                    null);
 
         } catch (Exception ex) {
-            return ResponseEntity.ok(ResponseDTO.builder()
-                    .status("fail")
-                    .code(Constants.HTTP_STATUS.BAD_REQUEST)
-                    .message("Update failed: " + ex.getMessage())
-                    .build());
+            return new  SuccessResponse<>(
+                    Constants.HTTP_STATUS.BAD_REQUEST,
+            "update failed",
+                    null);
         }
     }
 

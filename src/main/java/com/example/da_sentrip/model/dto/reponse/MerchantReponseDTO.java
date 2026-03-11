@@ -7,6 +7,7 @@ import lombok.Setter;
 @Setter
 @Getter
 public class MerchantReponseDTO {
+    private Long id;
     private String merchantName;
     private String phone;
     private String cccd;
@@ -16,6 +17,7 @@ public class MerchantReponseDTO {
     private String img;
     private String businessLicense;
     public MerchantReponseDTO(Merchant merchant){
+        this.id=merchant.getId();
         this.merchantName = merchant.getMerchantName();
         this.phone =merchant.getPhone();
         this.cccd=merchant.getCccd();

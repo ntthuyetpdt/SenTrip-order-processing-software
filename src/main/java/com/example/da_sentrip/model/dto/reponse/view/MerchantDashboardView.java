@@ -5,4 +5,6 @@ public interface MerchantDashboardView {
     BigDecimal getTotalRevenue();
     Long getTotalCustomers();
     Long getTotalOrders();
+    Long getSuccessOrders();
+    Long getCancelledOrders();
 }

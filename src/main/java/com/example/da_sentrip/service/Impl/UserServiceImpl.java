@@ -92,7 +92,7 @@ public class UserServiceImpl implements UserService {
         Role role = roleRepository.findById(roleId).orElseThrow(() -> new RuntimeException("Role not found"));
         User userAdd = new User();
         userAdd.setGmail(request.getGmail());
-        userAdd.setPassword(passwordEncoder.encode("Ab123456@"));
+        userAdd.setPassword(passwordEncoder.encode("123456@Ab"));
         userAdd.setRole(role);
         userAdd.setStatus(Status.ACTIVE);
         User savedUser = userRepository.save(userAdd);

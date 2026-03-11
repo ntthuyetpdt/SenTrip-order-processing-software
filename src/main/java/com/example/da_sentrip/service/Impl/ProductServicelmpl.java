@@ -7,7 +7,6 @@ import com.example.da_sentrip.model.dto.reponse.ListProductMechartReponseDTO;
 import com.example.da_sentrip.model.dto.reponse.MerchantDashboardResponseDTO;
 import com.example.da_sentrip.model.dto.reponse.ProductReponseDTO;
 import com.example.da_sentrip.model.dto.reponse.view.MerchantDashboardView;
-import com.example.da_sentrip.model.dto.reponse.view.OrderCustomerView;
 import com.example.da_sentrip.model.dto.request.MerchantDashboardRequestDTO;
 import com.example.da_sentrip.model.dto.request.ProductRequestDTO;
 import com.example.da_sentrip.model.entity.Merchant;
@@ -21,15 +20,12 @@ import com.example.da_sentrip.security.JwtUtil;
 import com.example.da_sentrip.service.ProductService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import org.apache.coyote.BadRequestException;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -78,54 +74,23 @@ public class ProductServicelmpl implements ProductService {
     }
 
     @Override
-    @Transactional
-    public ProductDTO update(Long id, ProductRequestDTO request, MultipartFile img) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new BadCredentialsException("ID NOT FOUND"));
-
-        if (request.getPrice() != null) {
-            product.setPrice(String.valueOf(request.getPrice()));
+    public ProductDTO update(Long id, ProductRequestDTO request, MultipartFile img, Authentication authentication) {
+        String gmail = authentication.getName();
+        User user = userRepository.findByGmail(gmail).orElseThrow(() -> new RuntimeException("User not found"));
+        Merchant merchant = merchantRepository.findByUserId(user.getId()).orElseThrow(() -> new RuntimeException("Merchant not found"));
+        Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
+        if (!product.getMerchant().getId().equals(merchant.getId())) {
+            throw new RuntimeException("You are not allowed to update this product");
         }
-
-        if (request.getProductName() != null && !request.getProductName().isBlank()) {
-            product.setProductName(request.getProductName());
-        }
-
-        if (request.getServiceType() != null && !request.getServiceType().isBlank()) {
-            product.setServiceType(request.getServiceType());
-        }
-
-        if (request.getRefundable() != null) {
-            product.setRefundable(request.getRefundable());
-        }
-
-        if (request.getStatus() != null) {
-            product.setStatus(request.getStatus());
-        }
-
-        if (request.getType() != null && !request.getType().isBlank()) {
-            product.setType(request.getType());
-        }
-
-        if (request.getAddress() != null && !request.getAddress().isBlank()) {
-            product.setAddress(request.getAddress());
-        }
-
-        if (request.getAdditionalService() != null && !request.getAdditionalService().isBlank()) {
-            product.setAdditionalService(request.getAdditionalService());
-        }
-
+        modelMapper.map(request, product);
         if (img != null && !img.isEmpty()) {
-            if (product.getImg() != null && product.getImg().matches("\\d+")) {
-                mediaStorageService.deleteMedia(Long.valueOf(product.getImg()));
-            }
-            String newDsId = mediaStorageService.uploadMedia(img);
-            product.setImg(newDsId);
+            String dsId = mediaStorageService.uploadMedia(img);
+            product.setImg(dsId);
         }
-
-        productRepository.save(product);
-        return new ProductDTO(product);
+        Product updated = productRepository.save(product);
+        return new ProductDTO(updated);
     }
+
     @Override
     public ProductDTO delete(Long id) {
         Product product = productRepository.findById(id).orElseThrow(() -> new BadCredentialsException("ID NOT FOUND"));
@@ -184,7 +149,9 @@ public class ProductServicelmpl implements ProductService {
         return new MerchantDashboardResponseDTO(
                 view.getTotalRevenue() != null ? view.getTotalRevenue() : BigDecimal.ZERO,
                 view.getTotalCustomers() != null ? view.getTotalCustomers() : 0L,
-                view.getTotalOrders() != null ? view.getTotalOrders() : 0L
+                view.getTotalOrders() != null ? view.getTotalOrders() : 0L,
+                view.getSuccessOrders() != null ? view.getSuccessOrders() : 0L,
+                view.getCancelledOrders() != null ? view.getCancelledOrders() : 0L
         );
     }
 

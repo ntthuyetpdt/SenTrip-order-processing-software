@@ -34,25 +34,6 @@ public class MerchantController  {
                 user
         );
     }
-
-    @PostMapping("/create/{id}")
-    public ResponseEntity<ResponseDTO> create(@PathVariable Long id, @RequestBody MerchantRequestDTO request) {
-        merchantService.create(request, id);
-        try {
-            return ResponseEntity.ok(ResponseDTO.builder()
-                    .status("ok")
-                    .code(Constants.HTTP_STATUS.CREATED)
-                    .message("Add  success")
-                    .build());
-        }catch (Exception ex) {
-            return ResponseEntity.ok(ResponseDTO.builder()
-                    .status("ok")
-                    .code(Constants.HTTP_STATUS.BAD_REQUEST)
-                    .message("Add  failed")
-                    .build());
-        }
-    }
-
     @PostMapping("/update/{id}")
     public ResponseEntity<ResponseDTO> update(@PathVariable Long id, @ModelAttribute MerchantRequestDTO request, MultipartFile img) {
         merchantService.update(id, request,img);

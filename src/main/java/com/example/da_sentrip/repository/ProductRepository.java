@@ -47,24 +47,37 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<OrderCustomerView> getOrderCustomerFull(@Param("MERCHANT_ID") Long merchantId);
 
     @Query(value = """
+    SELECT 
+        COALESCE(SUM(T.REVENUE), 0) AS totalRevenue,
+        COUNT(DISTINCT T.USER_ID) AS totalCustomers,
+        COUNT(DISTINCT T.ORDER_ID) AS totalOrders,
+        COUNT(DISTINCT CASE 
+            WHEN T.REVENUE > 0 THEN T.ORDER_ID 
+        END) AS successOrders,
+        COUNT(DISTINCT CASE 
+            WHEN T.ORDER_STATUS = 'CANCELLED' THEN T.ORDER_ID 
+        END) AS cancelledOrders,
+        COUNT(DISTINCT CASE 
+            WHEN T.REVENUE > 0 OR T.ORDER_STATUS = 'CANCELLED' THEN T.ORDER_ID 
+        END) AS successAndCancelledOrders
+    FROM (
         SELECT 
-            COALESCE(SUM(T.REVENUE), 0) AS totalRevenue, 
-            COUNT(DISTINCT T.USER_ID) AS totalCustomers, 
-            COUNT(DISTINCT T.ORDER_ID) AS totalOrders
-        FROM (
-            SELECT 
-                O.ID AS ORDER_ID, 
-                O.USER_ID, 
-                MAX(CASE WHEN PY.PAYMENT_STATUS = 'SUCCESS' THEN PY.AMOUNT ELSE 0 END) AS REVENUE
-            FROM ORDERS O
-            JOIN ORDER_ITEMS OI ON OI.ORDER_ID = O.ID
-            JOIN PRODUCTS P ON P.ID = OI.PRODUCT_ID
-            LEFT JOIN PAYMENTS PY ON PY.ORDER_ID = O.ID
-            WHERE P.MERCHANT_ID = :merchantId 
-              AND O.CREATED_AT >= :startDate 
-              AND O.CREATED_AT < :endDate
-            GROUP BY O.ID, O.USER_ID
-        ) T
+            O.ID AS ORDER_ID,
+            O.USER_ID,
+            O.ORDER_STATUS,
+            MAX(CASE 
+                WHEN PY.PAYMENT_STATUS = 'SUCCESS' THEN PY.AMOUNT 
+                ELSE 0 
+            END) AS REVENUE
+        FROM ORDERS O
+        JOIN ORDER_ITEMS OI ON OI.ORDER_ID = O.ID
+        JOIN PRODUCTS P ON P.ID = OI.PRODUCT_ID
+        LEFT JOIN PAYMENTS PY ON PY.ORDER_ID = O.ID
+        WHERE P.MERCHANT_ID = :merchantId
+          AND O.CREATED_AT >= :startDate
+          AND O.CREATED_AT < :endDate
+        GROUP BY O.ID, O.USER_ID, O.ORDER_STATUS
+    ) T
     """, nativeQuery = true)
     MerchantDashboardView getMerchantDashboard(
             @Param("merchantId") Long merchantId,

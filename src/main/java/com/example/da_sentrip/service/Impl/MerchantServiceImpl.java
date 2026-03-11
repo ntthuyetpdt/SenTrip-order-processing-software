@@ -28,12 +28,6 @@ public class MerchantServiceImpl implements MerchantService {
     private final ModelMapper modelMapper;
 
     @Override
-    public MerchantDTO create(MerchantRequestDTO request, Long id) {
-        merchantRepository.findById(id).orElseThrow(()-> new BadCredentialsException("ID not Found"));
-        return new MerchantDTO(modelMapper.map(request, Merchant.class));
-    }
-
-    @Override
     public MerchantDTO update(Long id, MerchantRequestDTO request, MultipartFile img) {
         Merchant merchant =merchantRepository.findById(id).orElseThrow(()-> new BadCredentialsException("ID not Found"));
         modelMapper.map(request,Merchant.class);

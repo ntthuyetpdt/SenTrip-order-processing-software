@@ -2,6 +2,7 @@ package com.example.da_sentrip.service.Impl;
 
 import com.example.da_sentrip.model.dto.OrderDTO;
 import com.example.da_sentrip.model.dto.reponse.OderdetailReponseDTO;
+import com.example.da_sentrip.model.dto.reponse.OrderAllReponseDTO;
 import com.example.da_sentrip.model.dto.reponse.OrderReponseDTO;
 import com.example.da_sentrip.model.dto.reponse.UserOrderDTO;
 import com.example.da_sentrip.model.dto.reponse.view.OderDetailProjection;
@@ -48,41 +49,35 @@ public class OrderServiceImpl implements OrderService {
         order.setCreatedAt(LocalDateTime.now());
         order.setUpdatedAt(LocalDateTime.now());
         BigDecimal totalAmount = request.getItems().stream().map(item -> {
-            Product product = productRepository.findById(item.getProductId()).orElseThrow(() -> new BadCredentialsException("PRODUCT NOT FOUND: " + item.getProductId()));
-            if (product.getStatus() == null || product.getStatus() != 1) throw new IllegalStateException("PRODUCT IS INACTIVE: " + product.getId());
-            return new BigDecimal(product.getPrice()).multiply(BigDecimal.valueOf(item.getQuantity()));
-        }).reduce(BigDecimal.ZERO, BigDecimal::add);
-
+        Product product = productRepository.findById(item.getProductId()).orElseThrow(() -> new BadCredentialsException("PRODUCT NOT FOUND: " + item.getProductId()));
+        if (product.getStatus() == null || product.getStatus() != 1)
+            throw new IllegalStateException("PRODUCT IS INACTIVE: " + product.getId());
+                    return product.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
+                }).reduce(BigDecimal.ZERO, BigDecimal::add);
         order.setTotalAmount(totalAmount);
         Order savedOrder = orderRepository.save(order);
         request.getItems().forEach(item -> {
             Product product = productRepository.findById(item.getProductId()).get();
-            orderRepository.insertOrderItem(savedOrder.getId(), product.getId(), item.getQuantity(), product.getPrice());
+            orderRepository.insertOrderItem(savedOrder.getId(), product.getId(), item.getQuantity(), String.valueOf(product.getPrice()));
         });
         return  mapToDTO(savedOrder);
     }
 
     @Override
-    public List<OrderReponseDTO> Getall(Authentication authentication) {
+    public List<OrderAllReponseDTO> Getall(Authentication authentication) {
         return orderRepository.findAllOrderSummary()
                 .stream()
-                .map(view -> {
-                    OrderReponseDTO dto = new OrderReponseDTO(
-                            view.getOrderCode(),
-                            OrderStatus.valueOf(view.getOrderStatus()),
-                            view.getTotalAmount(),
-                            view.getCreatedAt(),
-                            view.getProductNames(),
-                            view.getAdditionalService(),
-                            view.getImg(),
-                            view.getQuantities()
-                    );
-                    UserOrderDTO userDto = new UserOrderDTO();
-                    userDto.setId(view.getUserId());
-                    userDto.setGmail(view.getGmail());
-
-                    return dto;
-                })
+                .map(view -> new OrderAllReponseDTO(
+                        view.getOrderCode(),
+                        view.getFullNameCustomer(),
+                        view.getCreatedAt(),
+                        view.getServiceType(),
+                        view.getAdditionalService(),
+                        view.getAddress(),
+                        view.getTotalAmount(),
+                        view.getOrderStatus(),
+                        view.getPaymentStatus()
+                ))
                 .toList();
     }
 

@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Entity
 @Getter
 @Setter
@@ -28,7 +30,7 @@ public class Product  extends BaseCreatedEntity{
     private Merchant merchant;
 
     @Column(name = "PRICE")
-    private String price;
+    private BigDecimal price;
 
     @Column(name = "REFUNDABLE")
     private Integer refundable;
@@ -37,7 +39,7 @@ public class Product  extends BaseCreatedEntity{
     private Integer status;
 
     @Column(name="TYPE")
-    private String Type;
+    private String type;
 
     @Column (name = "ADDRESS")
     private String address;

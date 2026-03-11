@@ -17,10 +17,11 @@ import java.util.List;
 public interface ProductService {
     List<ProductReponseDTO> getAll ();
     ProductDTO create (ProductRequestDTO request,MultipartFile img, Authentication authentication);
-    ProductDTO update (Long id, ProductRequestDTO request, MultipartFile img);
+    ProductDTO update (Long id, ProductRequestDTO request, MultipartFile img, Authentication authentication);
     ProductDTO delete (Long id);
     List<ProductReponseDTO> search (String productName,String price,String address);
     List<ListProductMechartReponseDTO> getOrderCustomerFull(Authentication authentication);
     MerchantDashboardResponseDTO getMerchantDashboard(Authentication authentication, MerchantDashboardRequestDTO request) ;
     List<ProductReponseDTO>getMechant(Authentication authentication);
+
 }
