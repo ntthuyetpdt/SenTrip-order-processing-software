@@ -60,23 +60,26 @@ public class ProductController {
     @PostMapping(value = "/update/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResponseDTO> update(
             @PathVariable Long id,
-            @RequestPart(value = "request", required = false) ProductRequestDTO request,
+            @RequestPart("request") ProductRequestDTO request,
             @RequestPart(value = "img", required = false) MultipartFile img
     ) {
-        if (request == null) request = new ProductRequestDTO();
-        productService.update(id, request, img);
         try {
-            return ResponseEntity.ok(ResponseDTO.builder()
-                    .status("ok")
-                    .code(Constants.HTTP_STATUS.SUCCESS)
-                    .message("create  success")
-                    .build());
-        }catch (Exception ex) {
-            return ResponseEntity.ok(ResponseDTO.builder()
-                    .status("ok")
-                    .code(Constants.HTTP_STATUS.BAD_REQUEST)
-                    .message("create  failed")
-                    .build());
+            productService.update(id, request, img);
+            return ResponseEntity.ok(
+                    ResponseDTO.builder()
+                            .status("ok")
+                            .code(Constants.HTTP_STATUS.SUCCESS)
+                            .message("update success")
+                            .build()
+            );
+        } catch (Exception ex) {
+            return ResponseEntity.ok(
+                    ResponseDTO.builder()
+                            .status("fail")
+                            .code(Constants.HTTP_STATUS.BAD_REQUEST)
+                            .message("update failed: " + ex.getMessage())
+                            .build()
+            );
         }
     }
     @PostMapping("/delete/{id}")

@@ -78,9 +78,43 @@ public class ProductServicelmpl implements ProductService {
     }
 
     @Override
+    @Transactional
     public ProductDTO update(Long id, ProductRequestDTO request, MultipartFile img) {
-        Product product = productRepository.findById(id).orElseThrow(() -> new BadCredentialsException("ID NOT FOUND"));
-        modelMapper.map(request, product);
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new BadCredentialsException("ID NOT FOUND"));
+
+        if (request.getPrice() != null) {
+            product.setPrice(String.valueOf(request.getPrice()));
+        }
+
+        if (request.getProductName() != null && !request.getProductName().isBlank()) {
+            product.setProductName(request.getProductName());
+        }
+
+        if (request.getServiceType() != null && !request.getServiceType().isBlank()) {
+            product.setServiceType(request.getServiceType());
+        }
+
+        if (request.getRefundable() != null) {
+            product.setRefundable(request.getRefundable());
+        }
+
+        if (request.getStatus() != null) {
+            product.setStatus(request.getStatus());
+        }
+
+        if (request.getType() != null && !request.getType().isBlank()) {
+            product.setType(request.getType());
+        }
+
+        if (request.getAddress() != null && !request.getAddress().isBlank()) {
+            product.setAddress(request.getAddress());
+        }
+
+        if (request.getAdditionalService() != null && !request.getAdditionalService().isBlank()) {
+            product.setAdditionalService(request.getAdditionalService());
+        }
+
         if (img != null && !img.isEmpty()) {
             if (product.getImg() != null && product.getImg().matches("\\d+")) {
                 mediaStorageService.deleteMedia(Long.valueOf(product.getImg()));
@@ -88,10 +122,10 @@ public class ProductServicelmpl implements ProductService {
             String newDsId = mediaStorageService.uploadMedia(img);
             product.setImg(newDsId);
         }
+
         productRepository.save(product);
         return new ProductDTO(product);
     }
-
     @Override
     public ProductDTO delete(Long id) {
         Product product = productRepository.findById(id).orElseThrow(() -> new BadCredentialsException("ID NOT FOUND"));

@@ -47,4 +47,6 @@ public class Product  extends BaseCreatedEntity{
 
     @Column (name = "ADDITIONAL_SERVICES")
     private String additionalService;
+
+
 }
