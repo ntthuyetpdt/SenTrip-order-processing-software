@@ -5,10 +5,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/exsport")
@@ -17,18 +15,17 @@ public class ExportController {
     private final ExportService exportService;
 
 
-    @GetMapping("/Bill/{orderCode}")
-    public ResponseEntity<byte[]> exportInvoice(@PathVariable String orderCode) {
+    @PostMapping("/bill/{orderCode}")
+    public ResponseEntity<?> exportInvoice(@PathVariable String orderCode) {
+        String fileUrl = exportService.exportInvoicePdf(orderCode);
 
-        byte[] pdfBytes = exportService.exportInvoicePdf(orderCode);
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=invoice_" + orderCode + ".pdf")
-                .contentType(MediaType.APPLICATION_PDF)
-                .body(pdfBytes);
+        return ResponseEntity.ok(Map.of(
+                "message", "Export invoice successfully",
+                "url", fileUrl
+        ));
     }
 
-    @GetMapping("/export-excel")
+    @PostMapping("/export-excel")
     public ResponseEntity<byte[]> exportOrdersExcel() {
         byte[] excelBytes = exportService.exportOrdersExcel();
 

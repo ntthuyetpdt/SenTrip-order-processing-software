@@ -2,6 +2,7 @@ package com.example.da_sentrip.repository;
 
 import com.example.da_sentrip.model.dto.reponse.view.MerchantDashboardView;
 import com.example.da_sentrip.model.dto.reponse.view.OrderCustomerView;
+import com.example.da_sentrip.model.dto.reponse.view.ProductStatisticDTO;
 import com.example.da_sentrip.model.entity.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -77,7 +78,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
           AND O.CREATED_AT >= :startDate
           AND O.CREATED_AT < :endDate
         GROUP BY O.ID, O.USER_ID, O.ORDER_STATUS
-    ) T
+    ) 
     """, nativeQuery = true)
     MerchantDashboardView getMerchantDashboard(
             @Param("merchantId") Long merchantId,
@@ -85,4 +86,23 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             @Param("endDate") LocalDateTime endDate
     );
     List<Product> findByMerchantId(Long merchantId);
+
+    @Query(value = """
+        SELECT
+            p.ID AS productId,
+            p.PRODUCT_NAME AS productName,
+            p.ADDITIONAL_SERVICES AS additionalServices,
+            COUNT(DISTINCT o.USER_ID) AS totalCustomers,
+            COUNT(DISTINCT o.ID) AS totalOrders,
+            SUM(o.TOTAL_AMOUNT) AS totalRevenue
+        FROM ORDER_ITEMS oi
+        JOIN PRODUCTS p ON p.ID = oi.PRODUCT_ID
+        JOIN ORDERS o ON o.ID = oi.ORDER_ID
+        WHERE oi.PRODUCT_ID = :productId
+        GROUP BY
+            p.ID,
+            p.PRODUCT_NAME,
+            p.ADDITIONAL_SERVICES
+        """, nativeQuery = true)
+    List<ProductStatisticDTO> findProductStatistic(@Param("productId") Long productId);
 }

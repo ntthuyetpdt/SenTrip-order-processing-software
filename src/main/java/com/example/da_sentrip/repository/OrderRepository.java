@@ -1,11 +1,7 @@
 package com.example.da_sentrip.repository;
 
-import com.example.da_sentrip.model.dto.reponse.OderdetailReponseDTO;
-import com.example.da_sentrip.model.dto.reponse.view.GetallOder;
-import com.example.da_sentrip.model.dto.reponse.view.InvoiceProjection;
-import com.example.da_sentrip.model.dto.reponse.view.OderDetailProjection;
+import com.example.da_sentrip.model.dto.reponse.view.*;
 import com.example.da_sentrip.model.entity.Order;
-import com.example.da_sentrip.model.dto.reponse.view.OrderSummaryView;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -13,7 +9,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -88,9 +83,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query(value = "DELETE FROM ORDERS WHERE ORDER_CODE = :orderCode", nativeQuery = true)
     void deleteOrderByOrderCode(@Param("orderCode") String orderCode);
 
-    @Query(value = "SELECT * FROM ORDERS WHERE USER_ID = :userId", nativeQuery = true)
-    List<Order> findAllByUserId(@Param("userId") Long userId);
-
     @Query(value = """
     SELECT
         o.CREATED_AT AS createdAt,
@@ -164,98 +156,85 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 """, nativeQuery = true)
     List<GetallOder> findAllOrderSummary();
 
-
-    @Query(value = """
-    SELECT EXISTS(
-    SELECT 1
-    FROM PAYMENTS p
-    WHERE p.ORDER_ID = :orderId
-    AND p.PAYMENT_STATUS = 'SUCCESS'
-    )
-""", nativeQuery = true)
-    int existsPaidSuccess(@Param("orderId") Long orderId);
-
-
-    @Query(value = """
-    SELECT EXISTS(
-    SELECT 1
-    FROM INVOICES i
-    WHERE i.ORDER_ID = :orderId
-    AND i.STATUS = 'SUCCESS'
-    )""", nativeQuery = true)
-    int existsInvoiceSuccess(@Param("orderId") Long orderId);
-
-
-    @Modifying
-    @Query(value = """
-    INSERT INTO INVOICES (INVOICE_CODE, ORDER_ID, MERCHANT_ID, AMOUNT, STATUS, CREATED_AT)
-    VALUES (:invoiceCode, :orderId, :merchantId, :amount, :status, NOW())
-""", nativeQuery = true)
-    void insertInvoice(
-            @Param("invoiceCode") String invoiceCode,
-            @Param("orderId") Long orderId,
-            @Param("merchantId") Long merchantId,
-            @Param("amount") BigDecimal amount,
-            @Param("status") String status
-    );
-
-
     @Query(value = """
     SELECT
-        i.ID AS id,
-        i.INVOICE_CODE AS invoiceCode,
-        i.ORDER_ID AS orderId,
-        i.MERCHANT_ID AS merchantId,
-        i.AMOUNT AS amount,
-        i.STATUS AS status,
-        i.CREATED_AT AS createdAt
-    FROM INVOICES i
-    WHERE i.ORDER_ID = :orderId
-    ORDER BY i.ID DESC
-    LIMIT 1
-""", nativeQuery = true)
-    Optional<InvoiceProjection1> findLatestByOrderId(@Param("orderId") Long orderId);
+        o.ID AS orderId,
+        o.ORDER_CODE AS orderCode,
+        o.USER_ID AS userId,
+        o.MERCHANT_ID AS merchantId,
+        c.FULL_NAME AS fullNameCustomer,
+        c.PHONE AS phone,
+        c.ADDRESS AS address,
+        o.CREATED_AT AS createdAt,
+        o.TOTAL_AMOUNT AS totalAmount,
+        o.ORDER_STATUS AS orderStatus,
+        COALESCE(pm.PAYMENT_STATUS, 'UNPAID') AS paymentStatus,
+        GROUP_CONCAT(p.PRODUCT_NAME ORDER BY oi.ID SEPARATOR ', ') AS productNames,
+        GROUP_CONCAT(oi.QUANTITY ORDER BY oi.ID SEPARATOR ', ') AS quantities
+    FROM ORDERS o
+             JOIN CUSTOMERS c ON c.USER_ID = o.USER_ID
+             JOIN ORDER_ITEMS oi ON oi.ORDER_ID = o.ID
+             JOIN PRODUCTS p ON p.ID = oi.PRODUCT_ID
+             LEFT JOIN PAYMENTS pm ON pm.ORDER_ID = o.ID
+    WHERE o.ORDER_CODE = :orderCode
+    GROUP BY
+        o.ID,
+        o.ORDER_CODE,
+        o.USER_ID,
+        o.MERCHANT_ID,
+        c.FULL_NAME,
+        c.PHONE,
+        c.ADDRESS,
+        o.CREATED_AT,
+        o.TOTAL_AMOUNT,
+        o.ORDER_STATUS,
+        pm.PAYMENT_STATUS
+    """, nativeQuery = true)
+    InvoiceProjection findInvoiceByOrderCode(@Param("orderCode") String orderCode);
 
-    interface InvoiceProjection1 {
-        Long getId();
-        String getInvoiceCode();
-        Long getOrderId();
-        Long getMerchantId();
-        BigDecimal getAmount();
-        String getStatus();
-        LocalDateTime getCreatedAt();
-    }
     @Query(value = """
-
-            SELECT
-                o.ORDER_CODE AS orderCode,
-                c.FULL_NAME AS fullNameCustomer,
-                c.PHONE AS phone,
-                c.ADDRESS AS address,
-                o.CREATED_AT AS createdAt,
-                o.TOTAL_AMOUNT AS totalAmount,
-                o.ORDER_STATUS AS orderStatus,
-                COALESCE(pm.PAYMENT_STATUS, 'UNPAID') AS paymentStatus,
-                GROUP_CONCAT(p.PRODUCT_NAME ORDER BY oi.ID SEPARATOR ', ') AS productNames,
-                GROUP_CONCAT(oi.QUANTITY ORDER BY oi.ID SEPARATOR ', ') AS quantities
-            FROM ORDERS o
-                     JOIN CUSTOMERS c ON c.USER_ID = o.USER_ID
-                     JOIN ORDER_ITEMS oi ON oi.ORDER_ID = o.ID
-                     JOIN PRODUCTS p ON p.ID = oi.PRODUCT_ID
-                     LEFT JOIN PAYMENTS pm ON pm.ORDER_ID = o.ID
-            WHERE o.ORDER_CODE = :orderCode
-            GROUP BY
-                o.ID,
-                o.ORDER_CODE,
-                c.FULL_NAME,
-                c.PHONE,
-                c.ADDRESS,
-                o.CREATED_AT,
-                o.TOTAL_AMOUNT,
-                o.ORDER_STATUS,
-                pm.PAYMENT_STATUS
-        """, nativeQuery = true)
-    InvoiceProjection findInvoiceByOrderId(@Param("orderCode") String orderCode);
+SELECT
+    o.ORDER_CODE AS orderCode,
+    c.FULL_NAME AS fullNameCustomer,
+    c.CCCD AS cccd,
+    c.PHONE AS phone,
+    c.ADDRESS AS address,
+    u.GMAIL AS gmail,
+    o.CREATED_AT AS createdAt,
+    o.UPDATED_AT AS updatedAt,
+    o.TOTAL_AMOUNT AS totalAmount,
+    o.ORDER_STATUS AS orderStatus,
+    COALESCE(pm.PAYMENT_STATUS, 'UNPAID') AS paymentStatus,
+    pm.PAYMENT_CODE AS paymentCode,
+    pm.AMOUNT AS paymentAmount,
+    pm.PAID_AT AS paidAt,
+    GROUP_CONCAT(p.PRODUCT_NAME ORDER BY oi.ID SEPARATOR ', ') AS productNames,
+    GROUP_CONCAT(oi.QUANTITY ORDER BY oi.ID SEPARATOR ', ') AS quantities
+FROM ORDERS o
+JOIN CUSTOMERS c ON c.USER_ID = o.USER_ID
+JOIN USERS u ON u.ID = c.USER_ID
+JOIN ORDER_ITEMS oi ON oi.ORDER_ID = o.ID
+JOIN PRODUCTS p ON p.ID = oi.PRODUCT_ID
+LEFT JOIN PAYMENTS pm ON pm.ORDER_ID = o.ID
+WHERE o.ORDER_CODE = :orderCode
+GROUP BY
+    o.ID,
+    o.ORDER_CODE,
+    c.FULL_NAME,
+    c.CCCD,
+    c.PHONE,
+    c.ADDRESS,
+    u.GMAIL,
+    o.CREATED_AT,
+    o.UPDATED_AT,
+    o.TOTAL_AMOUNT,
+    o.ORDER_STATUS,
+    pm.PAYMENT_STATUS,
+    pm.PAYMENT_CODE,
+    pm.AMOUNT,
+    pm.PAID_AT
+""", nativeQuery = true)
+    DetailedSet getOrderDetail(@Param("orderCode") String orderCode);
 
 
 }

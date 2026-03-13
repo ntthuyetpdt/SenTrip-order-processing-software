@@ -2,13 +2,11 @@ package com.example.da_sentrip.controller;
 
 import com.example.da_sentrip.model.SuccessResponse;
 import com.example.da_sentrip.model.dto.MerchantDTO;
-import com.example.da_sentrip.model.dto.reponse.MerchantDashboardResponseDTO;
-import com.example.da_sentrip.model.dto.reponse.MerchantReponseDTO;
-import com.example.da_sentrip.model.dto.reponse.ProductReponseDTO;
-import com.example.da_sentrip.model.dto.reponse.ResponseDTO;
+import com.example.da_sentrip.model.dto.reponse.*;
 import com.example.da_sentrip.model.dto.request.MerchantDashboardRequestDTO;
 import com.example.da_sentrip.model.dto.request.MerchantRequestDTO;
 import com.example.da_sentrip.service.MerchantService;
+import com.example.da_sentrip.service.OrderService;
 import com.example.da_sentrip.service.ProductService;
 import com.example.da_sentrip.utils.Constants;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +22,7 @@ import java.util.List;
 public class MerchantController  {
     private final MerchantService merchantService;
     private final ProductService productService;
+    private final OrderService orderService;
 
     @GetMapping("/getAll")
     public SuccessResponse<?> getAll(){
@@ -98,6 +97,14 @@ public class MerchantController  {
                 "view success",
                 data
         );
+    }
+    @GetMapping("/DetailedSet/{orderCode}")
+    public ResponseEntity<OrderDetailResponse> getOrderDetail(@PathVariable String orderCode) {
+        return ResponseEntity.ok(orderService.getOrderDetail(orderCode));
+    }
+    @GetMapping("/statistics/{productId}")
+    public ResponseEntity<List<ProductStatisticResponse>> getProductStatistic(@PathVariable Long productId) {
+        return ResponseEntity.ok(productService.getProductStatistic(productId));
     }
 
 }

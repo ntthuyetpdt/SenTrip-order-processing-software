@@ -1,10 +1,8 @@
 package com.example.da_sentrip.service.Impl;
 
 import com.example.da_sentrip.model.dto.OrderDTO;
-import com.example.da_sentrip.model.dto.reponse.OderdetailReponseDTO;
-import com.example.da_sentrip.model.dto.reponse.OrderAllReponseDTO;
-import com.example.da_sentrip.model.dto.reponse.OrderReponseDTO;
-import com.example.da_sentrip.model.dto.reponse.UserOrderDTO;
+import com.example.da_sentrip.model.dto.reponse.*;
+import com.example.da_sentrip.model.dto.reponse.view.DetailedSet;
 import com.example.da_sentrip.model.dto.reponse.view.OderDetailProjection;
 import com.example.da_sentrip.model.dto.request.OrderRequestDTO;
 import com.example.da_sentrip.model.entity.*;
@@ -40,7 +38,7 @@ public class OrderServiceImpl implements OrderService {
             throw new IllegalArgumentException("No product found.");
         }
         User user = userRepository.findByGmail(gmail).orElseThrow(() -> new BadCredentialsException("User not found"));
-        Merchant merchant = request.getMerchantId() == null ? null : merchantRepository.findById(request.getMerchantId()).orElseThrow(() -> new BadCredentialsException("MERCHANT NOT FOUND"));
+        Merchant merchant = request.getMerchantId() == null ? null : merchantRepository.findById(request.getMerchantId()).orElseThrow(() -> new BadCredentialsException("merchant not found"));
         Order order = new Order();
         order.setOrderCode(generateOrderCode());
         order.setUser(user);
@@ -51,7 +49,7 @@ public class OrderServiceImpl implements OrderService {
         BigDecimal totalAmount = request.getItems().stream().map(item -> {
         Product product = productRepository.findById(item.getProductId()).orElseThrow(() -> new BadCredentialsException("PRODUCT NOT FOUND: " + item.getProductId()));
         if (product.getStatus() == null || product.getStatus() != 1)
-            throw new IllegalStateException("PRODUCT IS INACTIVE: " + product.getId());
+            throw new IllegalStateException("product is inactive IS : " + product.getId());
                     return product.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
                 }).reduce(BigDecimal.ZERO, BigDecimal::add);
         order.setTotalAmount(totalAmount);
@@ -85,7 +83,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public OrderDTO Cancel(String orderCode) {
-        Order order = orderRepository.findByOrderCode(orderCode).orElseThrow(() -> new BadCredentialsException("ORDER NOT FOUND: " + orderCode));
+        Order order = orderRepository.findByOrderCode(orderCode).orElseThrow(() -> new BadCredentialsException("oder not found: " + orderCode));
         orderRepository.deleteOrderItemsByOrderCode(orderCode);
         orderRepository.deleteOrderByOrderCode(orderCode);
         OrderDTO dto = mapToDTO(order);
@@ -145,6 +143,34 @@ public class OrderServiceImpl implements OrderService {
         return result;
     }
 
+    @Override
+    public OrderDetailResponse getOrderDetail(String orderCode) {
+        DetailedSet data = orderRepository.getOrderDetail(orderCode);
+
+        if (data == null) {
+            throw new RuntimeException("Không tìm thấy đơn hàng với mã: " + orderCode);
+        }
+
+        return OrderDetailResponse.builder()
+                .orderCode(data.getOrderCode())
+                .fullNameCustomer(data.getFullNameCustomer())
+                .cccd(data.getCccd())
+                .phone(data.getPhone())
+                .address(data.getAddress())
+                .gmail(data.getGmail())
+                .createdAt(data.getCreatedAt())
+                .updatedAt(data.getUpdatedAt())
+                .totalAmount(data.getTotalAmount())
+                .orderStatus(data.getOrderStatus())
+                .paymentStatus(data.getPaymentStatus())
+                .paymentCode(data.getPaymentCode())
+                .paymentAmount(data.getPaymentAmount())
+                .paidAt(data.getPaidAt())
+                .productNames(data.getProductNames())
+                .quantities(data.getQuantities())
+                .build();
+    }
+
 
     private OrderDTO mapToDTO(Order order) {
         OrderDTO dto = new OrderDTO();
@@ -157,8 +183,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private String generateOrderCode() {
-        String date = java.time.LocalDate.now().toString().replace("-", "");
         String rand = UUID.randomUUID().toString().replace("-", "").substring(0, 6).toUpperCase();
-        return "OD-" + date + "-" + rand;
+        return "ST"  + "" + rand;
     }
 }

@@ -4,6 +4,7 @@ import com.example.da_sentrip.model.dto.ProductDTO;
 import com.example.da_sentrip.model.dto.reponse.ListProductMechartReponseDTO;
 import com.example.da_sentrip.model.dto.reponse.MerchantDashboardResponseDTO;
 import com.example.da_sentrip.model.dto.reponse.ProductReponseDTO;
+import com.example.da_sentrip.model.dto.reponse.ProductStatisticResponse;
 import com.example.da_sentrip.model.dto.request.MerchantDashboardRequestDTO;
 import com.example.da_sentrip.model.dto.request.ProductRequestDTO;
 import org.apache.coyote.BadRequestException;
@@ -23,5 +24,6 @@ public interface ProductService {
     List<ListProductMechartReponseDTO> getOrderCustomerFull(Authentication authentication);
     MerchantDashboardResponseDTO getMerchantDashboard(Authentication authentication, MerchantDashboardRequestDTO request) ;
     List<ProductReponseDTO>getMechant(Authentication authentication);
+    List<ProductStatisticResponse> getProductStatistic(Long productId);
 
 }

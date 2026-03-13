@@ -27,7 +27,7 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/order/**", "/user/**", "/employee/**", "/customer/**", "/cart/**","/product/**","/merchant/**","/exsport/**").authenticated()
+                        .requestMatchers("/order/**", "/user/**", "/employee/**", "/customer/**", "/cart/**","/product/**","/merchant/**","/exsport/**","/dashboard/**").authenticated()
                         .anyRequest().authenticated()
                 ).addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
