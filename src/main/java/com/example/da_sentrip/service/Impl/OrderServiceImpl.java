@@ -149,8 +149,8 @@ public class OrderServiceImpl implements OrderService {
                 .paymentCode(data.getPaymentCode())
                 .paymentAmount(data.getPaymentAmount())
                 .paidAt(data.getPaidAt())
-                .productNames(data.getProductNames())
-                .quantitie(data.getQuantities())
+                .productName(data.getProductNames())
+                .quantity(data.getQuantities())
                 .build();
     }
 
