@@ -36,7 +36,7 @@ public class EmployeeController {
                 .status("ok").code(Constants.HTTP_STATUS.CREATED).message("Create success").build());
     }
 
-    @PostMapping("/update{id}")
+    @PostMapping("/update/{id}")
     @PreAuthorize("hasAnyAuthority('ADMIN_UPDATE_EMPLOYEE')")
     public ResponseEntity<ResponseDTO> update(@PathVariable Long id, @RequestBody EmployeeRequestDTO request,
                                               @RequestParam(required = false) MultipartFile img) {
