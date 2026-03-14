@@ -44,14 +44,21 @@ public class ProductServicelmpl implements ProductService {
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
 
+    private Merchant getMerchantFromAuth(Authentication authentication) {
+        String email = authentication.getName();
+        User user = userRepository.findByGmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + email));
+        return merchantRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Bạn chưa đăng ký profile Merchant"));
+    }
+
     @Override
     public List<ProductReponseDTO> getAll() {
         return productRepository.findAll().stream().map(product -> {
             ProductReponseDTO dto = new ProductReponseDTO(product);
             if (product.getImg() != null && product.getImg().matches("\\d+")) {
-                dataSourceRepository.findById(Long.valueOf(product.getImg())).ifPresent(ds -> {
-                    dto.setImg(ds.getImageUrl());
-                });
+                dataSourceRepository.findById(Long.valueOf(product.getImg()))
+                        .ifPresent(ds -> dto.setImg(ds.getImageUrl()));
             }
             return dto;
         }).toList();
@@ -60,94 +67,68 @@ public class ProductServicelmpl implements ProductService {
     @Transactional
     @Override
     public ProductDTO create(ProductRequestDTO request, MultipartFile img, Authentication authentication) {
-
-        String gmail = authentication.getName();
-        User user = userRepository.findByGmail(gmail).orElseThrow(() -> new RuntimeException("User not found"));
-        Merchant merchant = merchantRepository.findByUserId(user.getId()).orElseThrow(() -> new RuntimeException("Merchant not found"));
+        Merchant merchant = getMerchantFromAuth(authentication);
         Product product = modelMapper.map(request, Product.class);
         product.setMerchant(merchant);
         product.setCreatedAt(LocalDateTime.now());
         if (img != null && !img.isEmpty()) {
-            String dsId = mediaStorageService.uploadMedia(img);
-            product.setImg(dsId);
+            product.setImg(mediaStorageService.uploadMedia(img));
         }
-        Product saved = productRepository.save(product);
-        return new ProductDTO(saved);
+        return new ProductDTO(productRepository.save(product));
     }
 
     @Override
     public ProductDTO update(Long id, ProductRequestDTO request, MultipartFile img, Authentication authentication) {
-        String gmail = authentication.getName();
-        User user = userRepository.findByGmail(gmail).orElseThrow(() -> new RuntimeException("User not found"));
-        Merchant merchant = merchantRepository.findByUserId(user.getId()).orElseThrow(() -> new RuntimeException("Merchant not found"));
-        Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
+        Merchant merchant = getMerchantFromAuth(authentication);
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
         if (!product.getMerchant().getId().equals(merchant.getId())) {
             throw new RuntimeException("You are not allowed to update this product");
         }
         modelMapper.map(request, product);
         if (img != null && !img.isEmpty()) {
-            String dsId = mediaStorageService.uploadMedia(img);
-            product.setImg(dsId);
+            product.setImg(mediaStorageService.uploadMedia(img));
         }
-        Product updated = productRepository.save(product);
-        return new ProductDTO(updated);
+        return new ProductDTO(productRepository.save(product));
     }
 
     @Override
     public ProductDTO delete(Long id) {
-        Product product = productRepository.findById(id).orElseThrow(() -> new BadCredentialsException("ID NOT FOUND"));
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new BadCredentialsException("ID NOT FOUND"));
         return new ProductDTO(product);
-
     }
 
     @Override
     public List<ProductReponseDTO> search(String productName, String price, String address) {
-        return productRepository.search(productName, price, address).stream().map(ProductReponseDTO::new).collect(Collectors.toList());
+        return productRepository.search(productName, price, address).stream()
+                .map(ProductReponseDTO::new)
+                .toList();
     }
 
     @Override
     public List<ListProductMechartReponseDTO> getOrderCustomerFull(Authentication authentication) {
-        String gmail = authentication.getName();
-        User user = userRepository.findByGmail(gmail).orElseThrow(() -> new RuntimeException("User not found"));
-        Merchant merchant = merchantRepository.findByUserId(user.getId()).orElseThrow(() -> new RuntimeException("Merchant not found"));
-        return productRepository.getOrderCustomerFull(merchant.getId())
-                .stream()
+        Merchant merchant = getMerchantFromAuth(authentication);
+        return productRepository.getOrderCustomerFull(merchant.getId()).stream()
                 .map(view -> new ListProductMechartReponseDTO(
-                        view.getOrderCode(),
-                        view.getCreatedAt(),
-                        view.getFullName(),
-                        view.getPhone(),
-                        view.getProductName(),
-                        view.getType(),
-                        view.getAdditionalServices(),
-                        view.getAddress(),
-                        view.getQuantity(),
-                        view.getPrice()
+                        view.getOrderCode(), view.getCreatedAt(), view.getFullName(),
+                        view.getPhone(), view.getProductName(), view.getType(),
+                        view.getAdditionalServices(), view.getAddress(),
+                        view.getQuantity(), view.getPrice()
                 ))
                 .toList();
     }
 
-
     @Override
     public MerchantDashboardResponseDTO getMerchantDashboard(Authentication authentication, MerchantDashboardRequestDTO request) {
-        String email = authentication.getName();
-        User user = userRepository.findByGmail(email).orElseThrow(() -> new ResourceNotFoundException("User not found: " + email));
-        Merchant merchant = merchantRepository.findByUserId(user.getId()).orElseThrow(() -> new ResourceNotFoundException("Bạn chưa đăng ký profile Merchant"));
-        LocalDateTime finalStart;
-        LocalDateTime finalEnd;
+        Merchant merchant = getMerchantFromAuth(authentication);
 
-        if (request == null || (request.getStartDate() == null && request.getEndDate() == null)) {
-            finalStart = LocalDateTime.of(2000, 1, 1, 0, 0);
-            finalEnd = LocalDateTime.now().plusYears(100);
-        } else {
-            finalStart = (request.getStartDate() != null) ? request.getStartDate() : LocalDateTime.of(1970, 1, 1, 0, 0);
-            finalEnd = (request.getEndDate() != null) ? request.getEndDate() : LocalDateTime.now().plusYears(100);
-        }
-        MerchantDashboardView view = productRepository.getMerchantDashboard(
-                merchant.getId(),
-                finalStart,
-                finalEnd
-        );
+        LocalDateTime start = (request == null || request.getStartDate() == null)
+                ? LocalDateTime.of(2000, 1, 1, 0, 0) : request.getStartDate();
+        LocalDateTime end = (request == null || request.getEndDate() == null)
+                ? LocalDateTime.now().plusYears(100) : request.getEndDate();
+
+        MerchantDashboardView view = productRepository.getMerchantDashboard(merchant.getId(), start, end);
         return new MerchantDashboardResponseDTO(
                 view.getTotalRevenue() != null ? view.getTotalRevenue() : BigDecimal.ZERO,
                 view.getTotalCustomers() != null ? view.getTotalCustomers() : 0L,
@@ -159,31 +140,25 @@ public class ProductServicelmpl implements ProductService {
 
     @Override
     public List<ProductReponseDTO> getMechant(Authentication authentication) {
-        String gmail = authentication.getName();
-        User user = userRepository.findByGmail(gmail).orElseThrow(() -> new RuntimeException("User not found"));
-        Merchant merchant = merchantRepository.findByUserId(user.getId()).orElseThrow(() -> new RuntimeException("Merchant not found"));
-        return  productRepository.findByMerchantId(merchant.getId()).stream().map(product -> {
+        Merchant merchant = getMerchantFromAuth(authentication);
+        return productRepository.findByMerchantId(merchant.getId()).stream().map(product -> {
             ProductReponseDTO dto = new ProductReponseDTO(product);
             if (product.getImg() != null && product.getImg().matches("\\d+")) {
-                dataSourceRepository.findById(Long.valueOf(product.getImg())).ifPresent(ds -> {
-                    dto.setImg(ds.getImageUrl());
-                });
+                dataSourceRepository.findById(Long.valueOf(product.getImg()))
+                        .ifPresent(ds -> dto.setImg(ds.getImageUrl()));
             }
             return dto;
         }).toList();
     }
 
-    public List<ProductStatisticResponse> getProductStatistic(Long productId) {
-
-        List<ProductStatisticDTO> data = productRepository.findProductStatistic(productId);
-
-        return data.stream().map(view -> new ProductStatisticResponse(
-                view.getProductId(),
-                view.getProductName(),
-                view.getAdditionalServices(),
-                view.getTotalCustomers(),
-                view.getTotalOrders(),
-                view.getTotalRevenue()
-        )).toList();
+    @Override
+    public List<ProductStatisticResponse> getProductStatistic(Authentication authentication) {
+        Merchant merchant = getMerchantFromAuth(authentication);
+        return productRepository.findProductStatistic(merchant.getId()).stream()
+                .map(view -> new ProductStatisticResponse(
+                        view.getProductId(), view.getProductName(), view.getAdditionalServices(),
+                        view.getTotalCustomers(), view.getTotalOrders(), view.getTotalRevenue()
+                ))
+                .toList();
     }
 }

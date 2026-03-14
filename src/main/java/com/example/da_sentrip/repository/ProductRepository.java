@@ -88,21 +88,21 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findByMerchantId(Long merchantId);
 
     @Query(value = """
-        SELECT
-            p.ID AS productId,
-            p.PRODUCT_NAME AS productName,
-            p.ADDITIONAL_SERVICES AS additionalServices,
-            COUNT(DISTINCT o.USER_ID) AS totalCustomers,
-            COUNT(DISTINCT o.ID) AS totalOrders,
-            SUM(o.TOTAL_AMOUNT) AS totalRevenue
-        FROM ORDER_ITEMS oi
-        JOIN PRODUCTS p ON p.ID = oi.PRODUCT_ID
-        JOIN ORDERS o ON o.ID = oi.ORDER_ID
-        WHERE oi.PRODUCT_ID = :productId
-        GROUP BY
-            p.ID,
-            p.PRODUCT_NAME,
-            p.ADDITIONAL_SERVICES
-        """, nativeQuery = true)
-    List<ProductStatisticDTO> findProductStatistic(@Param("productId") Long productId);
+    SELECT
+        p.ID AS productId,
+        p.PRODUCT_NAME AS productName,
+        p.ADDITIONAL_SERVICES AS additionalServices,
+        COUNT(DISTINCT o.USER_ID) AS totalCustomers,
+        COUNT(DISTINCT o.ID) AS totalOrders,
+        SUM(o.TOTAL_AMOUNT) AS totalRevenue
+    FROM PRODUCTS p
+    JOIN ORDER_ITEMS oi ON oi.PRODUCT_ID = p.ID
+    JOIN ORDERS o ON o.ID = oi.ORDER_ID
+    WHERE p.MERCHANT_ID = :merchantId
+    GROUP BY
+        p.ID,
+        p.PRODUCT_NAME,
+        p.ADDITIONAL_SERVICES
+    """, nativeQuery = true)
+    List<ProductStatisticDTO> findProductStatistic(@Param("merchantId") Long merchantId);
 }

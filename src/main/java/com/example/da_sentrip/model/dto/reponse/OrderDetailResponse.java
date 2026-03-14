@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class OrderDetailResponse {
     private String orderCode;
-    private String fullNameCustomer;
+    private String fullName;
     private String cccd;
     private String phone;
     private String address;
@@ -28,5 +28,5 @@ public class OrderDetailResponse {
     private BigDecimal paymentAmount;
     private LocalDateTime paidAt;
     private String productNames;
-    private String quantities;
+    private String quantitie;
 }

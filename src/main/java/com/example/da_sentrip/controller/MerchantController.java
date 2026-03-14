@@ -102,9 +102,9 @@ public class MerchantController  {
     public ResponseEntity<OrderDetailResponse> getOrderDetail(@PathVariable String orderCode) {
         return ResponseEntity.ok(orderService.getOrderDetail(orderCode));
     }
-    @GetMapping("/statistics/{productId}")
-    public ResponseEntity<List<ProductStatisticResponse>> getProductStatistic(@PathVariable Long productId) {
-        return ResponseEntity.ok(productService.getProductStatistic(productId));
+    @GetMapping("/statistics")
+    public ResponseEntity<List<ProductStatisticResponse>> getProductStatistic(Authentication authentication) {
+        return ResponseEntity.ok(productService.getProductStatistic(authentication));
     }
 
 }

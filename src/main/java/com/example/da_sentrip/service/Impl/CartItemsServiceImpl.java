@@ -12,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -28,29 +29,32 @@ public class CartItemsServiceImpl implements CartItemsService {
 
     @Override
     public CartItemsDTO add(Authentication authentication, AddToCartRequest request) {
+        User user = getUser(authentication);
+        Product product = productRepository.findById(request.getProductId())
+                .orElseThrow(() -> new RuntimeException("Product not found"));
 
-        String gmail = authentication.getName();
-        User user = userRepository.findByGmail(gmail).orElseThrow(() -> new RuntimeException("User not found"));
-        Product product = productRepository.findById(request.getProductId()).orElseThrow(() -> new RuntimeException("Product not found"));
-        Carts cart = cartsRepository.findByUserId(user.getId()).orElse(null);
-        if (cart == null) {
-            cart = new Carts();
-            cart.setUserId(user.getId());
-            cart.setCreatedAt(LocalDateTime.now());
-            cart = cartsRepository.save(cart);
-        }
+        Carts cart = cartsRepository.findByUserId(user.getId()).orElseGet(() -> {
+            Carts c = new Carts();
+            c.setUserId(user.getId());
+            c.setCreatedAt(LocalDateTime.now());
+            return cartsRepository.save(c);
+        });
 
         BigDecimal cartId = BigDecimal.valueOf(cart.getId());
-        CartItems cartItems = cartItemsRepository.findByCartIdAndProductId_Id(cartId, request.getProductId()).orElse(null);
-        if (cartItems != null) {
-            cartItems.setQuantity(cartItems.getQuantity().add(BigDecimal.valueOf(request.getQuantity())));
-        } else {
-            cartItems = new CartItems();
-            cartItems.setCartId(cartId);
-            cartItems.setProductId(product);
-            cartItems.setQuantity(BigDecimal.valueOf(request.getQuantity()));
-            cartItems.setPrice(product.getPrice().multiply(BigDecimal.valueOf(request.getQuantity())));
-        }
+        CartItems cartItems = cartItemsRepository.findByCartIdAndProductId_Id(cartId, request.getProductId())
+                .map(existing -> {
+                    existing.setQuantity(existing.getQuantity().add(BigDecimal.valueOf(request.getQuantity())));
+                    return existing;
+                })
+                .orElseGet(() -> {
+                    CartItems c = new CartItems();
+                    c.setCartId(cartId);
+                    c.setProductId(product);
+                    c.setQuantity(BigDecimal.valueOf(request.getQuantity()));
+                    c.setPrice(product.getPrice().multiply(BigDecimal.valueOf(request.getQuantity())));
+                    return c;
+                });
+
         CartItems saved = cartItemsRepository.save(cartItems);
         CartItemsDTO dto = new CartItemsDTO();
         dto.setId(saved.getId());
@@ -63,43 +67,39 @@ public class CartItemsServiceImpl implements CartItemsService {
 
     @Override
     public String delete(Long cartItemId) {
-        CartItems cartItems = cartItemsRepository.findById(cartItemId).orElseThrow(() -> new BadCredentialsException("Order code not found in shopping cart"));
-        cartItemsRepository.delete(cartItems);
+        CartItems item = cartItemsRepository.findById(cartItemId)
+                .orElseThrow(() -> new BadCredentialsException("Cart item not found"));
+        cartItemsRepository.delete(item);
         return "Delete cart item successfully";
     }
 
     @Override
     public List<CartDetailResponseDTO> getCart(Authentication authentication) {
-        String gmail = authentication.getName();
-        User user = userRepository.findByGmail(gmail)
+        User user = getUser(authentication);
+        Optional<Carts> cartOpt = cartsRepository.findByUserId(user.getId());
+        if (cartOpt.isEmpty()) return Collections.emptyList();
+
+        return cartItemsRepository.findByCartId(BigDecimal.valueOf(cartOpt.get().getId())).stream()
+                .map(item -> {
+                    Product product = item.getProductId();
+                    CartDetailResponseDTO dto = new CartDetailResponseDTO();
+                    dto.setCartItemId(item.getId());
+                    dto.setProductId(product.getId());
+                    dto.setProductName(product.getProductName());
+                    dto.setPrice(String.valueOf(product.getPrice()));
+                    dto.setQuantity(item.getQuantity());
+                    if (product.getImg() != null && product.getImg().matches("\\d+"))
+                        dataSourceRepository.findById(Long.valueOf(product.getImg()))
+                                .ifPresent(ds -> dto.setImg(ds.getImageUrl()));
+                    else
+                        dto.setImg(product.getImg());
+                    return dto;
+                })
+                .toList();
+    }
+
+    private User getUser(Authentication authentication) {
+        return userRepository.findByGmail(authentication.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
-
-        Optional<Carts> cartOptional = cartsRepository.findByUserId(user.getId());
-
-        if (cartOptional.isEmpty()) {
-            return null;
-        }
-
-        Carts cart = cartOptional.get();
-        List<CartItems> cartItemsList = cartItemsRepository.findByCartId(BigDecimal.valueOf(cart.getId()));
-        return cartItemsList.stream().map(item -> {
-            Product product = item.getProductId();
-            CartDetailResponseDTO dto = new CartDetailResponseDTO();
-
-            if (product.getImg() != null && product.getImg().matches("\\d+")) {
-                dataSourceRepository.findById(Long.valueOf(product.getImg()))
-                        .ifPresent(ds -> dto.setImg(ds.getImageUrl()));
-            } else {
-                dto.setImg(product.getImg());
-            }
-
-            dto.setCartItemId(item.getId());
-            dto.setProductId(product.getId());
-            dto.setProductName(product.getProductName());
-            dto.setPrice(String.valueOf(product.getPrice()));
-            dto.setQuantity(item.getQuantity());
-
-            return dto;
-        }).collect(Collectors.toList());
     }
 }
