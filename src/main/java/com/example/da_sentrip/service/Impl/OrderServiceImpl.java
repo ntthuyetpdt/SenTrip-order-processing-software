@@ -136,7 +136,7 @@ public class OrderServiceImpl implements OrderService {
 
         return OrderDetailResponse.builder()
                 .orderCode(data.getOrderCode())
-                .fullNameCustomer(data.getFullNameCustomer())
+                .fullName(data.getFullNameCustomer())
                 .cccd(data.getCccd())
                 .phone(data.getPhone())
                 .address(data.getAddress())
@@ -150,7 +150,7 @@ public class OrderServiceImpl implements OrderService {
                 .paymentAmount(data.getPaymentAmount())
                 .paidAt(data.getPaidAt())
                 .productNames(data.getProductNames())
-                .quantities(data.getQuantities())
+                .quantitie(data.getQuantities())
                 .build();
     }
 
