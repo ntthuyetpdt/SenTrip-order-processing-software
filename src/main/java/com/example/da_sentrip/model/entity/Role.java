@@ -1,11 +1,10 @@
 package com.example.da_sentrip.model.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import java.util.ArrayList;
+import java.util.List;
 
 @Setter
 @Getter
@@ -14,12 +13,15 @@ import lombok.Setter;
 public class Role {
 
     @Id
-    @Column(name="ID")
+    @Column(name = "ID")
     private Long id;
 
-    @Column(name="ROLE_CODE")
+    @Column(name = "ROLE_CODE")
     private Integer roleCode;
 
     @Column(name = "ROLE_NAME")
     private String roleName;
+
+    @OneToMany(mappedBy = "role", fetch = FetchType.EAGER)
+    private List<RolePermission> rolePermissions = new ArrayList<>();
 }

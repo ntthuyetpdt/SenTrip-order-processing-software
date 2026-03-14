@@ -2,6 +2,7 @@ package com.example.da_sentrip.security;
 
 import com.example.da_sentrip.model.entity.User;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -34,6 +35,7 @@ public class JwtUtil {
                 .signWith(signingKey)
                 .compact();
     }
+
     public Claims getClaims(String token) {
         return Jwts.parser()
                 .verifyWith((SecretKey) signingKey)
@@ -41,10 +43,13 @@ public class JwtUtil {
                 .parseSignedClaims(token)
                 .getPayload();
     }
+
     public boolean validateToken(String token) {
         try {
             getClaims(token);
             return true;
+        } catch (ExpiredJwtException e) {
+            throw e;
         } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
@@ -53,8 +58,8 @@ public class JwtUtil {
     public String getGmailFromToken(String token) {
         return getClaims(token).getSubject();
     }
+
     public Long getUserIdFromToken(String token) {
-        Claims claims = getClaims(token);
-        return claims.get("userId", Long.class);
+        return getClaims(token).get("userId", Long.class);
     }
 }

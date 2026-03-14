@@ -21,36 +21,29 @@ public class MediaStorageService {
     public String uploadMedia(MultipartFile file) {
         try {
             String contentType = file.getContentType();
-            if (contentType == null ||
-                    (!contentType.startsWith("image") && !contentType.startsWith("video"))) {
+            if (contentType == null || (!contentType.startsWith("image") && !contentType.startsWith("video")))
                 throw new RuntimeException("Invalid media type");
-            }
 
             boolean isImage = contentType.startsWith("image");
+            String type = isImage ? "image" : "video";
 
             DataSource dataSource = new DataSource();
             dataSource.setMediaType(isImage ? "IMAGE" : "VIDEO");
             dataSource.setData(isImage ? file.getBytes() : null);
-
             dataSource = dataSourceRepository.save(dataSource);
 
-            String publicId = (isImage ? "image_" : "video_") + dataSource.getId();
-
-            Map<?, ?> result = cloudinary.uploader().upload(
-                    file.getBytes(),
-                    ObjectUtils.asMap(
-                            "folder", isImage ? "images" : "videos",
-                            "public_id", publicId,
-                            "resource_type", isImage ? "image" : "video"
-                    )
-            );
+            String publicId = type + "_" + dataSource.getId();
+            Map<?, ?> result = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
+                    "folder", type + "s",
+                    "public_id", publicId,
+                    "resource_type", type
+            ));
 
             dataSource.setPublicId(publicId);
             dataSource.setImageUrl(result.get("secure_url").toString());
             dataSourceRepository.save(dataSource);
 
             return String.valueOf(dataSource.getId());
-
         } catch (Exception e) {
             throw new RuntimeException("Upload media failed", e);
         }
@@ -60,21 +53,15 @@ public class MediaStorageService {
     public void deleteMedia(Long dataSourceId) {
         DataSource dataSource = dataSourceRepository.findById(dataSourceId)
                 .orElseThrow(() -> new RuntimeException("DataSource not found"));
-
         try {
             if (dataSource.getPublicId() != null) {
-                cloudinary.uploader().destroy(
-                        dataSource.getPublicId(),
-                        ObjectUtils.asMap(
-                                "resource_type",
-                                "VIDEO".equals(dataSource.getMediaType()) ? "video" : "image"
-                        )
-                );
+                cloudinary.uploader().destroy(dataSource.getPublicId(), ObjectUtils.asMap(
+                        "resource_type", "VIDEO".equals(dataSource.getMediaType()) ? "video" : "image"
+                ));
             }
         } catch (Exception e) {
             throw new RuntimeException("Delete media failed", e);
         }
-
         dataSourceRepository.delete(dataSource);
     }
 }

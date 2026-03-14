@@ -5,39 +5,27 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
-
-
 public class CloudinaryPDF {
-    private final Cloudinary cloudinary;
 
+    private final Cloudinary cloudinary;
 
     public String uploadPdf(byte[] fileBytes, String fileName) {
         try {
-            String publicId = fileName.replace(".pdf", "");
+            Map<?, ?> result = cloudinary.uploader().upload(fileBytes, Map.of(
+                    "resource_type", "raw",
+                    "folder", "invoices",
+                    "public_id", fileName.replace(".pdf", ""),
+                    "format", "pdf"
+            ));
 
-            Map<?, ?> uploadResult = cloudinary.uploader().upload(
-                    fileBytes,
-                    Map.of(
-                            "resource_type", "raw",
-                            "folder", "invoices",
-                            "public_id", publicId,
-                            "format", "pdf"
-                    )
-            );
+            String url = (String) Optional.ofNullable(result.get("secure_url"))
+                    .orElseThrow(() -> new RuntimeException("Cloudinary không trả về secure_url"));
 
-            Object secureUrl = uploadResult.get("secure_url");
-            if (secureUrl == null) {
-                throw new RuntimeException("Cloudinary không trả về secure_url");
-            }
-
-            String url = secureUrl.toString();
-            if (!url.endsWith(".pdf")) {
-                url = url + ".pdf";
-            }
-
-            return url;
+            return url.endsWith(".pdf") ? url : url + ".pdf";
 
         } catch (IOException e) {
             throw new RuntimeException("Upload PDF to Cloudinary failed: " + e.getMessage(), e);

@@ -1,20 +1,17 @@
 package com.example.da_sentrip.controller;
 
-import com.example.da_sentrip.model.SuccessResponse;
-import com.example.da_sentrip.model.dto.ProductDTO;
-import com.example.da_sentrip.model.dto.reponse.ListProductMechartReponseDTO;
-import com.example.da_sentrip.model.dto.reponse.ProductReponseDTO;
 import com.example.da_sentrip.model.dto.reponse.ResponseDTO;
 import com.example.da_sentrip.model.dto.request.ProductRequestDTO;
 import com.example.da_sentrip.service.ProductService;
 import com.example.da_sentrip.utils.Constants;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import java.util.List;
 
 @RestController
 @RequestMapping("/product")
@@ -23,93 +20,57 @@ public class ProductController {
 
     private final ProductService productService;
 
-    @GetMapping("/viewproduct")
-    public SuccessResponse<?> getAll() {
-        List<ProductReponseDTO> products = productService.getAll();
-        return new SuccessResponse<>(Constants.HTTP_STATUS.SUCCESS,
-                "view product success",
-                products);
+
+    @GetMapping
+    @PreAuthorize("hasAnyAuthority('CUSTOMER_VIEW_PRODUCT')")
+    public ResponseEntity<ResponseDTO> getAll() {
+        return ResponseEntity.ok(ResponseDTO.builder()
+                .status("ok").code(Constants.HTTP_STATUS.SUCCESS)
+                .message("Get all success").data(productService.getAll()).build());
     }
 
-    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public SuccessResponse<?> create(
-            @RequestPart(value = "request", required = false) ProductRequestDTO request,
-            @RequestPart(value = "img", required = false) MultipartFile img,
+    @PostMapping(value = "create",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAnyAuthority('MERCHANT_CREATE_PRODUCT')")
+    public ResponseEntity<ResponseDTO> create(
+            @RequestPart(required = false) ProductRequestDTO request,
+            @RequestPart(required = false) MultipartFile img,
             Authentication authentication) {
-        try {
-            productService.create( request, img, authentication);
-            return new SuccessResponse<>(200, "create success", null);
-        } catch (Exception ex) {
-            return new SuccessResponse<>(400, "create failed: " + ex.getMessage(), null);
-        }
+        productService.create(request, img, authentication);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseDTO.builder()
+                .status("ok").code(Constants.HTTP_STATUS.CREATED)
+                .message("Create success").build());
     }
 
-    @PostMapping(value = "/update/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public SuccessResponse<?> update(
+    @PostMapping(value = "update/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAnyAuthority('MERCHANT_UPDATE_PRODUCT')")
+    public ResponseEntity<ResponseDTO> update(
             @PathVariable Long id,
-            @RequestPart(value = "request") ProductRequestDTO request,
-            @RequestPart(value = "img", required = false) MultipartFile img,
+            @RequestPart ProductRequestDTO request,
+            @RequestPart(required = false) MultipartFile img,
             Authentication authentication) {
-        try {
-            productService.update( id,request, img, authentication);
-            return new SuccessResponse<>(200, "update success", null);
-        } catch (Exception ex) {
-            return new SuccessResponse<>(400, "Update failed: " + ex.getMessage(), null);
-        }
+        productService.update(id, request, img, authentication);
+        return ResponseEntity.ok(ResponseDTO.builder()
+                .status("ok").code(Constants.HTTP_STATUS.SUCCESS)
+                .message("Update success").build());
     }
 
-    @PostMapping("/delete/{id}")
+    @DeleteMapping("delete/{id}")
+    @PreAuthorize("hasAnyAuthority('MERCHANT_DELETE_PRODUCT')")
     public ResponseEntity<ResponseDTO> delete(@PathVariable Long id) {
         productService.delete(id);
-        try {
-            return ResponseEntity.ok(ResponseDTO.builder()
-                    .status("ok")
-                    .code(Constants.HTTP_STATUS.SUCCESS)
-                    .message("delete success")
-                    .build()
-            );
-        }catch (Exception ex){
-            return ResponseEntity.ok(ResponseDTO.builder()
-                    .status("ok")
-                    .code(Constants.HTTP_STATUS.NOT_FOUND)
-                    .message("delete failed")
-                    .build()
-            );
-        }
+        return ResponseEntity.ok(ResponseDTO.builder()
+                .status("ok").code(Constants.HTTP_STATUS.SUCCESS)
+                .message("Delete success").build());
     }
-
     @GetMapping("/search")
+    @PreAuthorize("hasAnyAuthority('CUSTOMER_SEARCH_PRODUCT','MERCHANT_SEARCH_PRODUCT')")
     public ResponseEntity<ResponseDTO> search(
             @RequestParam(required = false) String productName,
             @RequestParam(required = false) String price,
-            @RequestParam(required = false) String address
-    ) {
-        List<ProductReponseDTO> view = productService.search(productName, price, address);
-        try {
-            return ResponseEntity.ok(ResponseDTO.builder()
-                    .status("ok")
-                    .code(Constants.HTTP_STATUS.SUCCESS)
-                    .message("search success")
-                    .data(view)
-                    .build()
-            );
-        }catch (Exception ex){
-            return ResponseEntity.ok(ResponseDTO.builder()
-                    .status("ok")
-                    .code(Constants.HTTP_STATUS.NOT_FOUND)
-                    .message("search failed")
-                    .build()
-            );
-        }
+            @RequestParam(required = false) String address) {
+        return ResponseEntity.ok(ResponseDTO.builder()
+                .status("ok").code(Constants.HTTP_STATUS.SUCCESS)
+                .message("Search success").data(productService.search(productName, price, address)).build());
+    }
 
-    }
-    @GetMapping("/getOderCustome")
-    public SuccessResponse<?> getMerchantOrders(Authentication authentication) {
-        List<ListProductMechartReponseDTO> data = productService.getOrderCustomerFull(authentication);
-        return new SuccessResponse<>(
-                Constants.HTTP_STATUS.SUCCESS,
-                "view success",
-                data
-        );
-    }
 }

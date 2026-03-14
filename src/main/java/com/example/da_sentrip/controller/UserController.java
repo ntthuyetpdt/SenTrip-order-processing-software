@@ -1,82 +1,49 @@
 package com.example.da_sentrip.controller;
 
 import com.example.da_sentrip.service.UserService;
-import com.example.da_sentrip.model.SuccessResponse;
-import com.example.da_sentrip.model.dto.reponse.ProfileResponseDTO;
+
 import com.example.da_sentrip.model.dto.reponse.ResponseDTO;
 import com.example.da_sentrip.model.dto.request.UserRequestDTO;
-import com.example.da_sentrip.model.entity.User;
 import com.example.da_sentrip.security.JwtUtil;
 import com.example.da_sentrip.utils.Constants;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor
 public class UserController {
+
     private final UserService userService;
     private final JwtUtil jwtUtil;
 
-    @PostMapping("/create")
-    public ResponseEntity<?> add(@RequestBody UserRequestDTO request){
-        userService.add( request);
-            try {
-                return ResponseEntity.ok(ResponseDTO.builder()
-                        .status("ok")
-                        .code(Constants.HTTP_STATUS.CREATED)
-                        .message("create success")
-                        .build()
-                );
-            }catch (Exception ex) {
-                return ResponseEntity.ok(ResponseDTO.builder()
-                        .status("ok")
-                        .code(Constants.HTTP_STATUS.FORBIDDEN)
-                        .message("create failed")
-                        .build()
-                );
-            }
-
+    @PostMapping
+    public ResponseEntity<ResponseDTO> add(@RequestBody UserRequestDTO request) {
+        userService.add(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseDTO.builder()
+                .status("ok").code(Constants.HTTP_STATUS.CREATED)
+                .message("Create success").build());
     }
+
     @GetMapping("/profile")
-    public SuccessResponse<ProfileResponseDTO> getProfile(@RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.substring(7);
-        String email = jwtUtil.getGmailFromToken(token);
-        return new SuccessResponse<>(
-                Constants.HTTP_STATUS.SUCCESS,
-                "Get profile success",
-                userService.getProfile(email)
-        );
+    public ResponseEntity<ResponseDTO> getProfile(Authentication authentication) {
+        return ResponseEntity.ok(ResponseDTO.builder()
+                .status("ok").code(Constants.HTTP_STATUS.SUCCESS)
+                .message("Get profile success")
+                .data(userService.getProfile(authentication.getName())).build());
     }
 
     @GetMapping("/menu")
     public ResponseEntity<ResponseDTO> getMenu(
-            @RequestHeader("Authorization") String authHeader,
+            Authentication authentication,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size
-    ) {
-        String token = authHeader.substring(7);
-        String email = jwtUtil.getGmailFromToken(token);
-        User user= (User) userService.getMenu(email, page, size);
-        try {
-            return ResponseEntity.ok(ResponseDTO.builder()
-                    .status("ok")
-                    .code(Constants.HTTP_STATUS.SUCCESS)
-                    .message("view menuu success")
-                    .data(user)
-                    .build()
-            );
-        }catch (Exception ex){
-            return ResponseEntity.ok(ResponseDTO.builder()
-                    .status("ok")
-                    .code(Constants.HTTP_STATUS.UNAUTHORIZED)
-                    .message("view menuu failed")
-                    .build()
-            );
-        }
-
+            @RequestParam(defaultValue = "5") int size) {
+        return ResponseEntity.ok(ResponseDTO.builder()
+                .status("ok").code(Constants.HTTP_STATUS.SUCCESS)
+                .message("Get menu success")
+                .data(userService.getMenu(authentication.getName(), page, size)).build());
     }
-
-
 }
