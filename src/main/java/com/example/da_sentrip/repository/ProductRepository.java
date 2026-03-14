@@ -48,28 +48,19 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<OrderCustomerView> getOrderCustomerFull(@Param("MERCHANT_ID") Long merchantId);
 
     @Query(value = """
-    SELECT 
+    SELECT
         COALESCE(SUM(T.REVENUE), 0) AS totalRevenue,
         COUNT(DISTINCT T.USER_ID) AS totalCustomers,
         COUNT(DISTINCT T.ORDER_ID) AS totalOrders,
-        COUNT(DISTINCT CASE 
-            WHEN T.REVENUE > 0 THEN T.ORDER_ID 
-        END) AS successOrders,
-        COUNT(DISTINCT CASE 
-            WHEN T.ORDER_STATUS = 'CANCELLED' THEN T.ORDER_ID 
-        END) AS cancelledOrders,
-        COUNT(DISTINCT CASE 
-            WHEN T.REVENUE > 0 OR T.ORDER_STATUS = 'CANCELLED' THEN T.ORDER_ID 
-        END) AS successAndCancelledOrders
+        COUNT(DISTINCT CASE WHEN T.REVENUE > 0 THEN T.ORDER_ID END) AS successOrders,
+        COUNT(DISTINCT CASE WHEN T.ORDER_STATUS = 'CANCELLED' THEN T.ORDER_ID END) AS cancelledOrders,
+        COUNT(DISTINCT CASE WHEN T.REVENUE > 0 OR T.ORDER_STATUS = 'CANCELLED' THEN T.ORDER_ID END) AS successAndCancelledOrders
     FROM (
-        SELECT 
+        SELECT
             O.ID AS ORDER_ID,
             O.USER_ID,
             O.ORDER_STATUS,
-            MAX(CASE 
-                WHEN PY.PAYMENT_STATUS = 'SUCCESS' THEN PY.AMOUNT 
-                ELSE 0 
-            END) AS REVENUE
+            MAX(CASE WHEN PY.PAYMENT_STATUS = 'SUCCESS' THEN PY.AMOUNT ELSE 0 END) AS REVENUE
         FROM ORDERS O
         JOIN ORDER_ITEMS OI ON OI.ORDER_ID = O.ID
         JOIN PRODUCTS P ON P.ID = OI.PRODUCT_ID
@@ -78,13 +69,14 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
           AND O.CREATED_AT >= :startDate
           AND O.CREATED_AT < :endDate
         GROUP BY O.ID, O.USER_ID, O.ORDER_STATUS
-    ) 
+    ) AS T
     """, nativeQuery = true)
     MerchantDashboardView getMerchantDashboard(
             @Param("merchantId") Long merchantId,
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate
     );
+
     List<Product> findByMerchantId(Long merchantId);
 
     @Query(value = """
