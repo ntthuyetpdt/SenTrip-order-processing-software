@@ -54,7 +54,7 @@ public class ProductController {
                 .message("Update success").build());
     }
 
-    @DeleteMapping("delete/{id}")
+    @PostMapping("delete/{id}")
     @PreAuthorize("hasAnyAuthority('MERCHANT_DELETE_PRODUCT')")
     public ResponseEntity<ResponseDTO> delete(@PathVariable Long id) {
         productService.delete(id);
