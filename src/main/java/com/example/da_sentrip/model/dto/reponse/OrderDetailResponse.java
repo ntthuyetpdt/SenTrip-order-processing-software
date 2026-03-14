@@ -27,6 +27,6 @@ public class OrderDetailResponse {
     private String paymentCode;
     private BigDecimal paymentAmount;
     private LocalDateTime paidAt;
-    private String productNames;
-    private String quantitie;
+    private String productName;
+    private String quantity;
 }
