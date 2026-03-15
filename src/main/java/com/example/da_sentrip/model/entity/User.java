@@ -22,11 +22,10 @@ public class User {
     @Column(name = "PASSWORD", nullable = false)
     private String password;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ROLE", nullable = false)
     private Role role;
 
     @Column(name = "STATUS")
     private Status status;
-
 }

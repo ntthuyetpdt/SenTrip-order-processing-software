@@ -43,7 +43,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     VALUES 
     (:paymentId, :action, :oldStatus, :newStatus, :oldAmount, :newAmount, :performedBy, NOW())
     """, nativeQuery = true)
-    int insertLog(@Param("paymentId") Long paymentId,
+    int  insertLog(@Param("paymentId") Long paymentId,
                   @Param("action") String action,
                   @Param("oldStatus") String oldStatus,
                   @Param("newStatus") String newStatus,

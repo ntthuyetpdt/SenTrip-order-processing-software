@@ -45,63 +45,61 @@ public class UserServiceImpl implements UserService {
         String token = jwtUtil.generateToken(user);
         return new LoginReponseDTO(token);
     }
+
     @Transactional
     @Override
-    public User register(RegisterRequestDTO request) {
-        if (userRepository.findByGmail(request.getGmail()).isPresent()) {
+    public void register(RegisterRequestDTO request) {
+        if (userRepository.findByGmail(request.getGmail()).isPresent())
             throw new BadCredentialsException("Gmail already exists");
-        }
 
         Long roleId = request.getRole();
-        if (roleId == null || (!roleId.equals(4L) && !roleId.equals(5L))) {
+        if (roleId == null || (!roleId.equals(4L) && !roleId.equals(5L)))
             throw new IllegalArgumentException("Chỉ cho phép đăng ký CUSTOMER(4) hoặc MERCHANT(5)");
-        }
 
-        Role role = roleRepository.findById(roleId).orElseThrow(() -> new RuntimeException("Role not found"));
+        Role role = roleRepository.findById(roleId)
+                .orElseThrow(() -> new RuntimeException("Role not found"));
+
         User user = new User();
         user.setGmail(request.getGmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setStatus(Status.ACTIVE);
         user.setRole(role);
-        User savedUser = userRepository.save(user);
+        User saved = userRepository.save(user);
+
         if (roleId.equals(4L)) {
             Customer customer = new Customer();
-            customer.setUser(savedUser);
+            customer.setUser(saved);
             customerRepository.save(customer);
-        }
-        if (roleId.equals(5L)) {
+        } else {
             Merchant merchant = new Merchant();
-            merchant.setUser(savedUser);
+            merchant.setUser(saved);
             merchantRepository.save(merchant);
         }
-
-        return savedUser;
     }
 
     @Transactional
     @Override
-    public User add(UserRequestDTO request) {
-
-        if (userRepository.findByGmail(request.getGmail()).isPresent()) {
+    public void add(UserRequestDTO request) {
+        if (userRepository.findByGmail(request.getGmail()).isPresent())
             throw new BadCredentialsException("Gmail already exists");
-        }
+
         Long roleId = Long.valueOf(request.getRole());
-        if (!roleId.equals(2L) && !roleId.equals(3L)) {
+        if (!roleId.equals(2L) && !roleId.equals(3L))
             throw new IllegalArgumentException("Role chỉ được phép là 2 hoặc 3");
-        }
-        Role role = roleRepository.findById(roleId).orElseThrow(() -> new RuntimeException("Role not found"));
-        User userAdd = new User();
-        userAdd.setGmail(request.getGmail());
-        userAdd.setPassword(passwordEncoder.encode("123456@Ab"));
-        userAdd.setRole(role);
-        userAdd.setStatus(Status.ACTIVE);
-        User savedUser = userRepository.save(userAdd);
-        if (roleId.equals(2L) || roleId.equals(3L)) {
-            Employee employee = new Employee();
-            employee.setUser(savedUser);
-            employeeRepository.save(employee);
-        }
-        return savedUser;
+
+        Role role = roleRepository.findById(roleId)
+                .orElseThrow(() -> new RuntimeException("Role not found"));
+
+        User user = new User();
+        user.setGmail(request.getGmail());
+        user.setPassword(passwordEncoder.encode("123456@Ab"));
+        user.setRole(role);
+        user.setStatus(Status.ACTIVE);
+        User saved = userRepository.save(user);
+
+        Employee employee = new Employee();
+        employee.setUser(saved);
+        employeeRepository.save(employee);
     }
 
     @Override

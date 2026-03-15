@@ -11,6 +11,7 @@ import com.example.da_sentrip.service.ProductService;
 import com.example.da_sentrip.utils.Constants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,92 +20,71 @@ import java.util.List;
 @RestController
 @RequestMapping("/merchant")
 @RequiredArgsConstructor
-public class MerchantController  {
+public class MerchantController {
+
     private final MerchantService merchantService;
     private final ProductService productService;
     private final OrderService orderService;
 
-    @GetMapping("/getAll")
-    public SuccessResponse<?> getAll(){
-        List<MerchantReponseDTO> user =merchantService.getAll();
-        return new SuccessResponse<>(
-                Constants.HTTP_STATUS.SUCCESS,
-                "view  success",
-                user
-        );
-    }
-    @PostMapping("/update/{id}")
-    public ResponseEntity<ResponseDTO> update(@PathVariable Long id, @ModelAttribute MerchantRequestDTO request, MultipartFile img) {
-        merchantService.update(id, request,img);
-        try {
-            return ResponseEntity.ok(ResponseDTO.builder()
-                    .status("ok")
-                    .code(Constants.HTTP_STATUS.SUCCESS)
-                    .message("Update  success")
-                    .build());
-        }catch (Exception ex) {
-            return ResponseEntity.ok(ResponseDTO.builder()
-                    .status("ok")
-                    .code(Constants.HTTP_STATUS.BAD_REQUEST)
-                    .message("Update failed")
-                    .build());
-        }
+    @GetMapping
+    public ResponseEntity<SuccessResponse<List<MerchantReponseDTO>>> getAll() {
+        return ResponseEntity.ok(new SuccessResponse<>(Constants.HTTP_STATUS.SUCCESS, "Get all success", merchantService.getAll()));
     }
 
-    @PostMapping("/delete/{id}")
+    @PostMapping("update/{id}")
+    @PreAuthorize("hasAnyAuthority('ADMIN_VIEW_INVOICE')")
+    public ResponseEntity<ResponseDTO> update(@PathVariable Long id, @ModelAttribute MerchantRequestDTO request, MultipartFile img) {
+        merchantService.update(id, request, img);
+        return ResponseEntity.ok(ResponseDTO.builder()
+                .status("ok").code(Constants.HTTP_STATUS.SUCCESS).message("Update success").build());
+    }
+
+    @PostMapping("delete/{id}")
+    @PreAuthorize("hasAnyAuthority('ADMIN_DELETE_MERCHANT')")
     public ResponseEntity<ResponseDTO> delete(@PathVariable Long id) {
         merchantService.delete(id);
-        try {
-            return ResponseEntity.ok(ResponseDTO.builder()
-                    .status("ok")
-                    .code(Constants.HTTP_STATUS.SUCCESS)
-                    .message("Delete  success")
-                    .build());
-        }catch (Exception ex) {
-            return ResponseEntity.ok(ResponseDTO.builder()
-                    .status("ok")
-                    .code(Constants.HTTP_STATUS.SUCCESS)
-                    .message("Delete failed")
-                    .build());
-        }
+        return ResponseEntity.ok(ResponseDTO.builder()
+                .status("ok").code(Constants.HTTP_STATUS.SUCCESS).message("Delete success").build());
     }
 
     @GetMapping("/search")
+    @PreAuthorize("hasAnyAuthority('ADMIN_SEARCH_MERCHANT')")
     public ResponseEntity<SuccessResponse<List<MerchantDTO>>> search(
             @RequestParam(required = false) String fullName,
             @RequestParam(required = false) String address,
             @RequestParam(required = false) String mnv) {
-        return ResponseEntity.ok(new SuccessResponse<>(
-                Constants.HTTP_STATUS.SUCCESS,
-                "Search  success",
-                merchantService.search(fullName, address, mnv))
-        );
+        return ResponseEntity.ok(new SuccessResponse<>(Constants.HTTP_STATUS.SUCCESS, "Search success", merchantService.search(fullName, address, mnv)));
     }
 
     @PostMapping("/dashboard")
+    @PreAuthorize("hasAnyAuthority('MERCHANT_DASHBOARD')")
     public ResponseEntity<MerchantDashboardResponseDTO> getDashboard(
             Authentication authentication,
-            @RequestBody(required = false) MerchantDashboardRequestDTO request
-    ) {
+            @RequestBody(required = false) MerchantDashboardRequestDTO request) {
         return ResponseEntity.ok(productService.getMerchantDashboard(authentication, request));
     }
 
-    @GetMapping("/getMechant")
-    public SuccessResponse<?> getMechant(Authentication authentication) {
-        List<ProductReponseDTO> data = productService.getMechant(authentication);
-        return new SuccessResponse<>(
-                Constants.HTTP_STATUS.SUCCESS,
-                "view success",
-                data
-        );
+    @GetMapping("/products")
+    @PreAuthorize("hasAnyAuthority('MERCHANT_VIEW_OWN')")
+    public ResponseEntity<SuccessResponse<List<ProductReponseDTO>>> getMerchantProducts(Authentication authentication) {
+        return ResponseEntity.ok(new SuccessResponse<>(Constants.HTTP_STATUS.SUCCESS, "Get products success", productService.getMechant(authentication)));
     }
-    @GetMapping("/DetailedSet/{orderCode}")
+    @GetMapping("/detail/{orderCode}")
+    @PreAuthorize("hasAnyAuthority('MERCHANT_VIEW_DETAILS')")
     public ResponseEntity<OrderDetailResponse> getOrderDetail(@PathVariable String orderCode) {
         return ResponseEntity.ok(orderService.getOrderDetail(orderCode));
     }
+
     @GetMapping("/statistics")
+    @PreAuthorize("hasAnyAuthority('MERCHANT_STATIC')")
     public ResponseEntity<List<ProductStatisticResponse>> getProductStatistic(Authentication authentication) {
         return ResponseEntity.ok(productService.getProductStatistic(authentication));
     }
-
+    @GetMapping("/orders")
+    @PreAuthorize("hasAnyAuthority('MERCHANT_REVENUE')")
+    public ResponseEntity<ResponseDTO> getMerchantOrders(Authentication authentication) {
+        return ResponseEntity.ok(ResponseDTO.builder()
+                .status("ok").code(Constants.HTTP_STATUS.SUCCESS)
+                .message("Get orders success").data(productService.getOrderCustomerFull(authentication)).build());
+    }
 }

@@ -13,10 +13,11 @@ import java.util.Optional;
 
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
     @Query(value = """
-        SELECT * FROM Customers E WHERE (:fullName IS NULL OR E.fullName LIKE CONCAT('%', :fullName, '%'))
-          AND (:address IS NULL OR E.address LIKE CONCAT('%', :address, '%'))
-          AND (:phone IS NULL OR E.phone LIKE CONCAT('%', :mnv, '%'))
-        """, nativeQuery = true)
+    SELECT * FROM CUSTOMERS E
+    WHERE (:fullName IS NULL OR E.FULL_NAME LIKE CONCAT('%', :fullName, '%'))
+      AND (:address IS NULL OR E.ADDRESS LIKE CONCAT('%', :address, '%'))
+      AND (:phone IS NULL OR E.PHONE LIKE CONCAT('%', :phone, '%'))
+    """, nativeQuery = true)
     List<Customer> findBySearch(
             @Param("fullName") String fullName,
             @Param("address") String address,

@@ -16,67 +16,78 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
+
 import java.util.Date;
 
-@ControllerAdvice//Xử lý exception toàn cục cho tất cả Controller
-@Slf4j //là annotation của Lombok, tự động tạo logger:
+@ControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     @Autowired
     private MessageTemplate messageTemplate;
 
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<?> handleNoResourceFound(NoResourceFoundException e, WebRequest request) {
+        log.error(e.toString());
+        ErrorDetail errorDetail = new ErrorDetail(new Date(), "Endpoint not found: " + e.getMessage(), "", request.getDescription(false));
+        return new ResponseEntity<>(errorDetail, HttpStatus.NOT_FOUND);
+    }
+
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<?> handleResourceNotFoundException(ResourceNotFoundException e, WebRequest request) {
         log.error(e.toString());
-        ErrorDetail errorDetail= new ErrorDetail( new Date() ,e.getMessage(),"",request.getDescription(false));
-        return new ResponseEntity<>(errorDetail, HttpStatus.NOT_FOUND);//Server không tìm thấy tài nguyên (resource) tương ứng với URL mà client yêu cầu.
+        ErrorDetail errorDetail = new ErrorDetail(new Date(), e.getMessage(), "", request.getDescription(false));
+        return new ResponseEntity<>(errorDetail, HttpStatus.NOT_FOUND);
     }
+
     @ExceptionHandler(EntityValidationException.class)
-    public ResponseEntity<?> EntityValidationException(EntityValidationException e, WebRequest request) {
-        log.error(e.toString());
-        ErrorDetail errorDetail= new ErrorDetail( new Date() ,e.getMessage(),"",request.getDescription(false));
-        return new ResponseEntity<>(errorDetail, HttpStatus.BAD_REQUEST);
-
-    }
-    @ExceptionHandler(PartialUpdateException.class)
-    public ResponseEntity<?> PartialUpdateException(PartialUpdateException e, WebRequest request) {
-        log.error(e.toString());
-        ErrorDetail errorDetail= new ErrorDetail( new Date() ,messageTemplate.message("error validation"),"",request.getDescription(false));
-        return new ResponseEntity<>(errorDetail, HttpStatus.BAD_REQUEST);//Server không hiểu hoặc không thể xử lý request do dữ liệu client gửi lên không hợp lệ.
-    }
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<?> globalExceptionHandler(Exception e, WebRequest request) {
-        log.error(e.toString());
-        ErrorDetail errorDetail= new ErrorDetail( new Date() ,messageTemplate.message("error.system"),"",request.getDescription(false));
-        return new ResponseEntity<>(errorDetail, HttpStatus.INTERNAL_SERVER_ERROR);// Server đã nhận request đúng, nhưng bị lỗi trong quá trình xử lý nên không trả về kết quả được.
-
-    }
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<?> HttpMessageNotReadableException(HttpMessageNotReadableException e, WebRequest request) {
-        log.error(e.toString());
-        ErrorDetail errorDetail = new ErrorDetail( new Date() ,messageTemplate.message("error.validation"),"",request.getDescription(false));
-        return new ResponseEntity<>(errorDetail, HttpStatus.METHOD_NOT_ALLOWED);// Server có endpoint đó, nhưng không cho phép HTTP method mà client đang dùng.
-    }
-    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity <?> httpRequestMethodNotSupportedException (HttpRequestMethodNotSupportedException e, WebRequest request) {
-        log.error(e.toString());
-        ErrorDetail errorDetail = new ErrorDetail( new Date() ,messageTemplate.message("error.system"),"",request.getDescription(false));
-        return new ResponseEntity<>(errorDetail, HttpStatus.METHOD_NOT_ALLOWED);
-    }
-    @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<?> handleBadCredentialsException(BadCredentialsException e, WebRequest request) {
-        log.error(e.toString());
-        ErrorDetail errorDetail = new ErrorDetail( new Date(), e.getMessage(), "", request.getDescription(false));
-        return new ResponseEntity<>(errorDetail, HttpStatus.UNAUTHORIZED);
-    }
-    @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<?> handleBadRequestException(BadRequestException e, WebRequest request) {
+    public ResponseEntity<?> handleEntityValidationException(EntityValidationException e, WebRequest request) {
         log.error(e.toString());
         ErrorDetail errorDetail = new ErrorDetail(new Date(), e.getMessage(), "", request.getDescription(false));
         return new ResponseEntity<>(errorDetail, HttpStatus.BAD_REQUEST);
     }
 
-}
+    @ExceptionHandler(PartialUpdateException.class)
+    public ResponseEntity<?> handlePartialUpdateException(PartialUpdateException e, WebRequest request) {
+        log.error(e.toString());
+        ErrorDetail errorDetail = new ErrorDetail(new Date(), messageTemplate.message("error.validation"), "", request.getDescription(false));
+        return new ResponseEntity<>(errorDetail, HttpStatus.BAD_REQUEST);
+    }
 
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<?> handleHttpMessageNotReadable(HttpMessageNotReadableException e, WebRequest request) {
+        log.error(e.toString());
+        ErrorDetail errorDetail = new ErrorDetail(new Date(), messageTemplate.message("error.validation"), "", request.getDescription(false));
+        return new ResponseEntity<>(errorDetail, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<?> handleMethodNotSupported(HttpRequestMethodNotSupportedException e, WebRequest request) {
+        log.error(e.toString());
+        ErrorDetail errorDetail = new ErrorDetail(new Date(), e.getMessage(), "", request.getDescription(false));
+        return new ResponseEntity<>(errorDetail, HttpStatus.METHOD_NOT_ALLOWED);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<?> handleBadCredentials(BadCredentialsException e, WebRequest request) {
+        log.error(e.toString());
+        ErrorDetail errorDetail = new ErrorDetail(new Date(), e.getMessage(), "", request.getDescription(false));
+        return new ResponseEntity<>(errorDetail, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<?> handleBadRequest(BadRequestException e, WebRequest request) {
+        log.error(e.toString());
+        ErrorDetail errorDetail = new ErrorDetail(new Date(), e.getMessage(), "", request.getDescription(false));
+        return new ResponseEntity<>(errorDetail, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<?> handleGlobalException(Exception e, WebRequest request) {
+        log.error(e.toString());
+        ErrorDetail errorDetail = new ErrorDetail(new Date(), messageTemplate.message("error.system"), "", request.getDescription(false));
+        return new ResponseEntity<>(errorDetail, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+}
