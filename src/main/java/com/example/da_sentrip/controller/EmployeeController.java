@@ -5,12 +5,14 @@ import com.example.da_sentrip.model.dto.EmployeeDTO;
 import com.example.da_sentrip.model.dto.reponse.EmployeeReponseDTO;
 import com.example.da_sentrip.model.dto.reponse.ResponseDTO;
 import com.example.da_sentrip.model.dto.request.EmployeeRequestDTO;
+import com.example.da_sentrip.model.dto.request.UpdateRoleDTO;
 import com.example.da_sentrip.service.EmployeeService;
 import com.example.da_sentrip.utils.Constants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
@@ -36,13 +38,26 @@ public class EmployeeController {
                 .status("ok").code(Constants.HTTP_STATUS.CREATED).message("Create success").build());
     }
 
-    @PostMapping("/update/{id}")
+    @PostMapping("/update/{id}/role")
     @PreAuthorize("hasAnyAuthority('ADMIN_UPDATE_EMPLOYEE')")
-    public ResponseEntity<ResponseDTO> update(@PathVariable Long id, @RequestBody EmployeeRequestDTO request,
-                                              @RequestParam(required = false) MultipartFile img) {
-        employeeService.update(id, request, img);
+    public ResponseEntity<ResponseDTO> updateRole(
+            @PathVariable Long id,
+            @RequestBody UpdateRoleDTO request,
+            Authentication authentication) {
+        employeeService.updateRole(id, request.getRole());
         return ResponseEntity.ok(ResponseDTO.builder()
-                .status("ok").code(Constants.HTTP_STATUS.SUCCESS).message("Update success").build());
+                .status("ok").code(Constants.HTTP_STATUS.SUCCESS).message("Update role success").build());
+    }
+
+    @PostMapping("/update/profile")
+    public ResponseEntity<ResponseDTO> updateProfile(
+            @RequestParam(required = false) MultipartFile img,
+            @RequestBody EmployeeRequestDTO request,
+            Authentication authentication) {
+        String gmail = authentication.getName();
+        employeeService.updateProfile(gmail, request, img);
+        return ResponseEntity.ok(ResponseDTO.builder()
+                .status("ok").code(Constants.HTTP_STATUS.SUCCESS).message("Update profile success").build());
     }
 
     @PostMapping("delete/{id}")

@@ -4,6 +4,7 @@ import com.example.da_sentrip.model.SuccessResponse;
 import com.example.da_sentrip.model.dto.OrderDTO;
 import com.example.da_sentrip.model.dto.reponse.*;
 import com.example.da_sentrip.model.dto.request.OrderRequestDTO;
+import com.example.da_sentrip.model.dto.request.UpdateOrderStatusDTO;
 import com.example.da_sentrip.service.OrderService;
 import com.example.da_sentrip.utils.Constants;
 import lombok.RequiredArgsConstructor;
@@ -66,4 +67,12 @@ public class OrderController {
                 .build());
     }
 
+    @PostMapping("/update/{orderCode}/status")
+    public ResponseEntity<String> updateOrderStatus(
+            @PathVariable String orderCode,
+            @RequestBody UpdateOrderStatusDTO request,
+            Authentication authentication) {
+        orderService.updateOrderStatus(orderCode, request.getOrderStatus());
+        return ResponseEntity.ok("Order status updated successfully");
+    }
 }

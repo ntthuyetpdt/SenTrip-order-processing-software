@@ -10,7 +10,7 @@ import java.util.List;
 
 @Service
 public interface MerchantService {
-    MerchantDTO update (Long id, MerchantRequestDTO request, MultipartFile img);
+    MerchantDTO update(String gmail, MerchantRequestDTO request, MultipartFile img);
     MerchantDTO delete (Long id);
     List<MerchantDTO> getdetailis(Long id);
     List<MerchantDTO> search(String merchantName, String address, String businessLicense);

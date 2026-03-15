@@ -2,12 +2,12 @@ package com.example.da_sentrip.repository;
 
 import com.example.da_sentrip.model.dto.reponse.view.MerchantDashboardView;
 import com.example.da_sentrip.model.dto.reponse.view.OrderCustomerView;
+import com.example.da_sentrip.model.dto.reponse.view.PaymentStatisticDTO;
 import com.example.da_sentrip.model.dto.reponse.view.ProductStatisticDTO;
 import com.example.da_sentrip.model.entity.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -97,4 +97,30 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
         p.ADDITIONAL_SERVICES
     """, nativeQuery = true)
     List<ProductStatisticDTO> findProductStatistic(@Param("merchantId") Long merchantId);
+    @Query(value = """
+        SELECT
+            p.ID AS productId,
+            p.PRODUCT_NAME AS productName,
+            p.ADDITIONAL_SERVICES AS additionalServices,
+            COUNT(DISTINCT o.USER_ID) AS totalCustomers,
+            COUNT(DISTINCT o.ID) AS totalOrders,
+            SUM(o.TOTAL_AMOUNT) AS totalRevenue
+        FROM PRODUCTS p
+                 JOIN ORDER_ITEMS oi ON oi.PRODUCT_ID = p.ID
+                 JOIN ORDERS o ON o.ID = oi.ORDER_ID
+        GROUP BY
+            p.ID,
+            p.PRODUCT_NAME,
+            p.ADDITIONAL_SERVICES
+        """, nativeQuery = true)
+    List<ProductStatisticDTO> findProductStatistic();
+
+    @Query(value = """
+        SELECT
+            COUNT(DISTINCT p.ID) AS totalTransactions,
+            SUM(p.AMOUNT) AS totalRevenue
+        FROM PAYMENTS p
+        WHERE p.PAYMENT_STATUS = 'SUCCESS'
+        """, nativeQuery = true)
+    PaymentStatisticDTO findPaymentStatistic();
 }

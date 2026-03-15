@@ -13,7 +13,7 @@ import java.util.List;
 
 @Service
 public interface CustomerService {
-    CustomerDTO update (Long id, CustomerRequestDTO request, MultipartFile img, Authentication authentication);
+    CustomerDTO update(String gmail, CustomerRequestDTO request, MultipartFile img);
     List<CustomerDTO> search(String fullName, String address, String phone);
     List<CustomerReponseDTO> getAll ( );
     List<TicketReponseDTO> getTicket (Authentication authentication);

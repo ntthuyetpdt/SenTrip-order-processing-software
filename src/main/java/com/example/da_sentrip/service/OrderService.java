@@ -17,4 +17,5 @@ public interface OrderService {
     List<OrderReponseDTO> getMyOrders(Authentication authentication);
     List<OderdetailReponseDTO> details (String  orderCode);
     OrderDetailResponse getOrderDetail(String orderCode);
+    void updateOrderStatus(String orderCode, String orderStatus);
 }

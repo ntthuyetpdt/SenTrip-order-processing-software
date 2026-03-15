@@ -1,5 +1,6 @@
 package com.example.da_sentrip.controller;
 
+import com.example.da_sentrip.model.dto.reponse.PaymentStatisticResponse;
 import com.example.da_sentrip.model.dto.reponse.ResponseDTO;
 import com.example.da_sentrip.model.dto.request.PaymentRequestDTO;
 import com.example.da_sentrip.service.PaymentService;
@@ -11,7 +12,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -51,5 +55,13 @@ public class PaymentController {
                 .message("Payment confirmed")
                 .data(paymentService.confirmPaymentByUrl(url))
                 .build());
+    }
+    @GetMapping("/statistic")
+    public ResponseEntity<?> getPaymentStatistic(Authentication authentication) {
+        PaymentStatisticResponse data = paymentService.getPaymentStatistic();
+        return ResponseEntity.ok(Map.of(
+                "message", "View success",
+                "data", data
+        ));
     }
 }

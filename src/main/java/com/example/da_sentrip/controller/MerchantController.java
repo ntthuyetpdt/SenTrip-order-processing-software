@@ -28,23 +28,40 @@ public class MerchantController {
 
     @GetMapping
     public ResponseEntity<SuccessResponse<List<MerchantReponseDTO>>> getAll() {
-        return ResponseEntity.ok(new SuccessResponse<>(Constants.HTTP_STATUS.SUCCESS, "Get all success", merchantService.getAll()));
+        try {
+            return ResponseEntity.ok(new SuccessResponse<>(Constants.HTTP_STATUS.SUCCESS, "Get all success", merchantService.getAll()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new SuccessResponse<>(Constants.HTTP_STATUS.BAD_REQUEST, "Lấy danh sách thất bại: " + e.getMessage(), null));
+        }
     }
 
-    @PostMapping("update/{id}")
-    @PreAuthorize("hasAnyAuthority('ADMIN_VIEW_INVOICE')")
-    public ResponseEntity<ResponseDTO> update(@PathVariable Long id, @ModelAttribute MerchantRequestDTO request, MultipartFile img) {
-        merchantService.update(id, request, img);
-        return ResponseEntity.ok(ResponseDTO.builder()
-                .status("ok").code(Constants.HTTP_STATUS.SUCCESS).message("Update success").build());
+    @PostMapping("/update/profile")
+    public ResponseEntity<ResponseDTO> update(
+            @ModelAttribute MerchantRequestDTO request,
+            @RequestParam(required = false) MultipartFile img,
+            Authentication authentication) {
+        try {
+            String gmail = authentication.getName();
+            merchantService.update(gmail, request, img);
+            return ResponseEntity.ok(ResponseDTO.builder()
+                    .status("ok").code(Constants.HTTP_STATUS.SUCCESS).message("Cập nhật thông tin thành công").build());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ResponseDTO.builder()
+                    .status("error").code(Constants.HTTP_STATUS.BAD_REQUEST).message("Cập nhật thất bại: " + e.getMessage()).build());
+        }
     }
 
     @PostMapping("delete/{id}")
     @PreAuthorize("hasAnyAuthority('ADMIN_DELETE_MERCHANT')")
     public ResponseEntity<ResponseDTO> delete(@PathVariable Long id) {
-        merchantService.delete(id);
-        return ResponseEntity.ok(ResponseDTO.builder()
-                .status("ok").code(Constants.HTTP_STATUS.SUCCESS).message("Delete success").build());
+        try {
+            merchantService.delete(id);
+            return ResponseEntity.ok(ResponseDTO.builder()
+                    .status("ok").code(Constants.HTTP_STATUS.SUCCESS).message("Xóa thành công").build());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ResponseDTO.builder()
+                    .status("error").code(Constants.HTTP_STATUS.BAD_REQUEST).message("Xóa thất bại: " + e.getMessage()).build());
+        }
     }
 
     @GetMapping("/search")
@@ -52,8 +69,12 @@ public class MerchantController {
     public ResponseEntity<SuccessResponse<List<MerchantDTO>>> search(
             @RequestParam(required = false) String fullName,
             @RequestParam(required = false) String address,
-            @RequestParam(required = false) String mnv) {
-        return ResponseEntity.ok(new SuccessResponse<>(Constants.HTTP_STATUS.SUCCESS, "Search success", merchantService.search(fullName, address, mnv)));
+            @RequestParam(required = false) String businessLicense) {
+        try {
+            return ResponseEntity.ok(new SuccessResponse<>(Constants.HTTP_STATUS.SUCCESS, "Tìm kiếm thành công", merchantService.search(fullName, address, businessLicense)));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new SuccessResponse<>(Constants.HTTP_STATUS.BAD_REQUEST, "Tìm kiếm thất bại: " + e.getMessage(), null));
+        }
     }
 
     @PostMapping("/dashboard")
@@ -61,30 +82,53 @@ public class MerchantController {
     public ResponseEntity<MerchantDashboardResponseDTO> getDashboard(
             Authentication authentication,
             @RequestBody(required = false) MerchantDashboardRequestDTO request) {
-        return ResponseEntity.ok(productService.getMerchantDashboard(authentication, request));
+        try {
+            return ResponseEntity.ok(productService.getMerchantDashboard(authentication, request));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @GetMapping("/products")
     @PreAuthorize("hasAnyAuthority('MERCHANT_VIEW_OWN')")
     public ResponseEntity<SuccessResponse<List<ProductReponseDTO>>> getMerchantProducts(Authentication authentication) {
-        return ResponseEntity.ok(new SuccessResponse<>(Constants.HTTP_STATUS.SUCCESS, "Get products success", productService.getMechant(authentication)));
+        try {
+            return ResponseEntity.ok(new SuccessResponse<>(Constants.HTTP_STATUS.SUCCESS, "Lấy danh sách sản phẩm thành công", productService.getMechant(authentication)));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new SuccessResponse<>(Constants.HTTP_STATUS.BAD_REQUEST, "Lấy danh sách thất bại: " + e.getMessage(), null));
+        }
     }
+
     @GetMapping("/detail/{orderCode}")
     @PreAuthorize("hasAnyAuthority('MERCHANT_VIEW_DETAILS')")
     public ResponseEntity<OrderDetailResponse> getOrderDetail(@PathVariable String orderCode) {
-        return ResponseEntity.ok(orderService.getOrderDetail(orderCode));
+        try {
+            return ResponseEntity.ok(orderService.getOrderDetail(orderCode));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @GetMapping("/statistics")
     @PreAuthorize("hasAnyAuthority('MERCHANT_STATIC')")
     public ResponseEntity<List<ProductStatisticResponse>> getProductStatistic(Authentication authentication) {
-        return ResponseEntity.ok(productService.getProductStatistic(authentication));
+        try {
+            return ResponseEntity.ok(productService.getProductStatistic(authentication));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
+
     @GetMapping("/orders")
     @PreAuthorize("hasAnyAuthority('MERCHANT_REVENUE')")
     public ResponseEntity<ResponseDTO> getMerchantOrders(Authentication authentication) {
-        return ResponseEntity.ok(ResponseDTO.builder()
-                .status("ok").code(Constants.HTTP_STATUS.SUCCESS)
-                .message("Get orders success").data(productService.getOrderCustomerFull(authentication)).build());
+        try {
+            return ResponseEntity.ok(ResponseDTO.builder()
+                    .status("ok").code(Constants.HTTP_STATUS.SUCCESS)
+                    .message("Lấy danh sách đơn hàng thành công").data(productService.getOrderCustomerFull(authentication)).build());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ResponseDTO.builder()
+                    .status("error").code(Constants.HTTP_STATUS.BAD_REQUEST).message("Lấy danh sách thất bại: " + e.getMessage()).build());
+        }
     }
 }

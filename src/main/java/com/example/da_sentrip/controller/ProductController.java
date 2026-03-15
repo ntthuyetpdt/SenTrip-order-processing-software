@@ -1,5 +1,6 @@
 package com.example.da_sentrip.controller;
 
+import com.example.da_sentrip.model.dto.reponse.ProductStatisticResponse;
 import com.example.da_sentrip.model.dto.reponse.ResponseDTO;
 import com.example.da_sentrip.model.dto.request.ProductRequestDTO;
 import com.example.da_sentrip.service.ProductService;
@@ -12,6 +13,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/product")
@@ -71,6 +75,14 @@ public class ProductController {
         return ResponseEntity.ok(ResponseDTO.builder()
                 .status("ok").code(Constants.HTTP_STATUS.SUCCESS)
                 .message("Search success").data(productService.search(productName, price, address)).build());
+    }
+    @GetMapping("/statistic")
+    public ResponseEntity<?> getProductStatistic(Authentication authentication) {
+        List<ProductStatisticResponse> data = productService.getProductStatisticall();
+        return ResponseEntity.ok(Map.of(
+                "message", "View success",
+                "data", data
+        ));
     }
 
 }

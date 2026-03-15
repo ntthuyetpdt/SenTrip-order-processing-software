@@ -30,18 +30,18 @@ public class CustomerController {
         return ResponseEntity.ok(new SuccessResponse<>(Constants.HTTP_STATUS.SUCCESS, "Get all success", customerService.getAll()));
     }
 
-    @PostMapping(value = "update/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/update/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAnyAuthority('CUSTOMER_UPDATE_PROFILE')")
     public ResponseEntity<ResponseDTO> update(
-            @PathVariable Long id,
-            @RequestParam CustomerRequestDTO request,
+            @RequestPart(required = false) CustomerRequestDTO request,
             @RequestPart(required = false) MultipartFile img,
             Authentication authentication) {
-        customerService.update(id, request, img, authentication);
+        String gmail = authentication.getName();
+        customerService.update(gmail, request, img);
         return ResponseEntity.ok(ResponseDTO.builder()
                 .status("ok").code(Constants.HTTP_STATUS.SUCCESS).message("Update success").build());
     }
-//DMIN/
+
     @GetMapping("/search")
     public ResponseEntity<SuccessResponse<List<CustomerDTO>>> search(
             @RequestParam(required = false) String fullName,

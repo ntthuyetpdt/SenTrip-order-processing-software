@@ -10,11 +10,12 @@ import java.util.List;
 @Service
 public interface EmployeeService {
     EmployeeDTO create (EmployeeRequestDTO request ,String gmail);
-    EmployeeDTO update (Long id, EmployeeRequestDTO request, MultipartFile img);
     void delete (Long id);
     List<EmployeeDTO>  getdetailis(Long id);
     List<EmployeeDTO> search(String fullName, String address, String mnv);
     List<EmployeeReponseDTO> getAll ( );
+    void updateProfile(String gmail, EmployeeRequestDTO request, MultipartFile img);
+    void updateRole(Long id, String role);
 
 
 }

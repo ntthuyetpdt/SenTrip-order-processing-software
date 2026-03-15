@@ -5,8 +5,10 @@ import com.example.da_sentrip.model.dto.MerchantDTO;
 import com.example.da_sentrip.model.dto.reponse.MerchantReponseDTO;
 import com.example.da_sentrip.model.dto.request.MerchantRequestDTO;
 import com.example.da_sentrip.model.entity.Merchant;
+import com.example.da_sentrip.model.entity.User;
 import com.example.da_sentrip.repository.DataSourceRepository;
 import com.example.da_sentrip.repository.MerchantRepository;
+import com.example.da_sentrip.repository.UserRepository;
 import com.example.da_sentrip.service.MerchantService;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -24,17 +26,21 @@ public class MerchantServiceImpl implements MerchantService {
     private final DataSourceRepository dataSourceRepository;
     private final MediaStorageService mediaStorageService;
     private final ModelMapper modelMapper;
+    private final UserRepository userRepository;
 
     @Override
-    public MerchantDTO update(Long id, MerchantRequestDTO request, MultipartFile img) {
-        Merchant merchant = merchantRepository.findById(id)
-                .orElseThrow(() -> new BadCredentialsException("ID not Found"));
-        modelMapper.map(request, Merchant.class);
+    public MerchantDTO update(String gmail, MerchantRequestDTO request, MultipartFile img) {
+        User user = userRepository.findByGmail(gmail).orElseThrow(() -> new RuntimeException("User not found"));
+
+        Merchant merchant = merchantRepository.findByUser_Id(user.getId()).orElseThrow(() -> new BadCredentialsException("Merchant not found"));
+        modelMapper.map(request, merchant);
+
         if (img != null && !img.isEmpty()) {
             if (merchant.getImg() != null && merchant.getImg().matches("\\d+"))
                 mediaStorageService.deleteMedia(Long.valueOf(merchant.getImg()));
             merchant.setImg(mediaStorageService.uploadMedia(img));
         }
+
         return new MerchantDTO(merchantRepository.save(merchant));
     }
 
