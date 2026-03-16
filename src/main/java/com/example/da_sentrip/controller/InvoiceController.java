@@ -55,7 +55,7 @@ public class InvoiceController {
                 "data", data
         ));
     }
-    @PostMapping(" /submit-input")
+    @PostMapping("/submit-input")
     public ResponseEntity<?> submitInputInvoice(
             @RequestParam("orderCode") String orderCode,
             @RequestParam("file") MultipartFile file,
