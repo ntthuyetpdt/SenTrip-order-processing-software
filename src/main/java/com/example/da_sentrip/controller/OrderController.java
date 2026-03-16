@@ -67,7 +67,9 @@ public class OrderController {
                 .build());
     }
 
+
     @PostMapping("/update/{orderCode}/status")
+    @PreAuthorize("hasAnyAuthority('EMPLOYEE_UPDATE_STATUS')")
     public ResponseEntity<String> updateOrderStatus(
             @PathVariable String orderCode,
             @RequestBody UpdateOrderStatusDTO request,

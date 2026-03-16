@@ -77,6 +77,7 @@ public class ProductController {
                 .message("Search success").data(productService.search(productName, price, address)).build());
     }
     @GetMapping("/statistic")
+    @PreAuthorize("hasAnyAuthority('EMPLOYEE_VIEW_STATIC')")
     public ResponseEntity<?> getProductStatistic(Authentication authentication) {
         List<ProductStatisticResponse> data = productService.getProductStatisticall();
         return ResponseEntity.ok(Map.of(

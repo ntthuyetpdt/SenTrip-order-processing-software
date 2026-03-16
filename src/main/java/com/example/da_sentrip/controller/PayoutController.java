@@ -4,6 +4,7 @@ import com.example.da_sentrip.service.PayoutRequestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,6 +18,7 @@ public class PayoutController {
     private final PayoutRequestService payoutRequestService;
 
     @PostMapping("/request")
+    @PreAuthorize("hasAnyAuthority('MERCHANT_REQUEST')")
     public ResponseEntity<?> createPayoutRequest(
             @RequestParam String orderCode,
             Authentication authentication) {
@@ -26,6 +28,7 @@ public class PayoutController {
     }
 
     @GetMapping("/all")
+    @PreAuthorize("hasAnyAuthority('ACCOUNTANT_VIEW_ALL')")
     public ResponseEntity<?> getAllPayoutRequests(Authentication authentication) {
         return ResponseEntity.ok(Map.of(
                 "message", "View success",
@@ -34,6 +37,7 @@ public class PayoutController {
     }
 
     @PostMapping(value = "/process/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAnyAuthority('ACCOUNTANT_PROCESS')")
     public ResponseEntity<?> processPayout(
             @PathVariable Long id,
             @RequestParam("img") MultipartFile file,
@@ -44,6 +48,7 @@ public class PayoutController {
     }
 
     @GetMapping("/my")
+    @PreAuthorize("hasAnyAuthority('MERCHANT_VIEW_BANK')")
     public ResponseEntity<?> getMyPayoutRequests(Authentication authentication) {
         String gmail = authentication.getName();
         return ResponseEntity.ok(Map.of(

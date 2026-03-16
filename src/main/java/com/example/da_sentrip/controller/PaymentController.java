@@ -57,6 +57,7 @@ public class PaymentController {
                 .build());
     }
     @GetMapping("/statistic")
+    @PreAuthorize("hasAnyAuthority('EMPLOYEE_VIEW_STATIC')")
     public ResponseEntity<?> getPaymentStatistic(Authentication authentication) {
         PaymentStatisticResponse data = paymentService.getPaymentStatistic();
         return ResponseEntity.ok(Map.of(

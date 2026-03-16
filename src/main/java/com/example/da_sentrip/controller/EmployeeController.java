@@ -50,6 +50,7 @@ public class EmployeeController {
     }
 
     @PostMapping("/update/profile")
+    @PreAuthorize("hasAnyAuthority('EMPLOYEE_UPDATE_PROFILE','ACCOUNTANT_UPDATE_PROFILE')")
     public ResponseEntity<ResponseDTO> updateProfile(
             @RequestParam(required = false) MultipartFile img,
             @RequestBody EmployeeRequestDTO request,
