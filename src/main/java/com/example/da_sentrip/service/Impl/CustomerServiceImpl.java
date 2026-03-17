@@ -15,6 +15,7 @@ import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,14 +30,20 @@ public class CustomerServiceImpl implements CustomerService {
     private final DataSourceRepository dataSourceRepository;
     private final UserRepository userRepository;
     private final MediaStorageService mediaStorageService;
-    private final ModelMapper modelMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public CustomerDTO update(String gmail, CustomerRequestDTO request, MultipartFile img) {
         User user = userRepository.findByGmail(gmail).orElseThrow(() -> new RuntimeException("User not found"));
         Customer customer = customerRepository.findByUserId(user.getId()).orElseThrow(() -> new BadCredentialsException("Customer not found"));
-        modelMapper.map(request, customer);
-
+        if (request.getFullName() != null) customer.setFullName(request.getFullName());
+        if (request.getPhone() != null) customer.setPhone(request.getPhone());
+        if (request.getAddress() != null) customer.setAddress(request.getAddress());
+        if (request.getCccd() != null) customer.setCccd(request.getCccd());
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+            userRepository.save(user);
+        }
         if (img != null && !img.isEmpty()) {
             if (customer.getImg() != null && customer.getImg().matches("\\d+")) {
                 mediaStorageService.deleteMedia(Long.valueOf(customer.getImg()));

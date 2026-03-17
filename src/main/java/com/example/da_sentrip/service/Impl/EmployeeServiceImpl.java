@@ -15,6 +15,7 @@ import com.example.da_sentrip.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.lang.module.ResolutionException;
@@ -31,6 +32,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final MediaStorageService mediaStorageService;
     private final ModelMapper modelMapper;
     private final RoleRepository repository;
+     private final PasswordEncoder passwordEncoder;
 
     @Override
     public EmployeeDTO create(EmployeeRequestDTO request, String gmail) {
@@ -78,6 +80,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
     @Override
     public void updateProfile(String gmail, EmployeeRequestDTO request, MultipartFile img) {
+        User user = userRepository.findByGmail(gmail).orElseThrow(() -> new RuntimeException("User not found"));
         Employee emp = employeeRepository.findByUser_Gmail(gmail).orElseThrow(() -> new RuntimeException("Employee not found"));
 
         if (request.getFullName() != null) emp.setFullName(request.getFullName());
@@ -86,6 +89,10 @@ public class EmployeeServiceImpl implements EmployeeService {
         if (request.getAddress() != null) emp.setAddress(request.getAddress());
         if (request.getBankName() != null) emp.setBankName(request.getBankName());
         if (request.getAccountBank() != null) emp.setAccountBank(request.getAccountBank());
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+            userRepository.save(user);
+        }
 
         if (img != null && !img.isEmpty()) {
             if (emp.getImg() != null && emp.getImg().matches("\\d+"))

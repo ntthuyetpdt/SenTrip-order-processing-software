@@ -53,7 +53,7 @@ public class EmployeeController {
     @PreAuthorize("hasAnyAuthority('EMPLOYEE_UPDATE_PROFILE','ACCOUNTANT_UPDATE_PROFILE')")
     public ResponseEntity<ResponseDTO> updateProfile(
             @RequestParam(required = false) MultipartFile img,
-            @RequestBody EmployeeRequestDTO request,
+            @RequestPart(required = false)  EmployeeRequestDTO request,
             Authentication authentication) {
         String gmail = authentication.getName();
         employeeService.updateProfile(gmail, request, img);

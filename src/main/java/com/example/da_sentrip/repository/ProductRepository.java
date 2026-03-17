@@ -1,27 +1,28 @@
 package com.example.da_sentrip.repository;
 
-import com.example.da_sentrip.model.dto.reponse.view.MerchantDashboardView;
-import com.example.da_sentrip.model.dto.reponse.view.OrderCustomerView;
-import com.example.da_sentrip.model.dto.reponse.view.PaymentStatisticDTO;
-import com.example.da_sentrip.model.dto.reponse.view.ProductStatisticDTO;
+import com.example.da_sentrip.model.dto.reponse.view.*;
 import com.example.da_sentrip.model.entity.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query(value = """
-        SELECT * FROM products p
-        WHERE (:productName IS NULL OR LOWER(p.product_name) LIKE LOWER(CONCAT('%', :productName, '%')))
-          AND (:address IS NULL OR LOWER(p.address) LIKE LOWER(CONCAT('%', :address, '%')))
-          AND (:price IS NULL OR p.price = :price)
-    """, nativeQuery = true)
+    SELECT * FROM products p
+    WHERE (:productName IS NULL OR LOWER(p.product_name) LIKE LOWER(CONCAT('%', :productName, '%')))
+      AND (:address IS NULL OR LOWER(p.address) LIKE LOWER(CONCAT('%', :address, '%')))
+      AND (:minPrice IS NULL OR p.price >= :minPrice)
+      AND (:maxPrice IS NULL OR p.price <= :maxPrice)
+""", nativeQuery = true)
     List<Product> search(
             @Param("productName") String productName,
-            @Param("price") String price,
+            @Param("minPrice") BigDecimal minPrice,
+            @Param("maxPrice") BigDecimal maxPrice,
             @Param("address") String address
     );
     @Query(value = """
@@ -78,6 +79,40 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     );
 
     List<Product> findByMerchantId(Long merchantId);
+    @Query(value = """
+    SELECT
+        o.ORDER_CODE AS orderCode,
+        c.FULL_NAME AS fullNameCustomer,
+        c.PHONE AS phoneNumber,
+        p.PRODUCT_NAME AS productName,
+        oi.QUANTITY AS quantity,
+        oi.PRICE AS price,
+        o.CREATED_AT AS createdAt
+    FROM ORDERS o
+             JOIN customers c
+                  ON c.USER_ID = o.USER_ID
+             JOIN ORDER_ITEMS oi
+                  ON oi.ORDER_ID = o.ID
+             JOIN PRODUCTS p
+                  ON p.ID = oi.PRODUCT_ID
+    WHERE p.MERCHANT_ID = :merchantId
+      AND (:orderCode IS NULL OR LOWER(o.ORDER_CODE) LIKE LOWER(CONCAT('%', :orderCode, '%')))
+      AND (:productName IS NULL OR LOWER(p.PRODUCT_NAME) LIKE LOWER(CONCAT('%', :productName, '%')))
+      AND (:minPrice IS NULL OR oi.PRICE >= :minPrice)
+      AND (:maxPrice IS NULL OR oi.PRICE <= :maxPrice)
+      AND (:startDate IS NULL OR o.CREATED_AT >= :startDate)
+      AND (:endDate IS NULL OR o.CREATED_AT <= :endDate)
+    ORDER BY o.CREATED_AT DESC
+""", nativeQuery = true)
+    List<OrderDetailDTO> searchByMerchant(
+            @Param("merchantId") Long merchantId,
+            @Param("orderCode") String orderCode,
+            @Param("productName") String productName,
+            @Param("minPrice") BigDecimal minPrice,
+            @Param("maxPrice") BigDecimal maxPrice,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
+    );
 
     @Query(value = """
     SELECT

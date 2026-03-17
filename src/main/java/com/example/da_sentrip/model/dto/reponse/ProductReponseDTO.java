@@ -23,6 +23,7 @@ public class ProductReponseDTO {
     private String img;
     private String additionalService;
     private Long merchantId;
+    private String address;
 
     public ProductReponseDTO (Product product){
         this.id = product.getId();
@@ -33,6 +34,7 @@ public class ProductReponseDTO {
         this.status = product.getStatus();
         this.type= product.getType();
         this.img= product.getImg();
+        this.address =product.getAddress();
         this.additionalService =product.getAdditionalService();
         if (product.getMerchant() != null) {
             this.merchantId = product.getMerchant().getId();

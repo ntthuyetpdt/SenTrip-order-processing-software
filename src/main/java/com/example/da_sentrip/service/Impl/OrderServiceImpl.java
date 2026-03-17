@@ -1,8 +1,11 @@
 package com.example.da_sentrip.service.Impl;
 
+import com.example.da_sentrip.exception.ResourceNotFoundException;
 import com.example.da_sentrip.model.dto.OrderDTO;
 import com.example.da_sentrip.model.dto.reponse.*;
 import com.example.da_sentrip.model.dto.reponse.view.DetailedSet;
+import com.example.da_sentrip.model.dto.reponse.view.GetallOder;
+import com.example.da_sentrip.model.dto.reponse.view.OrderDetailDTO;
 import com.example.da_sentrip.model.dto.request.OrderRequestDTO;
 import com.example.da_sentrip.model.entity.*;
 import com.example.da_sentrip.model.enums.OrderStatus;
@@ -26,6 +29,12 @@ public class OrderServiceImpl implements OrderService {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final MerchantRepository merchantRepository;
+
+    private Merchant getMerchantFromAuth(Authentication authentication) {
+        String email = authentication.getName();
+        User user = userRepository.findByGmail(email).orElseThrow(() -> new ResourceNotFoundException("User not found: " + email));
+        return merchantRepository.findByUserId(user.getId()).orElseThrow(() -> new ResourceNotFoundException("Bạn chưa đăng ký profile Merchant"));
+    }
 
     @Override
     @Transactional
@@ -74,6 +83,11 @@ public class OrderServiceImpl implements OrderService {
                         view.getTotalAmount(), view.getOrderStatus(), view.getPaymentStatus()
                 ))
                 .toList();
+    }
+
+    @Override
+    public List<GetallOder> searchOrder(String orderCode, String address, BigDecimal minPrice, BigDecimal maxPrice, String sortByPrice, String orderStatus) {
+        return orderRepository.searchOrder(orderCode, address, minPrice, maxPrice, sortByPrice, orderStatus);
     }
 
     @Override
@@ -164,6 +178,11 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
+    @Override
+    public List<OrderDetailDTO> searchByMerchant(Authentication authentication, String orderCode, String productName, BigDecimal minPrice, BigDecimal maxPrice, LocalDateTime startDate, LocalDateTime endDate) {
+        Merchant merchant = getMerchantFromAuth(authentication);
+        return productRepository.searchByMerchant(merchant.getId(), orderCode, productName, minPrice, maxPrice, startDate, endDate);
+    }
     private OrderDTO mapToDTO(Order order) {
         OrderDTO dto = new OrderDTO();
         dto.setOrderCode(order.getOrderCode());

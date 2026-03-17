@@ -159,6 +159,53 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query(value = """
     SELECT
+        o.ORDER_CODE AS orderCode,
+        c.FULL_NAME AS fullNameCustomer,
+        o.CREATED_AT AS createdAt,
+        GROUP_CONCAT(DISTINCT p.SERVICE_TYPE ORDER BY oi.ID SEPARATOR ', ') AS serviceType,
+        GROUP_CONCAT(DISTINCT p.ADDITIONAL_SERVICES ORDER BY oi.ID SEPARATOR ', ') AS additionalService,
+        GROUP_CONCAT(DISTINCT p.ADDRESS ORDER BY oi.ID SEPARATOR ', ') AS address,
+        o.TOTAL_AMOUNT AS totalAmount,
+        o.ORDER_STATUS AS orderStatus,
+        pm.PAYMENT_STATUS AS paymentStatus
+    FROM ORDERS o
+             JOIN customers c
+                  ON c.USER_ID = o.USER_ID
+             JOIN ORDER_ITEMS oi
+                  ON oi.ORDER_ID = o.ID
+             JOIN PRODUCTS p
+                  ON p.ID = oi.PRODUCT_ID
+             LEFT JOIN PAYMENTS pm
+                       ON pm.ORDER_ID = o.ID
+    WHERE (:orderCode IS NULL OR LOWER(o.ORDER_CODE) LIKE LOWER(CONCAT('%', :orderCode, '%')))
+      AND (:address IS NULL OR LOWER(p.ADDRESS) LIKE LOWER(CONCAT('%', :address, '%')))
+      AND (:minPrice IS NULL OR o.TOTAL_AMOUNT >= :minPrice)
+      AND (:maxPrice IS NULL OR o.TOTAL_AMOUNT <= :maxPrice)
+      AND (:orderStatus IS NULL OR o.ORDER_STATUS = :orderStatus)
+    GROUP BY
+        o.ID,
+        o.ORDER_CODE,
+        c.FULL_NAME,
+        o.CREATED_AT,
+        o.TOTAL_AMOUNT,
+        o.ORDER_STATUS,
+        pm.PAYMENT_STATUS
+    ORDER BY
+        CASE WHEN :sortByPrice = 'asc' THEN o.TOTAL_AMOUNT END ASC,
+        CASE WHEN :sortByPrice = 'desc' THEN o.TOTAL_AMOUNT END DESC,
+        o.CREATED_AT DESC
+""", nativeQuery = true)
+    List<GetallOder> searchOrder(
+            @Param("orderCode") String orderCode,
+            @Param("address") String address,
+            @Param("minPrice") BigDecimal minPrice,
+            @Param("maxPrice") BigDecimal maxPrice,
+            @Param("sortByPrice") String sortByPrice,
+            @Param("orderStatus") String orderStatus
+    );
+
+    @Query(value = """
+    SELECT
         o.ID AS orderId,
         o.ORDER_CODE AS orderCode,
         o.USER_ID AS userId,

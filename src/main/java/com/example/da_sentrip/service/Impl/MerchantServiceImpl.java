@@ -13,6 +13,7 @@ import com.example.da_sentrip.service.MerchantService;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.Collections;
@@ -25,15 +26,24 @@ public class MerchantServiceImpl implements MerchantService {
     private final MerchantRepository merchantRepository;
     private final DataSourceRepository dataSourceRepository;
     private final MediaStorageService mediaStorageService;
-    private final ModelMapper modelMapper;
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public MerchantDTO update(String gmail, MerchantRequestDTO request, MultipartFile img) {
         User user = userRepository.findByGmail(gmail).orElseThrow(() -> new RuntimeException("User not found"));
-
         Merchant merchant = merchantRepository.findByUser_Id(user.getId()).orElseThrow(() -> new BadCredentialsException("Merchant not found"));
-        modelMapper.map(request, merchant);
+        if (request.getMerchantName() != null) merchant.setMerchantName(request.getMerchantName());
+        if (request.getPhone() != null) merchant.setPhone(request.getPhone());
+        if (request.getCccd() != null) merchant.setCccd(request.getCccd());
+        if (request.getBankName() != null) merchant.setBankName(request.getBankName());
+        if (request.getBankAccount() != null) merchant.setBankAccount(request.getBankAccount());
+        if (request.getAddress() != null) merchant.setAddress(request.getAddress());
+        if (request.getBusinessLicense() != null) merchant.setBusinessLicense(request.getBusinessLicense());
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+            userRepository.save(user);
+        }
 
         if (img != null && !img.isEmpty()) {
             if (merchant.getImg() != null && merchant.getImg().matches("\\d+"))
@@ -43,7 +53,6 @@ public class MerchantServiceImpl implements MerchantService {
 
         return new MerchantDTO(merchantRepository.save(merchant));
     }
-
     @Override
     public MerchantDTO delete(Long id) {
         Merchant merchant = merchantRepository.findById(id)

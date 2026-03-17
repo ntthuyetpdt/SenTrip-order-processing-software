@@ -12,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -20,7 +21,7 @@ public interface ProductService {
     ProductDTO create (ProductRequestDTO request,MultipartFile img, Authentication authentication);
     ProductDTO update (Long id, ProductRequestDTO request, MultipartFile img, Authentication authentication);
     ProductDTO delete (Long id);
-    List<ProductReponseDTO> search (String productName,String price,String address);
+    List<ProductReponseDTO> search(String productName, BigDecimal minPrice, BigDecimal maxPrice, String address);
     List<ListProductMechartReponseDTO> getOrderCustomerFull(Authentication authentication);
     MerchantDashboardResponseDTO getMerchantDashboard(Authentication authentication, MerchantDashboardRequestDTO request) ;
     List<ProductReponseDTO>getMechant(Authentication authentication);
