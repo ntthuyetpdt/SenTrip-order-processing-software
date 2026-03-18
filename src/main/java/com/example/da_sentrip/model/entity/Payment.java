@@ -29,11 +29,6 @@ public class Payment {
     @Column(name = "PAYMENT_STATUS")
     private String paymentStatus;
 
-    @Column(name = "BANK_NAME")
-    private String bankName;
-
-    @Column(name = "BANK_ACCOUNT")
-    private String bankAccount;
 
     @ManyToOne
     @JoinColumn(name = "PROCESSED_BY")
