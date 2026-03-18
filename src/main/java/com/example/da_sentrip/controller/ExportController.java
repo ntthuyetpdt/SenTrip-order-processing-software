@@ -29,7 +29,7 @@ public class ExportController {
     }
 
     @GetMapping("/excel")
-    @PreAuthorize("hasAnyAuthority('ADMIN_EXCEL')")
+    @PreAuthorize("hasAnyAuthority('ADMIN_EXCEL','EMPLOYEE_EXCEL')")
     public ResponseEntity<byte[]> exportOrdersExcel() {
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=orders.xlsx")

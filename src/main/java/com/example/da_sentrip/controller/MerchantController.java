@@ -10,11 +10,15 @@ import com.example.da_sentrip.service.OrderService;
 import com.example.da_sentrip.service.ProductService;
 import com.example.da_sentrip.utils.Constants;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -38,7 +42,7 @@ public class MerchantController {
     @PostMapping("/update/profile")
     @PreAuthorize("hasAnyAuthority('MERCHANT_UPDATE_PROFILE')")
     public ResponseEntity<ResponseDTO> update(
-            @ModelAttribute MerchantRequestDTO request,
+            @RequestPart(required = false)  MerchantRequestDTO request,
             @RequestParam(required = false) MultipartFile img,
             Authentication authentication) {
         try {
@@ -131,5 +135,22 @@ public class MerchantController {
             return ResponseEntity.badRequest().body(ResponseDTO.builder()
                     .status("error").code(Constants.HTTP_STATUS.BAD_REQUEST).message("view failed: " + e.getMessage()).build());
         }
+    }
+
+    @GetMapping("/searchOder")
+    @PreAuthorize("hasAnyAuthority('MERCHANT_SEARCH_ORDER')")
+    public ResponseEntity<ResponseDTO> searchByMerchant(
+            Authentication authentication,
+            @RequestParam(required = false) String orderCode,
+            @RequestParam(required = false) String productName,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+        return ResponseEntity.ok(ResponseDTO.builder()
+                .status("ok").code(Constants.HTTP_STATUS.SUCCESS)
+                .message("Search success")
+                .data(orderService.searchByMerchant(authentication, orderCode, productName, minPrice, maxPrice, startDate, endDate))
+                .build());
     }
 }

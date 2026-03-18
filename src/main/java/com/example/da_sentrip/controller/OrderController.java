@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
+
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -42,6 +44,21 @@ public class OrderController {
                 .code(Constants.HTTP_STATUS.CREATED)
                 .message("Order created success")
                 .data(order)
+                .build());
+    }
+    @GetMapping("/search")
+    @PreAuthorize("hasAnyAuthority('ADMIN_SEARCH_ORDER','EMPLOYEE_SEARCH_ORDER')")
+    public ResponseEntity<ResponseDTO> searchOrder(
+            @RequestParam(required = false) String orderCode,
+            @RequestParam(required = false) String address,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(required = false) String sortByPrice,
+            @RequestParam(required = false) String orderStatus) {
+        return ResponseEntity.ok(ResponseDTO.builder()
+                .status("ok").code(Constants.HTTP_STATUS.SUCCESS)
+                .message("Search success")
+                .data(orderService.searchOrder(orderCode, address, minPrice, maxPrice, sortByPrice, orderStatus))
                 .build());
     }
 

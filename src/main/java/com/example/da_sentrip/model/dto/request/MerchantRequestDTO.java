@@ -14,4 +14,5 @@ public class MerchantRequestDTO {
     private String address;
     private String img;
     private String businessLicense;
+    private String password;
 }

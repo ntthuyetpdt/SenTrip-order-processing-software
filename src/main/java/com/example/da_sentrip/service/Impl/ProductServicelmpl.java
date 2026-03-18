@@ -99,8 +99,8 @@ public class ProductServicelmpl implements ProductService {
     }
 
     @Override
-    public List<ProductReponseDTO> search(String productName, String price, String address) {
-        return productRepository.search(productName, price, address).stream()
+    public List<ProductReponseDTO> search(String productName, BigDecimal minPrice, BigDecimal maxPrice, String address) {
+        return productRepository.search(productName, minPrice, maxPrice, address).stream()
                 .map(ProductReponseDTO::new)
                 .toList();
     }

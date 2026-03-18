@@ -14,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -70,12 +71,16 @@ public class ProductController {
     @PreAuthorize("hasAnyAuthority('CUSTOMER_SEARCH_PRODUCT','MERCHANT_SEARCH_PRODUCT')")
     public ResponseEntity<ResponseDTO> search(
             @RequestParam(required = false) String productName,
-            @RequestParam(required = false) String price,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
             @RequestParam(required = false) String address) {
         return ResponseEntity.ok(ResponseDTO.builder()
                 .status("ok").code(Constants.HTTP_STATUS.SUCCESS)
-                .message("Search success").data(productService.search(productName, price, address)).build());
+                .message("Search success")
+                .data(productService.search(productName, minPrice, maxPrice, address))
+                .build());
     }
+
     @GetMapping("/statistic")
     @PreAuthorize("hasAnyAuthority('EMPLOYEE_VIEW_STATIC')")
     public ResponseEntity<?> getProductStatistic(Authentication authentication) {

@@ -20,5 +20,6 @@ public class EmployeeRequestDTO {
     private String cccd;
     private String bankName;
     private String accountBank;
+    private String password;
 
 }
