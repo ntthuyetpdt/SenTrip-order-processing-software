@@ -2,6 +2,7 @@ package com.example.da_sentrip.repository;
 
 import com.example.da_sentrip.model.dto.reponse.view.*;
 import com.example.da_sentrip.model.entity.Order;
+import com.example.da_sentrip.model.enums.OrderStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -235,6 +236,12 @@ GROUP BY
     pm.PAID_AT
 """, nativeQuery = true)
     DetailedSet getOrderDetail(@Param("orderCode") String orderCode);
+
+
+    @Modifying
+    @Query("UPDATE Order o SET o.orderStatus = :orderStatus WHERE o.orderCode = :orderCode")
+    int updateOrderStatus(@Param("orderCode") String orderCode,
+                          @Param("orderStatus") OrderStatus orderStatus);
 
 
 }

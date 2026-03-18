@@ -154,6 +154,16 @@ public class OrderServiceImpl implements OrderService {
                 .build();
     }
 
+    @Transactional
+    @Override
+    public void updateOrderStatus(String orderCode, String orderStatus) {
+        OrderStatus status = OrderStatus.valueOf(orderStatus.toUpperCase());
+        int updated = orderRepository.updateOrderStatus(orderCode, status);
+        if (updated == 0) {
+            throw new RuntimeException("Order not found with code: " + orderCode);
+        }
+    }
+
     private OrderDTO mapToDTO(Order order) {
         OrderDTO dto = new OrderDTO();
         dto.setOrderCode(order.getOrderCode());

@@ -1,9 +1,12 @@
 package com.example.da_sentrip.service.Impl;
 
 import com.example.da_sentrip.model.dto.reponse.PaymentResponseDTO;
+import com.example.da_sentrip.model.dto.reponse.PaymentStatisticResponse;
+import com.example.da_sentrip.model.dto.reponse.view.PaymentStatisticDTO;
 import com.example.da_sentrip.model.dto.request.PaymentRequestDTO;
 import com.example.da_sentrip.repository.OrderRepository;
 import com.example.da_sentrip.repository.PaymentRepository;
+import com.example.da_sentrip.repository.ProductRepository;
 import com.example.da_sentrip.service.PaymentService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +23,7 @@ public class PaymentServicelmpl implements PaymentService {
 
     private final OrderRepository orderRepository;
     private final PaymentRepository paymentRepository;
+    private final ProductRepository productRepository;
 
     @Value("${app.public-base-url}")
     private String publicBaseUrl;
@@ -65,6 +69,15 @@ public class PaymentServicelmpl implements PaymentService {
         paymentRepository.markSuccess(pay.getId());
 
         return buildResponse(paymentCode, null, pay.getAmount(), "SUCCESS", LocalDateTime.now());
+    }
+
+    @Override
+    public PaymentStatisticResponse getPaymentStatistic() {
+        PaymentStatisticDTO dto = productRepository.findPaymentStatistic();
+        return new PaymentStatisticResponse(
+                dto.getTotalTransactions(),
+                dto.getTotalRevenue()
+        );
     }
 
     private PaymentResponseDTO buildResponse(String paymentCode, String orderCode,

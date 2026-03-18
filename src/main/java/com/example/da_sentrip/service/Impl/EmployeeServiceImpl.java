@@ -5,9 +5,11 @@ import com.example.da_sentrip.model.dto.EmployeeDTO;
 import com.example.da_sentrip.model.dto.reponse.EmployeeReponseDTO;
 import com.example.da_sentrip.model.dto.request.EmployeeRequestDTO;
 import com.example.da_sentrip.model.entity.Employee;
+import com.example.da_sentrip.model.entity.Role;
 import com.example.da_sentrip.model.entity.User;
 import com.example.da_sentrip.repository.DataSourceRepository;
 import com.example.da_sentrip.repository.EmployeeRepository;
+import com.example.da_sentrip.repository.RoleRepository;
 import com.example.da_sentrip.repository.UserRepository;
 import com.example.da_sentrip.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
@@ -28,25 +30,13 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final UserRepository userRepository;
     private final MediaStorageService mediaStorageService;
     private final ModelMapper modelMapper;
+    private final RoleRepository repository;
 
     @Override
     public EmployeeDTO create(EmployeeRequestDTO request, String gmail) {
         userRepository.findByGmail(gmail)
                 .orElseThrow(() -> new BadCredentialsException("Gmail not found"));
         return new EmployeeDTO(modelMapper.map(request, Employee.class));
-    }
-
-    @Override
-    public EmployeeDTO update(Long id, EmployeeRequestDTO request, MultipartFile img) {
-        Employee emp = employeeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Employee not found"));
-        modelMapper.map(request, emp);
-        if (img != null && !img.isEmpty()) {
-            if (emp.getImg() != null && emp.getImg().matches("\\d+"))
-                mediaStorageService.deleteMedia(Long.valueOf(emp.getImg()));
-            emp.setImg(mediaStorageService.uploadMedia(img));
-        }
-        return new EmployeeDTO(employeeRepository.save(emp));
     }
 
     @Override
@@ -85,5 +75,35 @@ public class EmployeeServiceImpl implements EmployeeService {
                         .ifPresent(ds -> dto.setImg(ds.getImageUrl()));
             return dto;
         }).toList();
+    }
+    @Override
+    public void updateProfile(String gmail, EmployeeRequestDTO request, MultipartFile img) {
+        Employee emp = employeeRepository.findByUser_Gmail(gmail).orElseThrow(() -> new RuntimeException("Employee not found"));
+
+        if (request.getFullName() != null) emp.setFullName(request.getFullName());
+        if (request.getPhone() != null) emp.setPhone(request.getPhone());
+        if (request.getGender() != null) emp.setGender(request.getGender());
+        if (request.getAddress() != null) emp.setAddress(request.getAddress());
+        if (request.getBankName() != null) emp.setBankName(request.getBankName());
+        if (request.getAccountBank() != null) emp.setAccountBank(request.getAccountBank());
+
+        if (img != null && !img.isEmpty()) {
+            if (emp.getImg() != null && emp.getImg().matches("\\d+"))
+                mediaStorageService.deleteMedia(Long.valueOf(emp.getImg()));
+            emp.setImg(mediaStorageService.uploadMedia(img));
+        }
+
+        employeeRepository.save(emp);
+    }
+    @Override
+    public void updateRole(Long id, String roleName) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Role role = repository.findByRoleName(roleName)
+                .orElseThrow(() -> new RuntimeException("Role not found: " + roleName));
+
+        user.setRole(role);
+        userRepository.save(user);
     }
 }

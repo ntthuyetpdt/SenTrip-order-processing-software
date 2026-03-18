@@ -1,6 +1,7 @@
 package com.example.da_sentrip.service.Impl;
 
 import com.example.da_sentrip.helper.CloudinaryPDF;
+import com.example.da_sentrip.model.dto.reponse.InvoiceResponse;
 import com.example.da_sentrip.model.dto.reponse.view.InvoiceDetailProjection;
 import com.example.da_sentrip.model.dto.reponse.view.InvoiceProjection;
 import com.example.da_sentrip.model.entity.Invoices;
@@ -45,7 +46,6 @@ public class InvoiceServiceImpl implements InvoiceService {
             String invoiceCode = "INV" + System.currentTimeMillis();
             String fileName = invoiceCode + ".pdf";
             String fileUrl = cloudinaryPDF.uploadPdf(file.getBytes(), fileName);
-
             Invoices entity = new Invoices();
             entity.setInvoiceCode(invoiceCode);
             entity.setOderId(invoice.getOrderId());
@@ -60,8 +60,58 @@ public class InvoiceServiceImpl implements InvoiceService {
             invoiceRepository.save(entity);
 
             return fileUrl;
+
         } catch (IOException e) {
             throw new RuntimeException("Lỗi khi đọc file PDF: " + e.getMessage(), e);
         }
+    }
+
+    @Override
+    public List<InvoiceResponse> searchInvoices(String invoiceCode, String orderCode, LocalDateTime fromDate, LocalDateTime toDate) {
+        return invoiceRepository.findInvoices(invoiceCode, orderCode, fromDate, toDate)
+                .stream()
+                .map(i -> new InvoiceResponse(
+                        i.getOrderCode(),
+                        i.getInvoiceCode(),
+                        i.getAmount(),
+                        i.getStatus(),
+                        i.getFileName(),
+                        i.getGeneratedAt(),
+                        i.getFileUrl()
+                ))
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public void submitInputInvoice(String orderCode, MultipartFile file) {
+        Invoices invoice = invoiceRepository.findByOrderCode(orderCode).orElseThrow(() -> new RuntimeException("Invoice not found with orderCode: " + orderCode));
+        try {
+            byte[] fileBytes = file.getBytes();
+            String fileName = file.getOriginalFilename();
+            String fileUrl = cloudinaryPDF.uploadPdf(fileBytes, fileName);
+            invoice.setStatus("INVOICE_HAS_BEEN_ISSUED");
+            invoice.setFileUrl(fileUrl);
+            invoice.setFileName(fileName);
+            invoiceRepository.save(invoice);
+        } catch (IOException e) {
+            throw new RuntimeException("Upload file failed: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public List<InvoiceResponse> getAllInvoice() {
+        return invoiceRepository.findAllInvoices()
+                .stream()
+                .map(i -> new InvoiceResponse(
+                        i.getOrderCode(),
+                        i.getInvoiceCode(),
+                        i.getAmount(),
+                        i.getStatus(),
+                        i.getFileName(),
+                        i.getGeneratedAt(),
+                        i.getFileUrl()
+                ))
+                .toList();
     }
 }

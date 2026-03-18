@@ -32,19 +32,18 @@ public class CustomerServiceImpl implements CustomerService {
     private final ModelMapper modelMapper;
 
     @Override
-    public CustomerDTO update(Long id, CustomerRequestDTO request, MultipartFile img, Authentication authentication) {
-        String gmail = authentication.getName();
+    public CustomerDTO update(String gmail, CustomerRequestDTO request, MultipartFile img) {
         User user = userRepository.findByGmail(gmail).orElseThrow(() -> new RuntimeException("User not found"));
-        Customer customer =customerRepository.findByUserId(user.getId()).orElseThrow(() ->new BadCredentialsException("Customer not found"));
-        modelMapper.map(request,customer);
+        Customer customer = customerRepository.findByUserId(user.getId()).orElseThrow(() -> new BadCredentialsException("Customer not found"));
+        modelMapper.map(request, customer);
+
         if (img != null && !img.isEmpty()) {
             if (customer.getImg() != null && customer.getImg().matches("\\d+")) {
                 mediaStorageService.deleteMedia(Long.valueOf(customer.getImg()));
             }
-
-            String newDsId = mediaStorageService.uploadMedia(img);
-            customer.setImg(newDsId);
+            customer.setImg(mediaStorageService.uploadMedia(img));
         }
+
         customerRepository.save(customer);
         return new CustomerDTO(customer);
     }

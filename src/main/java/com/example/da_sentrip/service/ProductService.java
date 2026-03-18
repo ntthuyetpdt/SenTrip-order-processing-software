@@ -25,5 +25,6 @@ public interface ProductService {
     MerchantDashboardResponseDTO getMerchantDashboard(Authentication authentication, MerchantDashboardRequestDTO request) ;
     List<ProductReponseDTO>getMechant(Authentication authentication);
     List<ProductStatisticResponse> getProductStatistic(Authentication authentication);
+    List<ProductStatisticResponse> getProductStatisticall( );
 
 }

@@ -8,7 +8,6 @@ import com.example.da_sentrip.model.dto.reponse.MerchantDashboardResponseDTO;
 import com.example.da_sentrip.model.dto.reponse.ProductReponseDTO;
 import com.example.da_sentrip.model.dto.reponse.ProductStatisticResponse;
 import com.example.da_sentrip.model.dto.reponse.view.MerchantDashboardView;
-import com.example.da_sentrip.model.dto.reponse.view.ProductStatisticDTO;
 import com.example.da_sentrip.model.dto.request.MerchantDashboardRequestDTO;
 import com.example.da_sentrip.model.dto.request.ProductRequestDTO;
 import com.example.da_sentrip.model.entity.Merchant;
@@ -158,6 +157,19 @@ public class ProductServicelmpl implements ProductService {
                 .map(view -> new ProductStatisticResponse(
                         view.getProductId(), view.getProductName(), view.getAdditionalServices(),
                         view.getTotalCustomers(), view.getTotalOrders(), view.getTotalRevenue()
+                ))
+                .toList();
+    }
+
+    public List<ProductStatisticResponse> getProductStatisticall() {
+        return productRepository.findProductStatistic().stream()
+                .map(p -> new ProductStatisticResponse(
+                        p.getProductId(),
+                        p.getProductName(),
+                        p.getAdditionalServices(),
+                        p.getTotalCustomers(),
+                        p.getTotalOrders(),
+                        p.getTotalRevenue()
                 ))
                 .toList();
     }

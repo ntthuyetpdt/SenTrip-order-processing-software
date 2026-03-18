@@ -30,6 +30,7 @@ public interface MerchantRepository extends JpaRepository<Merchant, Long> {
     );
 
     Optional<Merchant> findByUserId(Long userId);
+    Optional<Merchant> findByUser_Id(Long userId);
 
     @Query(value = """
     SELECT 
