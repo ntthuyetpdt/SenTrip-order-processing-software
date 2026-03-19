@@ -54,7 +54,11 @@ public class UserServiceImpl implements UserService {
 
         Long roleId = request.getRole();
         if (roleId == null || (!roleId.equals(4L) && !roleId.equals(5L)))
-            throw new IllegalArgumentException("Chỉ cho phép đăng ký CUSTOMER(4) hoặc MERCHANT(5)");
+            throw new IllegalArgumentException("Only allow registration of CUSTOMER(4) or MERCHANT(5)");
+        if (roleId.equals(5L)) {
+            if (request.getBusinessLicense() == null || request.getBusinessLicense().isBlank())
+                throw new IllegalArgumentException("Merchants must enter the Business License Number.");
+        }
 
         Role role = roleRepository.findById(roleId)
                 .orElseThrow(() -> new RuntimeException("Role not found"));
@@ -73,6 +77,7 @@ public class UserServiceImpl implements UserService {
         } else {
             Merchant merchant = new Merchant();
             merchant.setUser(saved);
+            merchant.setBusinessLicense(request.getBusinessLicense());
             merchantRepository.save(merchant);
         }
     }
@@ -85,7 +90,7 @@ public class UserServiceImpl implements UserService {
 
         Long roleId = Long.valueOf(request.getRole());
         if (!roleId.equals(2L) && !roleId.equals(3L))
-            throw new IllegalArgumentException("Role chỉ được phép là 2 hoặc 3");
+            throw new IllegalArgumentException("Roles are only allowed to be 2 or 3.");
 
         Role role = roleRepository.findById(roleId)
                 .orElseThrow(() -> new RuntimeException("Role not found"));

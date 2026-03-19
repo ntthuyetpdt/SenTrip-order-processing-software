@@ -14,4 +14,5 @@ public class RegisterRequestDTO {
     private String gmail;
     private String password;
     private Long Role;
+    private String businessLicense;
 }
