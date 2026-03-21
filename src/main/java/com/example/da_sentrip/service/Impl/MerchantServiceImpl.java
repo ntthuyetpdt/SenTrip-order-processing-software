@@ -30,7 +30,7 @@ public class MerchantServiceImpl implements MerchantService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public MerchantDTO update(String gmail, MerchantRequestDTO request, MultipartFile img) {
+    public void update(String gmail, MerchantRequestDTO request, MultipartFile img) {
         User user = userRepository.findByGmail(gmail).orElseThrow(() -> new RuntimeException("User not found"));
         Merchant merchant = merchantRepository.findByUser_Id(user.getId()).orElseThrow(() -> new BadCredentialsException("Merchant not found"));
         if (request.getMerchantName() != null) merchant.setMerchantName(request.getMerchantName());
@@ -51,7 +51,7 @@ public class MerchantServiceImpl implements MerchantService {
             merchant.setImg(mediaStorageService.uploadMedia(img));
         }
 
-        return new MerchantDTO(merchantRepository.save(merchant));
+        merchantRepository.save(merchant);
     }
     @Override
     public MerchantDTO delete(Long id) {
