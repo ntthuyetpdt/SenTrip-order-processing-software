@@ -24,7 +24,7 @@ public class ExportController {
                 .status("ok")
                 .code(Constants.HTTP_STATUS.SUCCESS)
                 .message("Export invoice successfully")
-                .data(exportServiceg.exportInvoicePdf(orderCode))
+                .data(exportService.exportInvoicePdf(orderCode))
                 .build());
     }
 

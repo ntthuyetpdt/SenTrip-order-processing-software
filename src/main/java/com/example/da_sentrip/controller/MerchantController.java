@@ -42,8 +42,8 @@ public class MerchantController {
     @PostMapping("/update/profile")
     @PreAuthorize("hasAnyAuthority('MERCHANT_UPDATE_PROFILE')")
     public ResponseEntity<ResponseDTO> update(
-            @RequestPart(required = false)  MerchantRequestDTO request,
-            @RequestParam(required = false) MultipartFile img,
+            @RequestPart("request") MerchantRequestDTO request,
+            @RequestPart(value = "img", required = false) MultipartFile img,
             Authentication authentication) {
         try {
             String gmail = authentication.getName();
