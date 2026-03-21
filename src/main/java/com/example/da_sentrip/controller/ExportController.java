@@ -18,13 +18,13 @@ public class ExportController {
     private final ExportService exportService;
 
     @GetMapping("/bill/{orderCode}")
-    @PreAuthorize("hasAnyAuthority('ADMIN_IMPORT_BILL')")
+    @PreAuthorize("hasAnyAuthority('ADMIN_IMPORT_BILL', 'EMPLOYEE_EXPORT_BILL')")
     public ResponseEntity<ResponseDTO> exportInvoice(@PathVariable String orderCode) {
         return ResponseEntity.ok(ResponseDTO.builder()
                 .status("ok")
                 .code(Constants.HTTP_STATUS.SUCCESS)
                 .message("Export invoice successfully")
-                .data(exportService.exportInvoicePdf(orderCode))
+                .data(exportServiceg.exportInvoicePdf(orderCode))
                 .build());
     }
 
