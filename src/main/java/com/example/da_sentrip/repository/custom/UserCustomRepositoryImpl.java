@@ -36,7 +36,7 @@ public class UserCustomRepositoryImpl implements UserCustomRepository {
 
     private EmployeeProfileDTO getEmployeeProfile(String email) {
         String sql = """
-                SELECT u.GMAIL, u.ROLE,
+                SELECT u.GMAIL, r.ROLE_NAME,
                        e.MNV, e.FULL_NAME, e.PHONE, e.GENDER,
                        e.DATE, e.ADDRESS, e.JOIN_DATE,
                        e.CCCD, e.BANK_NAME, e.ACCOUNT_BANK,
@@ -46,6 +46,7 @@ public class UserCustomRepositoryImpl implements UserCustomRepository {
                            ELSE e.IMG
                        END AS img
                 FROM USERS u
+                JOIN DIM_ROLE r ON r.ROLE_CODE = u.ROLE
                 LEFT JOIN EMPLOYEES e ON e.USER_ID = u.ID
                 LEFT JOIN DATA_SOUSES ds
                     ON e.IMG IS NOT NULL
@@ -78,7 +79,7 @@ public class UserCustomRepositoryImpl implements UserCustomRepository {
 
     private MerchantProfileDTO getMerchantProfile(String email) {
         String sql = """
-                SELECT u.GMAIL, u.ROLE,
+                SELECT u.GMAIL, r.ROLE_NAME,
                        m.MERCHANT_CODE, m.MERCHANT_NAME, m.PHONE,
                        m.CCCD, m.BANK_NAME, m.BANK_ACCOUNT,
                        m.ADDRESS, m.BUSINESS_LICENSE_NUMBER,
@@ -88,6 +89,7 @@ public class UserCustomRepositoryImpl implements UserCustomRepository {
                            ELSE m.IMG
                        END AS img
                 FROM USERS u
+                JOIN DIM_ROLE r ON r.ROLE_CODE = u.ROLE
                 LEFT JOIN MERCHANTS m ON m.USER_ID = u.ID
                 LEFT JOIN DATA_SOUSES ds
                     ON m.IMG IS NOT NULL
@@ -111,14 +113,14 @@ public class UserCustomRepositoryImpl implements UserCustomRepository {
                 r[6]  != null ? (String) r[6]  : null,
                 r[7]  != null ? (String) r[7]  : null,
                 r[8]  != null ? (String) r[8]  : null,
-                r[9]  != null ? (String) r[10]  : null,
-                r[10] != null ? (String) r[9] : null
+                r[10] != null ? (String) r[10] : null,
+                r[9]  != null ? (String) r[9]  : null
         );
     }
 
     private CustomerProfileDTO getCustomerProfile(String email) {
         String sql = """
-                SELECT u.GMAIL, u.ROLE,
+                SELECT u.GMAIL, r.ROLE_NAME,
                        c.CCCD, c.FULL_NAME, c.DATE,
                        c.PHONE, c.ADDRESS,
                        CASE
@@ -127,6 +129,7 @@ public class UserCustomRepositoryImpl implements UserCustomRepository {
                            ELSE c.IMG
                        END AS img
                 FROM USERS u
+                JOIN DIM_ROLE r ON r.ROLE_CODE = u.ROLE
                 LEFT JOIN CUSTOMERS c ON c.USER_ID = u.ID
                 LEFT JOIN DATA_SOUSES ds
                     ON c.IMG IS NOT NULL
