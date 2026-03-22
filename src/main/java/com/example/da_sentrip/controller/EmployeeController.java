@@ -51,14 +51,13 @@ public class EmployeeController {
 
     @PostMapping("/update/profile")
     @PreAuthorize("hasAnyAuthority('EMPLOYEE_UPDATE_PROFILE','ACCOUNTANT_UPDATE_PROFILE')")
-    public ResponseEntity<ResponseDTO> updateProfile(
+    public ResponseEntity<?> updateProfile(
             @RequestParam(required = false) MultipartFile img,
             @RequestPart(required = false)  EmployeeRequestDTO request,
             Authentication authentication) {
         String gmail = authentication.getName();
         employeeService.updateProfile(gmail, request, img);
-        return ResponseEntity.ok(ResponseDTO.builder()
-                .status("ok").code(Constants.HTTP_STATUS.SUCCESS).message("Update profile success").build());
+        return ResponseEntity.ok("update success");
     }
 
     @PostMapping("delete/{id}")
