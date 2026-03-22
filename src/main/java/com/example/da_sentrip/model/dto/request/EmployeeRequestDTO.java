@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 @Getter
 
 public class EmployeeRequestDTO {
-    private String mnv;
     private String fullName;
     private String phone;
     private String gender;
