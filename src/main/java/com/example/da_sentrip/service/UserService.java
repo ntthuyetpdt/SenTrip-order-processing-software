@@ -15,6 +15,6 @@ public interface UserService {
     LoginReponseDTO login(LoginRequestDto request);
     void register(RegisterRequestDTO request);
     void add(UserRequestDTO request);
-    ProfileResponseDTO getProfile(String email);
+    Object getProfile(String email);
     Map<String, Object> getMenu(String email, int page, int size);
 }

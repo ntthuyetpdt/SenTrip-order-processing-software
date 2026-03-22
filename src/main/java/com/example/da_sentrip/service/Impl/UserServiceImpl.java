@@ -108,7 +108,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ProfileResponseDTO getProfile(String email) {
+    public Object getProfile(String email) {
         return userCustomRepository.getProfileByEmail(email);
     }
 
