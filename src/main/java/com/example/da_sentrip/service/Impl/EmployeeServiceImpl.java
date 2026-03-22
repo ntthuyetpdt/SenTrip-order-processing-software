@@ -86,7 +86,9 @@ public class EmployeeServiceImpl implements EmployeeService {
         if (request.getFullName() != null) emp.setFullName(request.getFullName());
         if (request.getPhone() != null) emp.setPhone(request.getPhone());
         if (request.getGender() != null) emp.setGender(request.getGender());
+        if(request.getDateTime()!=null) emp.setDateTime(request.getDateTime());
         if (request.getAddress() != null) emp.setAddress(request.getAddress());
+        if (request.getCccd()!=null) emp.setCccd(request.getCccd());
         if (request.getBankName() != null) emp.setBankName(request.getBankName());
         if (request.getAccountBank() != null) emp.setAccountBank(request.getAccountBank());
         if (request.getPassword() != null && !request.getPassword().isBlank()) {
