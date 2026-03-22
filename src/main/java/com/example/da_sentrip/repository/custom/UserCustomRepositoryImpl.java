@@ -26,10 +26,9 @@ public class UserCustomRepositoryImpl implements UserCustomRepository {
         String role = roleRaw != null ? roleRaw.toString().trim() : "";
 
         return switch (role) {
-            case "2", "3" -> getEmployeeProfile(email);
+            case "2", "3","1" -> getEmployeeProfile(email);
             case "4"      -> getCustomerProfile(email);
             case "5"      -> getMerchantProfile(email);
-            case "1"      -> throw new RuntimeException("Admin profile not supported");
             default       -> throw new RuntimeException("Role not found: " + role);
         };
     }
