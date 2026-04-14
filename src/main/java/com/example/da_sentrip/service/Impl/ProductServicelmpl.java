@@ -92,10 +92,10 @@ public class ProductServicelmpl implements ProductService {
     }
 
     @Override
-    public ProductDTO delete(Long id) {
+    public void delete(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new BadCredentialsException("ID NOT FOUND"));
-        return new ProductDTO(product);
+        productRepository.delete(product);
     }
 
     @Override

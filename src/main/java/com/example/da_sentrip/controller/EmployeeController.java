@@ -5,6 +5,7 @@ import com.example.da_sentrip.model.dto.EmployeeDTO;
 import com.example.da_sentrip.model.dto.reponse.EmployeeReponseDTO;
 import com.example.da_sentrip.model.dto.reponse.ResponseDTO;
 import com.example.da_sentrip.model.dto.request.EmployeeRequestDTO;
+import com.example.da_sentrip.model.dto.request.UpdateEmployees;
 import com.example.da_sentrip.model.dto.request.UpdateRoleDTO;
 import com.example.da_sentrip.service.EmployeeService;
 import com.example.da_sentrip.utils.Constants;
@@ -30,12 +31,18 @@ public class EmployeeController {
         return ResponseEntity.ok(new SuccessResponse<>(Constants.HTTP_STATUS.SUCCESS, "Get all success", employeeService.getAll()));
     }
 
-    @PostMapping("/create")
-    @PreAuthorize("hasAnyAuthority('ADMIN_CREATE_EMPLOYEE')")
-    public ResponseEntity<ResponseDTO> create(@RequestParam String gmail, @RequestBody EmployeeRequestDTO request) {
-        employeeService.create(request, gmail);
-        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseDTO.builder()
-                .status("ok").code(Constants.HTTP_STATUS.CREATED).message("Create success").build());
+    @PutMapping("/update/{id}")
+    @PreAuthorize("hasAnyAuthority('EMPLOYEE_UPDATE_PROFILE')")
+    public ResponseEntity<ResponseDTO> update(
+            @PathVariable Long id,
+            @RequestParam String gmail,
+            @RequestBody UpdateEmployees request) {
+        employeeService.update(request, gmail, id);
+        return ResponseEntity.ok(ResponseDTO.builder()
+                .status("ok")
+                .code(200)
+                .message("Update success")
+                .build());
     }
 
     @PostMapping("/update/{id}/role")

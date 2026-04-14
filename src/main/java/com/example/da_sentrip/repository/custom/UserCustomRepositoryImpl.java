@@ -7,8 +7,10 @@ import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+
 
 @Repository
 @RequiredArgsConstructor
@@ -66,7 +68,7 @@ public class UserCustomRepositoryImpl implements UserCustomRepository {
                 r[3]  != null ? (String) r[3]  : null,
                 r[4]  != null ? (String) r[4]  : null,
                 r[5]  != null ? (String) r[5]  : null,
-                toLocalDateTime(r[6]),
+                toLocalDate( r[6]),
                 r[7]  != null ? (String) r[7]  : null,
                 toLocalDateTime(r[8]),
                 r[9]  != null ? (String) r[9]  : null,
@@ -170,7 +172,16 @@ public class UserCustomRepositoryImpl implements UserCustomRepository {
 
     private LocalDateTime toLocalDateTime(Object value) {
         if (value == null) return null;
+        if (value instanceof LocalDateTime ldt) return ldt;
         if (value instanceof Timestamp ts) return ts.toLocalDateTime();
+        if (value instanceof java.sql.Date d) return d.toLocalDate().atStartOfDay();
+        return null;
+    }
+    private LocalDate toLocalDate(Object value) {
+        if (value == null) return null;
+        if (value instanceof LocalDate ld) return ld;
+        if (value instanceof java.sql.Date d) return d.toLocalDate();
+        if (value instanceof Timestamp ts) return ts.toLocalDateTime().toLocalDate();
         return null;
     }
 }

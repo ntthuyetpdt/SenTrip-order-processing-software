@@ -7,7 +7,6 @@ import com.example.da_sentrip.model.dto.reponse.ProductReponseDTO;
 import com.example.da_sentrip.model.dto.reponse.ProductStatisticResponse;
 import com.example.da_sentrip.model.dto.request.MerchantDashboardRequestDTO;
 import com.example.da_sentrip.model.dto.request.ProductRequestDTO;
-import org.apache.coyote.BadRequestException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,7 +19,7 @@ public interface ProductService {
     List<ProductReponseDTO> getAll ();
     ProductDTO create (ProductRequestDTO request,MultipartFile img, Authentication authentication);
     ProductDTO update (Long id, ProductRequestDTO request, MultipartFile img, Authentication authentication);
-    ProductDTO delete (Long id);
+    void delete (Long id);
     List<ProductReponseDTO> search(String productName, BigDecimal minPrice, BigDecimal maxPrice, String address);
     List<ListProductMechartReponseDTO> getOrderCustomerFull(Authentication authentication);
     MerchantDashboardResponseDTO getMerchantDashboard(Authentication authentication, MerchantDashboardRequestDTO request) ;

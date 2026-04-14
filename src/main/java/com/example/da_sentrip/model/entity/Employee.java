@@ -1,5 +1,5 @@
 package com.example.da_sentrip.model.entity;
-
+import java.time.LocalDate;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -33,7 +33,7 @@ public class Employee extends BaseCreatedEntity {
     private String gender;
 
     @Column(name="DATE")
-    private LocalDateTime dateTime;
+    private LocalDate dateTime;
 
     @Column(name = "ADDRESS")
     private String address;

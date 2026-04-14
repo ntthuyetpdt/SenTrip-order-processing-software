@@ -1,11 +1,11 @@
 package com.example.da_sentrip.model.dto;
 
 import com.example.da_sentrip.model.entity.Employee;
-import com.example.da_sentrip.model.entity.Merchant;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 
@@ -18,7 +18,7 @@ public class EmployeeDTO {
     private String fullName;
     private String phone;
     private String gender;
-    private LocalDateTime dateTime;
+    private LocalDate dateTime;
     private String address;
     private LocalDateTime JoinDate;
     private String cccd;

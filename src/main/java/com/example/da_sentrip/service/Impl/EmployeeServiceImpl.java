@@ -4,6 +4,7 @@ import com.example.da_sentrip.helper.MediaStorageService;
 import com.example.da_sentrip.model.dto.EmployeeDTO;
 import com.example.da_sentrip.model.dto.reponse.EmployeeReponseDTO;
 import com.example.da_sentrip.model.dto.request.EmployeeRequestDTO;
+import com.example.da_sentrip.model.dto.request.UpdateEmployees;
 import com.example.da_sentrip.model.entity.Employee;
 import com.example.da_sentrip.model.entity.Role;
 import com.example.da_sentrip.model.entity.User;
@@ -35,10 +36,17 @@ public class EmployeeServiceImpl implements EmployeeService {
      private final PasswordEncoder passwordEncoder;
 
     @Override
-    public EmployeeDTO create(EmployeeRequestDTO request, String gmail) {
+    public void update(UpdateEmployees request, String gmail, Long id) {
         userRepository.findByGmail(gmail)
                 .orElseThrow(() -> new BadCredentialsException("Gmail not found"));
-        return new EmployeeDTO(modelMapper.map(request, Employee.class));
+
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new BadCredentialsException("ID not found"));
+
+        if (request.getMnv() != null) employee.setMnv(request.getMnv());
+        if (request.getJoinDate() != null) employee.setJoinDate(request.getJoinDate());
+
+        employeeRepository.save(employee);
     }
 
     @Override

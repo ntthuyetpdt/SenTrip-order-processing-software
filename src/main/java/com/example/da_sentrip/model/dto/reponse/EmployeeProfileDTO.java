@@ -3,10 +3,10 @@ package com.example.da_sentrip.model.dto.reponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-// EmployeeProfileDTO.java
 @Getter
 @AllArgsConstructor
 public class EmployeeProfileDTO {
@@ -17,7 +17,7 @@ public class EmployeeProfileDTO {
     private String fullName;
     private String phone;
     private String gender;
-    private LocalDateTime dateTime;
+    private LocalDate dateTime;
     private String address;
     private LocalDateTime joinDate;
     private String cccd;

@@ -1,9 +1,9 @@
 package com.example.da_sentrip.model.dto.request;
 
+
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.web.multipart.MultipartFile;
-
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Setter
@@ -12,8 +12,9 @@ import java.time.LocalDateTime;
 public class EmployeeRequestDTO {
     private String fullName;
     private String phone;
+    private String mnv;
     private String gender;
-    private LocalDateTime dateTime;
+    private LocalDate dateTime;
     private String address;
     private LocalDateTime JoinDate;
     private String cccd;
