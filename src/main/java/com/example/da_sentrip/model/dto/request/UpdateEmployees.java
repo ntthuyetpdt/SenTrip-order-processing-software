@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class UpdateEmployees {
+    private String role;
     private String mnv;
     private LocalDateTime JoinDate;
 }

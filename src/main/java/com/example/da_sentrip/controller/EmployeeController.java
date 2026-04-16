@@ -49,11 +49,13 @@ public class EmployeeController {
     @PreAuthorize("hasAnyAuthority('ADMIN_UPDATE_EMPLOYEE')")
     public ResponseEntity<ResponseDTO> updateRole(
             @PathVariable Long id,
-            @RequestBody UpdateRoleDTO request,
-            Authentication authentication) {
-        employeeService.updateRole(id, request.getRole());
+            @RequestBody UpdateEmployees request) {
+        employeeService.updateRole(request, id);
         return ResponseEntity.ok(ResponseDTO.builder()
-                .status("ok").code(Constants.HTTP_STATUS.SUCCESS).message("Update role success").build());
+                .status("ok")
+                .code(Constants.HTTP_STATUS.SUCCESS)
+                .message("Update role success")
+                .build());
     }
 
     @PostMapping("/update/profile")

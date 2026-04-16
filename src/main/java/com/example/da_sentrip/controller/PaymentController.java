@@ -27,9 +27,7 @@ public class PaymentController {
 
     @Value("${app.public-base-url}")
     private String publicBaseUrl;
-
     @PostMapping
-    @PreAuthorize("hasAnyAuthority('CUSTOMER_PAY')")
     public ResponseEntity<ResponseDTO> payOrder(@RequestBody PaymentRequestDTO request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(ResponseDTO.builder()
                 .status("ok")
@@ -40,14 +38,12 @@ public class PaymentController {
     }
 
     @GetMapping(value = "/{paymentCode}/qr", produces = MediaType.IMAGE_PNG_VALUE)
-    @PreAuthorize("hasAnyAuthority('CUSTOMER_GET_URLPAY')")
     public ResponseEntity<byte[]> getPaymentQr(@PathVariable String paymentCode) {
         byte[] qrImage = qrCodeService.generateQr(publicBaseUrl + "/payments/" + paymentCode, 300, 300);
         return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(qrImage);
     }
-
     @PostMapping("/confirmation")
-    @PreAuthorize("hasAnyAuthority('CUSTOMER_PAY_CONFIRM')")
+
     public ResponseEntity<ResponseDTO> confirm(@RequestParam String url) {
         return ResponseEntity.ok(ResponseDTO.builder()
                 .status("ok")
@@ -57,7 +53,6 @@ public class PaymentController {
                 .build());
     }
     @GetMapping("/statistic")
-    @PreAuthorize("hasAnyAuthority('EMPLOYEE_VIEW_STATIC')")
     public ResponseEntity<?> getPaymentStatistic(Authentication authentication) {
         PaymentStatisticResponse data = paymentService.getPaymentStatistic();
         return ResponseEntity.ok(Map.of(

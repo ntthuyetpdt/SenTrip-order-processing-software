@@ -36,16 +36,43 @@ public class EmployeeServiceImpl implements EmployeeService {
      private final PasswordEncoder passwordEncoder;
 
     @Override
-    public void update(UpdateEmployees request, String gmail, Long id) {
-        userRepository.findByGmail(gmail)
-                .orElseThrow(() -> new BadCredentialsException("Gmail not found"));
-
+    public void updateRole(UpdateEmployees request, Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new BadCredentialsException("ID not found"));
         Employee employee = employeeRepository.findById(id)
                 .orElseThrow(() -> new BadCredentialsException("ID not found"));
 
         if (request.getMnv() != null) employee.setMnv(request.getMnv());
         if (request.getJoinDate() != null) employee.setJoinDate(request.getJoinDate());
+        if (request.getRole() != null) {
+            Long roleId = Long.valueOf(request.getRole());
+            if (!roleId.equals(2L) && !roleId.equals(3L))
+                throw new IllegalArgumentException("Roles are only allowed to be 2 or 3.");
+            Role role = repository.findById(roleId)
+                    .orElseThrow(() -> new BadCredentialsException("Role not found"));
+            user.setRole(role);
+        }
 
+        userRepository.save(user);
+        employeeRepository.save(employee);
+    }
+
+    @Override
+    public void update(UpdateEmployees request, String gmail, Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new BadCredentialsException("ID not found"));
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new BadCredentialsException("ID not found"));
+
+        if (request.getMnv() != null) employee.setMnv(request.getMnv());
+        if (request.getJoinDate() != null) employee.setJoinDate(request.getJoinDate());
+        if (request.getRole() != null) {
+            Role role = repository.findByRoleName(request.getRole())
+                    .orElseThrow(() -> new BadCredentialsException("Role not found"));
+            user.setRole(role);
+        }
+
+        userRepository.save(user);
         employeeRepository.save(employee);
     }
 
@@ -112,15 +139,5 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         employeeRepository.save(emp);
     }
-    @Override
-    public void updateRole(Long id, String roleName) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        Role role = repository.findByRoleName(roleName)
-                .orElseThrow(() -> new RuntimeException("Role not found: " + roleName));
-
-        user.setRole(role);
-        userRepository.save(user);
-    }
 }
