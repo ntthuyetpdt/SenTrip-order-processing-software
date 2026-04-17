@@ -3,8 +3,8 @@ package com.example.da_sentrip.model.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Entity
 @Getter
@@ -29,4 +29,7 @@ public class CartItems {
 
     @Column(name = "PRICE")
     private BigDecimal price;
+
+    @Column(name="NSD")
+    private LocalDate NSD;
 }

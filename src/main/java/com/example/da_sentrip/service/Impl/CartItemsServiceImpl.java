@@ -3,9 +3,11 @@ package com.example.da_sentrip.service.Impl;
 import com.example.da_sentrip.model.dto.CartItemsDTO;
 import com.example.da_sentrip.model.dto.reponse.CartDetailResponseDTO;
 import com.example.da_sentrip.model.dto.request.AddToCartRequest;
+import com.example.da_sentrip.model.dto.request.CartItemRequest;
 import com.example.da_sentrip.model.entity.*;
 import com.example.da_sentrip.repository.*;
 import com.example.da_sentrip.service.CartItemsService;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
@@ -15,8 +17,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
+@Transactional
 @Service
 @AllArgsConstructor
 public class CartItemsServiceImpl implements CartItemsService {
@@ -41,27 +42,22 @@ public class CartItemsServiceImpl implements CartItemsService {
         });
 
         BigDecimal cartId = BigDecimal.valueOf(cart.getId());
-        CartItems cartItems = cartItemsRepository.findByCartIdAndProductId_Id(cartId, request.getProductId())
-                .map(existing -> {
-                    existing.setQuantity(existing.getQuantity().add(BigDecimal.valueOf(request.getQuantity())));
-                    return existing;
-                })
-                .orElseGet(() -> {
-                    CartItems c = new CartItems();
-                    c.setCartId(cartId);
-                    c.setProductId(product);
-                    c.setQuantity(BigDecimal.valueOf(request.getQuantity()));
-                    c.setPrice(product.getPrice().multiply(BigDecimal.valueOf(request.getQuantity())));
-                    return c;
-                });
+        CartItems cartItems = new CartItems();
+        cartItems.setCartId(cartId);
+        cartItems.setProductId(product);
+        cartItems.setQuantity(BigDecimal.valueOf(request.getQuantity()));
+        cartItems.setPrice(product.getPrice().multiply(BigDecimal.valueOf(request.getQuantity())));
+        cartItems.setNSD(request.getNSD());
 
         CartItems saved = cartItemsRepository.save(cartItems);
+
         CartItemsDTO dto = new CartItemsDTO();
         dto.setId(saved.getId());
         dto.setCartId(saved.getCartId());
         dto.setProductId(saved.getProductId().getId());
         dto.setQuantity(saved.getQuantity());
         dto.setPrice(saved.getPrice());
+        dto.setNSD(saved.getNSD());
         return dto;
     }
 
@@ -88,6 +84,7 @@ public class CartItemsServiceImpl implements CartItemsService {
                     dto.setProductName(product.getProductName());
                     dto.setPrice(String.valueOf(product.getPrice()));
                     dto.setQuantity(item.getQuantity());
+                    dto.setNSD(item.getNSD());
                     if (product.getImg() != null && product.getImg().matches("\\d+"))
                         dataSourceRepository.findById(Long.valueOf(product.getImg()))
                                 .ifPresent(ds -> dto.setImg(ds.getImageUrl()));
@@ -96,6 +93,22 @@ public class CartItemsServiceImpl implements CartItemsService {
                     return dto;
                 })
                 .toList();
+    }
+
+    @Override
+    public void update(Long id, CartItemRequest request) {
+        CartItems cartItems = cartItemsRepository.findById(id)
+                .orElseThrow(() -> new BadCredentialsException("ID NOT FOUND"));
+
+        if (request.getQuantity() != null) {
+            cartItems.setQuantity(BigDecimal.valueOf(request.getQuantity()));
+        }
+
+        if (request.getNSD() != null) {
+            cartItems.setNSD(request.getNSD());
+        }
+
+        cartItemsRepository.save(cartItems);
     }
 
     private User getUser(Authentication authentication) {

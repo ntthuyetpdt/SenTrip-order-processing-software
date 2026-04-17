@@ -2,6 +2,7 @@ package com.example.da_sentrip.controller;
 
 import com.example.da_sentrip.model.dto.reponse.ResponseDTO;
 import com.example.da_sentrip.model.dto.request.AddToCartRequest;
+import com.example.da_sentrip.model.dto.request.CartItemRequest;
 import com.example.da_sentrip.service.CartItemsService;
 import com.example.da_sentrip.utils.Constants;
 import lombok.AllArgsConstructor;
@@ -49,5 +50,10 @@ public class CartItemsController {
                 .message("Get cart success")
                 .data(cartItemsService.getCart(authentication))
                 .build());
+    }
+    @PostMapping("/update/{id}")
+    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody CartItemRequest request) {
+        cartItemsService.update(id, request);
+        return ResponseEntity.ok("update success");
     }
 }

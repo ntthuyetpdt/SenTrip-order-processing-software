@@ -7,8 +7,7 @@ import java.time.LocalDate;
 
 @Getter
 @Setter
-public class AddToCartRequest {
-    private Long productId;
-    private Integer quantity;
+public class CartItemRequest {
     private LocalDate NSD;
+    private Integer quantity;
 }
