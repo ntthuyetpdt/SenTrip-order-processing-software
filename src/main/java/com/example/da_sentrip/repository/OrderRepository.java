@@ -24,6 +24,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             o.CREATED_AT AS createdAt,
             o.ORDER_CODE AS orderCode,
             o.ORDER_STATUS AS orderStatus,
+            o.NSD AS  NSD,
             o.TOTAL_AMOUNT AS totalAmount,
             u.ID AS userId,
             u.GMAIL AS gmail,
@@ -48,11 +49,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
                  LEFT JOIN DATA_SOUSES ds ON (  p.IMG IS NOT NULL  AND p.IMG REGEXP '^[0-9]+$' AND ds.ID = CAST(p.IMG AS UNSIGNED)  )
         WHERE o.ORDER_CODE = :orderCode
         GROUP BY
-            o.CREATED_AT, o.ORDER_CODE, o.ORDER_STATUS, o.TOTAL_AMOUNT,
-            u.ID, u.GMAIL,
-            c.FULL_NAME, c.PHONE, c.CCCD,
-            pay.PAYMENT_STATUS, pay.PAYMENT_CODE, pay.PAID_AT
-        
+             o.CREATED_AT, o.ORDER_CODE, o.ORDER_STATUS, o.TOTAL_AMOUNT,o.NSD,
+                        u.ID, u.GMAIL,
+                        c.FULL_NAME, c.PHONE, c.CCCD,
+                        pay.PAYMENT_STATUS, pay.PAYMENT_CODE, pay.PAID_AT
         ORDER BY o.CREATED_AT DESC;
         """, nativeQuery = true)
     List<OderDetailProjection> findOrderDetailByOrderCode(String orderCode);

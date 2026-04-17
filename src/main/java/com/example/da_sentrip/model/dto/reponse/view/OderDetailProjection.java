@@ -1,5 +1,6 @@
 package com.example.da_sentrip.model.dto.reponse.view;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public interface OderDetailProjection {
@@ -7,6 +8,7 @@ public interface OderDetailProjection {
         String getOrderCode();
         String getOrderStatus();
         Double getTotalAmount();
+        LocalDate getNSD();
         String getType();
         Long getUserId();
         String getGmail();

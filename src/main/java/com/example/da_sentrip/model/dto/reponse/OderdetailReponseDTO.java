@@ -2,6 +2,8 @@ package com.example.da_sentrip.model.dto.reponse;
 
 import lombok.Getter;
 import lombok.Setter;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Setter
@@ -11,6 +13,7 @@ public class OderdetailReponseDTO {
     private LocalDateTime createdAt;
     private String orderCode;
     private String orderStatus;
+    private LocalDate NSD;
     private Double totalAmount;
     private Long userId;
     private String gmail;

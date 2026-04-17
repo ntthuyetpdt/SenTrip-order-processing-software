@@ -61,6 +61,7 @@ public class OrderServiceImpl implements OrderService {
         order.setUser(user);
         order.setMerchant(merchant);
         order.setOrderStatus(OrderStatus.PENDING);
+        order.setNSD(request.getNSD());
         order.setTotalAmount(totalAmount);
         order.setCreatedAt(LocalDateTime.now());
         order.setUpdatedAt(LocalDateTime.now());
@@ -124,6 +125,7 @@ public class OrderServiceImpl implements OrderService {
             dto.setOrderCode(p.getOrderCode());
             dto.setOrderStatus(p.getOrderStatus());
             dto.setTotalAmount(p.getTotalAmount());
+            dto.setNSD(p.getNSD());
             dto.setUserId(p.getUserId());
             dto.setGmail(p.getGmail());
             dto.setFullName(p.getFullName());
