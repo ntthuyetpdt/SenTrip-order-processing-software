@@ -54,6 +54,6 @@ public class CartItemsController {
     @PostMapping("/update/{id}")
     public ResponseEntity<?> update(@PathVariable Long id, @RequestBody CartItemRequest request) {
         cartItemsService.update(id, request);
-        return ResponseEntity.ok("update success");
+        return ResponseEntity.ok("update success1");
     }
 }
