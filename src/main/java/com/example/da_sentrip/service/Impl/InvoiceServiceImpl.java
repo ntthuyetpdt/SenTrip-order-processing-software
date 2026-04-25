@@ -1,6 +1,7 @@
 package com.example.da_sentrip.service.Impl;
 
-import com.example.da_sentrip.helper.CloudinaryPDF;
+//import com.example.da_sentrip.helper.CloudinaryPDF;
+import com.example.da_sentrip.helper.SupabasePDF;
 import com.example.da_sentrip.model.dto.reponse.InvoiceResponse;
 import com.example.da_sentrip.model.dto.reponse.view.InvoiceDetailProjection;
 import com.example.da_sentrip.model.dto.reponse.view.InvoiceProjection;
@@ -23,7 +24,7 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     private final InvoiceRepository invoiceRepository;
     private final OrderRepository orderRepository;
-    private final CloudinaryPDF cloudinaryPDF;
+    private final SupabasePDF cloudinaryPDF;
 
     @Override
     public List<InvoiceDetailProjection> getAllInvoices() {

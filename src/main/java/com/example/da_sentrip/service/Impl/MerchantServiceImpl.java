@@ -11,7 +11,6 @@ import com.example.da_sentrip.repository.MerchantRepository;
 import com.example.da_sentrip.repository.UserRepository;
 import com.example.da_sentrip.service.MerchantService;
 import lombok.AllArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

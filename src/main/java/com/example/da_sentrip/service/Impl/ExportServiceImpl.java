@@ -1,6 +1,6 @@
 package com.example.da_sentrip.service.Impl;
 
-import com.example.da_sentrip.helper.CloudinaryPDF;
+import com.example.da_sentrip.helper.SupabasePDF;
 import com.example.da_sentrip.model.dto.reponse.OrderAllReponseDTO;
 import com.example.da_sentrip.model.dto.reponse.view.InvoiceProjection;
 import com.example.da_sentrip.model.entity.Invoices;
@@ -32,7 +32,7 @@ import java.util.Optional;
 public class ExportServiceImpl implements ExportService {
 
     private final OrderRepository orderRepository;
-    private final CloudinaryPDF cloudinaryPDF;
+    private final SupabasePDF cloudinaryPDF;
     private final InvoiceRepository invoiceRepository;
 
     @Override

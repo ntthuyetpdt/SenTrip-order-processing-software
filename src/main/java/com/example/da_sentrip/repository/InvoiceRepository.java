@@ -53,6 +53,8 @@ public interface InvoiceRepository extends JpaRepository<Invoices, Long> {
             i.file_url AS fileUrl
         FROM ORDERS o
         LEFT JOIN INVOICES i ON i.ORDER_ID = o.ID
+                WHERE  i.ID IS NOT  NULL
+                ORDER BY i.GENRATED_AT DESC 
         """, nativeQuery = true)
     List<InvoiceDTO> findAllInvoices();
 

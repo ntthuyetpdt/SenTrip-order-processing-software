@@ -12,7 +12,6 @@ import com.example.da_sentrip.repository.DataSourceRepository;
 import com.example.da_sentrip.repository.UserRepository;
 import com.example.da_sentrip.service.CustomerService;
 import lombok.AllArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
