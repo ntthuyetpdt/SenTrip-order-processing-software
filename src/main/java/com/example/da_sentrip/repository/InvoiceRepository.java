@@ -83,7 +83,7 @@ public interface InvoiceRepository extends JpaRepository<Invoices, Long> {
             @Param("toDate") LocalDateTime toDate
     );
 
-    @Query(value = "SELECT * FROM invoices WHERE ORDER_ID = (SELECT ID FROM orders WHERE ORDER_CODE = :orderCode)",
+    @Query(value = "SELECT * FROM invoices WHERE ORDER_ID IN (SELECT ID FROM orders WHERE ORDER_CODE = :orderCode) ORDER BY GENRATED_AT DESC LIMIT 1",
             nativeQuery = true)
     Optional<Invoices> findByOrderCode(@Param("orderCode") String orderCode);
 }
